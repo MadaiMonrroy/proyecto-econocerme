@@ -13,7 +13,11 @@
         class="z-50"
       />
     </div>-->
+    <div>
+      
+    </div>
     <div class="card">
+
       <h2 class="text-2xl mb-4">Estudiantes</h2>
     <Divider />
 
