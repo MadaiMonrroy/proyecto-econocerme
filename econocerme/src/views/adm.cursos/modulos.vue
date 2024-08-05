@@ -162,9 +162,9 @@
 
 <script>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from "@/stores/authStore";
+import api from '@/axiosConfig.js'
 
 export default {
   setup() {
@@ -198,11 +198,7 @@ export default {
       const cursoId = route.params.idCurso; // Use route.params
       if (cursoId) {
         try {
-          const response = await axios.get(`http://localhost:3000/api/modulos/modulo/${cursoId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          const response = await api.get(`/modulos/modulo/${cursoId}`);
           modulos.value = response.data;
         } catch (error) {
           console.error('Error al cargar los módulos:', error);
