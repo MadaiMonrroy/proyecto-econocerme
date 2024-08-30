@@ -1,0 +1,149 @@
+/*@import './base.css';*/
+@layer tailwind-base, primevue, tailwind-utilities;
+
+@layer tailwind-base {
+  @tailwind base;
+}
+
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
+
+:root {
+  --body-bg: var(--p-surface-50);
+  --body-text-color: var(--p-surface-900);
+  --card-border: 1px solid var(--border-color);
+  --card-bg: var(--p-surface-0);
+  --border-color: var(--p-surface-200);
+  --text-color: var(--p-surface-700);
+  --overlay-background: #ffffff;
+}
+
+:root[class='p-dark'] {
+  --body-bg: var(--p-surface-950);
+  --body-text-color: var(--p-surface-50);
+  --card-border: 1px solid transparent;
+  --card-bg: var(--p-surface-900);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-color: var(--p-surface-0);
+  --overlay-background: var(--p-surface-900);
+}
+
+html {
+  font-size: 14px;
+}
+/* Aplicar estilos en modo oscuro */
+.p-dark p,
+.p-dark ul,
+.p-dark ol,
+.p-dark li {
+  color: var(--text-color); /* Color del texto en modo oscuro */
+}
+/* Estilos para botones en modo oscuro */
+.p-dark header button {
+  color: var(--text-color) !important; /* Cambia el color del texto de los botones a blanco */
+}
+
+.p-dark header button:hover {
+  color: var(--p-surface-50) !important; /* Cambia el color del texto en hover si es necesario */
+}
+
+/* Asegúrate de que los iconos dentro de los botones también cambien de color si es necesario */
+.p-dark header button i {
+  color: var(--text-color) !important; /* Cambia el color del icono a blanco */
+}
+
+body {
+  margin: 0px;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: var(--body-bg);
+  font-weight: normal;
+  color: var(--body-text-color);
+}
+
+.card {
+  background: var(--card-bg);
+  border: var(--card-border);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+/* Estilos para el modo oscuro en el DataTable */
+.p-dark .p-datatable {
+  background-color: var(--card-bg) !important; /* Fondo del DataTable */
+  color: var(--text-color) !important; /* Color del texto del DataTable */
+}
+
+.p-dark .p-datatable .p-datatable-header {
+  background-color: var(--p-surface-800) !important; /* Fondo del encabezado */
+  color: var(--text-color) !important; /* Color del texto del encabezado */
+}
+
+.p-dark .p-datatable .p-datatable-body {
+  background-color: var(--card-bg) !important; /* Fondo del cuerpo */
+}
+
+.p-dark .p-datatable .p-datatable-row {
+  background-color: var(--card-bg) !important; /* Fondo de las filas */
+  border-bottom: 1px solid var(--border-color) !important; /* Borde inferior de las filas */
+}
+
+.p-dark .p-datatable .p-datatable-row:nth-child(even) {
+  background-color: var(--p-surface-800) !important; /* Fondo alternativo para filas pares */
+}
+
+.p-dark .p-datatable .p-datatable-row:hover {
+  background-color: var(--p-surface-700) !important; /* Fondo de fila en hover */
+}
+
+.p-dark .p-datatable .p-datatable-cell {
+  color: var(--text-color) !important; /* Color del texto en las celdas */
+}
+
+.p-dark .p-datatable .p-datatable-footer {
+  background-color: var(--p-surface-800) !important; /* Fondo del pie del DataTable */
+  color: var(--text-color) !important; /* Color del texto en el pie */
+}
+
+.p-dark .p-datatable .p-button {
+  background-color: var(--button-bg-light) !important; /* Fondo del botón dentro del DataTable */
+  color: var(--button-text-light) !important; /* Color del texto del botón */
+}
+
+/*#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 2rem;
+  }
+}
+*/
