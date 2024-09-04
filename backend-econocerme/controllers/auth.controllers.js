@@ -91,7 +91,7 @@ export const login = async (req, res) => {
         }
 
         // Crear un token JWT
-        const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
 
         // Enviar los datos del usuario al frontend
@@ -101,7 +101,8 @@ export const login = async (req, res) => {
             usuario: {
                 id: usuario.id,
                 nombres: usuario.nombres,
-                apellidos: usuario.apellidos,
+                primerApellido: usuario.primerApellido,
+                segundoApellido: usuario.segundoApellido,
                 email: usuario.email,
                 tipoUsuario: usuario.tipoUsuario,
                 fotoPerfil: usuario.fotoPerfil,

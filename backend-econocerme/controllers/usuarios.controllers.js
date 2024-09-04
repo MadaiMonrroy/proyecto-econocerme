@@ -16,7 +16,15 @@ const transporter = nodemailer.createTransport({
         pass: 'uytfriafjzcohdgj'
     }
 });
-
+export const listaUsuariosInscripciones = async (req, res) => {
+    try {
+        const [result] = await connection.query(`SELECT id, nombres, primerApellido, segundoApellido, email, fotoPerfil, fechaNacimiento, tipoUsuario, estado FROM usuario WHERE estado = 1 OR estado = 2 AND tipoUsuario = "usuario"`);
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: "Ocurrió un error en el servidor" });
+    }
+};
 // Función para enviar correo con la contraseña
 async function enviarCorreoContrasenia(email, contrasenia, tokenConfirmacion) {
     const imageURL = `http://localhost:3000/src/logoec.png`;
@@ -123,7 +131,7 @@ export const obtenerUsuario = async (req, res) => {
 
 // Agregar un nuevo usuario
 export const agregarUsuario = async (req, res) => {
-    const { nombres, primerApellido, segundoApellido, email, contrasenia, fechaNacimiento, tipoUsuario } = req.body;
+    const { nombres, primerApellido, segundoApellido, email, contrasenia, fechaNacimiento, tipoUsuario , idUsuario} = req.body;
 
     if (!nombres || !primerApellido || !segundoApellido || !email || !contrasenia || !fechaNacimiento || !tipoUsuario) {
         return res.status(400).json({ mensaje: "Todos los campos son requeridos" });
@@ -164,8 +172,8 @@ export const agregarUsuario = async (req, res) => {
         const tokenConfirmacion = crypto.randomBytes(20).toString('hex');
 
         const [result] = await connection.query(
-            'INSERT INTO usuario (nombres, primerApellido, segundoApellido, email, contrasenia, fotoPerfil, fechaNacimiento, tipoUsuario, estado, tokenConfirmacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 2, ?)',
-            [nombres, primerApellido, segundoApellido, email, hashedPassword, fotoPerfilUrl, fechaNacimiento, tipoUsuario, tokenConfirmacion]
+            'INSERT INTO usuario (nombres, primerApellido, segundoApellido, email, contrasenia, fotoPerfil, fechaNacimiento, tipoUsuario, estado, idUsuario, tokenConfirmacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 2,?, ?)',
+            [nombres, primerApellido, segundoApellido, email, hashedPassword, fotoPerfilUrl, fechaNacimiento, tipoUsuario,idUsuario, tokenConfirmacion]
         );
 
         // Enviar la contraseña generada y el enlace de confirmación al usuario por correo
@@ -240,8 +248,8 @@ export const agregarUsuariocoach = async (req, res) => {
 // Editar un usuario por ID
 export const editarUsuario = async (req, res) => {
     const id = req.params.id;
-    const { nombres, primerApellido, segundoApellido, email, contrasenia, fechaNacimiento, tipoUsuario } = req.body;
-
+    const { nombres, primerApellido, segundoApellido, email, contrasenia, fechaNacimiento, tipoUsuario, idUsuario} = req.body;
+    console.log(idUsuario)
     try {
         // Obtener el usuario existente
         const [existingUser] = await connection.query('SELECT contrasenia FROM usuario WHERE id = ?', [id]);
@@ -290,9 +298,10 @@ export const editarUsuario = async (req, res) => {
                 contrasenia = ?,
                 fotoPerfil = ?,
                 fechaNacimiento = ?,
-                tipoUsuario = ?
+                tipoUsuario = ?,
+                idUsuario = ?
             WHERE id = ?`,
-            [nombres, primerApellido, segundoApellido, email, hashedPassword, fotoPerfilUrl, fechaNacimiento, tipoUsuario, id]
+            [nombres, primerApellido, segundoApellido, email, hashedPassword, fotoPerfilUrl, fechaNacimiento, tipoUsuario, idUsuario, id]
         );
 
         if (result.affectedRows === 0) {

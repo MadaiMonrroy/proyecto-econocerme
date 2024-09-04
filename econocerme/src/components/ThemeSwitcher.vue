@@ -1,15 +1,13 @@
 <template>
-  <ul class="flex list-none m-0 p-0 gap-2 items-center">
-    <li>
+    
       <button
         type="button"
-        class="inline-flex w-8 h-8 p-0 items-center justify-center surface-0 dark:surface-800 border border-surface-200 dark:border-surface-600 rounded"
+        class="inline-flex w-8 h-8 p-0 items-center justify-center surface-0 dark:surface-800 border border-surface-100  surface-600 rounded"
         @click="onThemeToggler"
       >
         <i :class="`dark:text-white pi ${iconClass}`" />
       </button>
-    </li>
-    <li class="relative">
+    
       <!--<button
         v-styleclass="{
           selector: '@next',
@@ -25,7 +23,7 @@
         <i class="pi pi-palette dark:text-white"></i>
       </button>-->
       <div
-        class="absolute top-[2.5rem] right-0 hidden w-[16rem] p-3 bg-white dark:bg-surface-800 rounded-md shadow border border-surface-200 dark:border-surface-700 flex-col justify-start items-start gap-3.5 inline-flex origin-top z-10"
+        class="absolute top-[2.5rem] right-0 hidden w-[16rem] p-3 bg-white  dark:bg-surface-800 rounded-md shadow border border-surface-200 dark:border-surface-700 flex-col justify-start items-start gap-3.5 inline-flex origin-top z-10"
       >
         <div class="flex-col justify-start items-start gap-2 inline-flex pr-4">
           <span class="text-sm font-medium">Primary Colors</span>
@@ -100,8 +98,8 @@
           />
         </div>
       </div>
-    </li>
-  </ul>
+    
+  
 </template>
 
 <script>

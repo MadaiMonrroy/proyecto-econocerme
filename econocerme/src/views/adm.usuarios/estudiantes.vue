@@ -45,6 +45,12 @@
         :rowsPerPageOptions="[4, 8, 12]"
         class="p-datatable-striped"
       >
+      <template #paginatorstart>
+                <Button type="button" icon="pi pi-refresh" text @click="reloadPage" />
+            </template>
+            <template #paginatorend>
+                <Button type="button" icon="pi pi-download" text @click="exportToExcel" />
+            </template>
         <Column header="#" sortable class="px-6 py-4">
           <template #body="rowData">
             {{ getRowIndex(rowData) }}
@@ -402,6 +408,10 @@ import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import CustomFileInput from "@/components/CustomFileInput.vue";
 import { useToast } from "primevue/usetoast";
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import { useAuthStore } from "@/stores/authStore";
+const authStore = useAuthStore();
 
 const usuarios = ref([]);
 const isModalOpen = ref(false);
@@ -410,7 +420,11 @@ const isConfirmModalOpen = ref(false);
 const toast = useToast();
 const showUserDetailsModal = ref(false);
 const selectedUser = ref(null);
-const token = localStorage.getItem('token');
+
+
+const token = authStore.token;
+const idUsuario = authStore.usuario.id;
+
 const selectedUsuario = ref({
   nombres: "",
   primerApellido: "",
@@ -421,6 +435,8 @@ const selectedUsuario = ref({
   fechaNacimiento: "",
   tipoUsuario: "usuario",
   estado: 2, // Por defecto inactivo
+  idUsuario: idUsuario,
+  
 });
 const previewFotoPerfil = ref("");
 let usuarioToDelete = ref(null); // Usuario a eliminar
@@ -474,6 +490,7 @@ const openAddModal = () => {
     fechaNacimiento: "",
     tipoUsuario: "usuario",
     estado: 1,
+    idUsuario: idUsuario,
   };
   previewFotoPerfil.value = "";
   isModalOpen.value = true;
@@ -497,6 +514,8 @@ const openEditModal = (usuario) => {
   selectedUsuario.value.fechaNacimiento = formatToDateInput(
     usuario.fechaNacimiento
   );
+  selectedUsuario.value.idUsuario = idUsuario
+  console.log(selectedUsuario.value.idUsuario)
   previewFotoPerfil.value = usuario.fotoPerfil ? usuario.fotoPerfil : "";
   isModalOpen.value = true;
 };
@@ -522,6 +541,10 @@ const closeModal = () => {
 const closeConfirmModal = () => {
   isConfirmModalOpen.value = false;
 };
+// Función para recargar la página
+const reloadPage = () => {
+  fetchData();
+};
 
 const addUsuario = async () => {
   const formData = new FormData();
@@ -536,8 +559,8 @@ const addUsuario = async () => {
   formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
   formData.append("contrasenia", selectedUsuario.value.contrasenia); // Se envía al backend
   formData.append("estado", selectedUsuario.value.estado);
-  formData.append("id", selectedUsuario.value.id); // Agregar el ID del usuario
-
+  formData.append("idUsuario", selectedUsuario.value.idUsuario);
+  
   if (selectedFile) {
     formData.append("fotoPerfil", selectedFile);
   }
@@ -602,6 +625,9 @@ const updateUsuario = async () => {
   formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
   formData.append("id", selectedUsuario.value.id); // Agregar el ID del usuario
   //console.log(date);
+  formData.append("idUsuario", selectedUsuario.value.idUsuario);
+  console.log(selectedUsuario.value.idUsuario)
+
   if (selectedFile) {
     formData.append("fotoPerfil", selectedFile);
   }
@@ -710,7 +736,30 @@ const generatePassword = () => {
 const getRowIndex = (rowData) => {
   return usuarios.value.findIndex((user) => user.id === rowData.data.id) + 1;
 };
+const exportToExcel = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Anuncios');
 
+  // Agrega encabezados
+  worksheet.columns = [
+    { header: 'ID', key: 'id', width: 10 },
+    { header: 'Título', key: 'titulo', width: 30 },
+    { header: 'Miniatura', key: 'miniatura', width: 30 },
+    { header: 'Descripción', key: 'descripcion', width: 50 },
+    { header: 'Fecha Inicio', key: 'fecha_inicio', width: 15 },
+    { header: 'Fecha Fin', key: 'fecha_fin', width: 15 },
+    { header: 'Tipo', key: 'tipo', width: 10 }
+  ];
+
+  // Agrega filas
+  anuncios.value.forEach((anuncio) => {
+    worksheet.addRow(anuncio);
+  });
+
+  // Generar y descargar el archivo Excel
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buffer]), 'anuncios.xlsx');
+};
 const handlePasswordChange = () => {
   selectedUsuario.value.contrasenia = generatePassword();
   toast.add({

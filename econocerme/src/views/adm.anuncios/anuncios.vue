@@ -39,6 +39,12 @@
           :rowsPerPageOptions="[4, 8, 12]"
           class="p-datatable-striped min-w-[600px]"
         >
+        <template #paginatorstart>
+                <Button type="button" icon="pi pi-refresh" text @click="reloadPage" />
+            </template>
+            <template #paginatorend>
+                <Button type="button" icon="pi pi-download" text @click="exportToExcel" />
+            </template>
           <!-- Columnas de la tabla -->
           <Column header="#" class="px-3 py-2 sm:px-6 sm:py-4">
             <template #body="rowData">
@@ -231,12 +237,18 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+import { useAuthStore } from "@/stores/authStore";
+
+const authStore = useAuthStore();
 
 const anuncios = ref([]);
 const showModal = ref(false);
 const selectedAnuncio = ref(null);
 const router = useRouter();
 const filter = ref("");
+const token = authStore.token;
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
@@ -254,11 +266,18 @@ const openAddView = () => {
 const openEditView = (anuncio) => {
   router.push(`/panelControl/formAnuncio/${anuncio.id}`);
 };
-
+// Función para recargar la página
+const reloadPage = () => {
+  fetchAnuncios();
+};
 const eliminarAnuncio = async (id) => {
   try {
     await axios.delete(
-      `http://localhost:3000/api/anuncios/eliminarAnuncio/${id}`
+      `http://localhost:3000/api/anuncios/eliminarAnuncio/${id}`, {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+}
     );
     fetchAnuncios();
   } catch (error) {
@@ -291,11 +310,38 @@ const filteredAnunciosConNumeracion = computed(() =>
     index: index + 1,
   }))
 );
+const exportToExcel = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Anuncios');
 
+  // Agrega encabezados
+  worksheet.columns = [
+    { header: 'ID', key: 'id', width: 10 },
+    { header: 'Título', key: 'titulo', width: 30 },
+    { header: 'Miniatura', key: 'miniatura', width: 30 },
+    { header: 'Descripción', key: 'descripcion', width: 50 },
+    { header: 'Fecha Inicio', key: 'fecha_inicio', width: 15 },
+    { header: 'Fecha Fin', key: 'fecha_fin', width: 15 },
+    { header: 'Tipo', key: 'tipo', width: 10 }
+  ];
+
+  // Agrega filas
+  anuncios.value.forEach((anuncio) => {
+    worksheet.addRow(anuncio);
+  });
+
+  // Generar y descargar el archivo Excel
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buffer]), 'anuncios.xlsx');
+};
 const fetchAnuncios = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:3000/api/anuncios/anuncio"
+      "http://localhost:3000/api/anuncios/anuncio", {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+}
     );
     anuncios.value = response.data;
   } catch (error) {

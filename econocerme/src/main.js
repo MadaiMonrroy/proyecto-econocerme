@@ -25,6 +25,9 @@ import DialogService from 'primevue/dialogservice';
 import ConfirmationService from 'primevue/confirmationservice';
 import Toast from 'primevue/toast';
 
+import Menu from 'primevue/menu';
+
+
 export const PrimeVitals = {
   install: (app) => {
     app.use(ConfirmationService);
@@ -76,7 +79,6 @@ import Menubar from 'primevue/menubar';
 import MegaMenu from 'primevue/megamenu';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
-import Menu from 'primevue/menu';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Textarea from 'primevue/textarea';
@@ -133,7 +135,6 @@ app.component('Toolbar', Toolbar);
 app.component('DatePicker',DatePicker);
 app.component('Image', Image);
 app.component('Tag', Tag);
-
 
 app.use(pinia);
 

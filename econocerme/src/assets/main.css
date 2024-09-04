@@ -37,7 +37,10 @@ html {
 .p-dark p,
 .p-dark ul,
 .p-dark ol,
-.p-dark li {
+.p-dark li,
+.p-dark span,
+.p-dark i,
+.p-dark h2 {
   color: var(--text-color); /* Color del texto en modo oscuro */
 }
 /* Estilos para botones en modo oscuro */

@@ -1,36 +1,49 @@
 <template>
-  <div class="dashboard">
-    <div class="topbar flex justify-between items-center p-4 shadow">
+  <div class="dashboard min-h-screen bg-gray-100">
+    <!-- Topbar -->
+    <div class="topbar flex justify-between items-center p-4 shadow-md bg-pink-500 text-white">
       <img src="@/assets/logoec.png" alt="Logo" class="logo w-12 h-auto" />
-      <div class="menu-items flex items-center space-x-4">
+
+      <div class="menu-items flex items-center space-x-6">
+        <!-- Mega Menu -->
         <MegaMenu :model="items" class="flex-1" />
-        <IconField>
-          <InputIcon class="pi pi-search bg" />
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <InputIcon class="pi pi-search absolute top-2.5 left-3 text-gray-500" />
           <InputText
+            v-model="searchValue"
             placeholder="Buscar"
             class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-500"
           />
-        </IconField>
-        <div class="notification-icons flex items-center gap-3">
+        </div>
+
+        <!-- Notification Icons -->
+        <div class="notification-icons flex items-center gap-4">
           <OverlayBadge value="2">
-            <i class="pi pi-bell text-xl" />
+            <i class="pi pi-bell text-2xl" />
           </OverlayBadge>
           <OverlayBadge value="4" severity="danger">
-            <i class="pi pi-calendar text-xl" />
+            <i class="pi pi-calendar text-2xl" />
           </OverlayBadge>
           <OverlayBadge severity="danger">
-            <i class="pi pi-envelope text-xl" />
+            <i class="pi pi-envelope text-2xl" />
           </OverlayBadge>
         </div>
-        <div class="topbar flex justify-between items-center p-1 bg-white">
-          <Button label="Mi aprendizaje" severity="secondary" size="medium" class="bg-white" outlined />
-        </div>
-        <Avatar icon="pi pi-user" class="ml-3" size="large" shape="circle" />
+
+        <!-- My Learning Button -->
+        <Button label="Mi aprendizaje" class="bg-transparent text-white border-white" outlined />
+
+        <!-- Avatar -->
+        <Avatar icon="pi pi-user" class="ml-3 bg-white text-gray-700" size="large" shape="circle" />
       </div>
     </div>
-    <div class="content p-4">
-      <div class="card bg-white shadow-md rounded-lg p-4">
-        <!-- Contenido adicional aquí -->
+
+    <!-- Main Content -->
+    <div class="content p-6">
+      <div class="card bg-white shadow-lg rounded-lg p-6">
+        <!-- Aquí se incluirá el contenido del curso -->
+        <router-view />
       </div>
     </div>
   </div>
@@ -39,7 +52,6 @@
 <script setup>
 import { ref } from 'vue';
 import MegaMenu from 'primevue/megamenu';
-import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import InputText from 'primevue/inputtext';
 import OverlayBadge from 'primevue/overlaybadge';
@@ -167,33 +179,28 @@ const searchValue = ref('');
 <style scoped>
 .dashboard {
   font-family: Arial, sans-serif;
+  min-height: 100vh;
 }
 
 .topbar {
-  background-color: #ff69b4; /* Color rosa */
-  color: white; /* Asegura que el texto sea legible */
+  background-color: #e91e63; /* Color rosa vibrante */
 }
 
 .logo {
   width: 50px;
-  height: auto;
-}
-
-.menu-items {
-  display: flex;
-  align-items: center;
 }
 
 .notification-icons .pi {
-  color: white; /* Color blanco para los iconos */
+  color: white;
 }
 
 .button {
-  color: white; /* Color blanco para los botones */
+  color: white;
+  border-color: white;
 }
 
 .avatar .pi {
-  color: white; /* Color blanco para los iconos de avatar */
+  color: gray-700; /* Color del icono en el avatar */
 }
 
 .content {

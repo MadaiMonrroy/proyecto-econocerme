@@ -109,10 +109,15 @@ import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 import CustomFileInput from '@/components/CustomFileInput.vue';
 import { useToast } from 'primevue/usetoast';
+import { useAuthStore } from "@/stores/authStore";
+
+const authStore = useAuthStore();
 
 const toast = useToast();
 const route = useRoute();
 const router = useRouter();
+const token = authStore.token;
+
 
 const anuncio = reactive({
   id: null,
@@ -147,7 +152,11 @@ const tipoOptions = ref([
 
 const cargarAnuncio = async (id) => {
   try {
-    const response = await axios.get(`http://localhost:3000/api/anuncios/obtenerAnuncio/${id}`);
+    const response = await axios.get(`http://localhost:3000/api/anuncios/obtenerAnuncio/${id}`, {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
     const { fecha_inicio, fecha_fin, descripcion, tipo, ...rest } = response.data;
     anuncio.fecha_inicio = new Date(fecha_inicio).toISOString().split('T')[0];
     anuncio.fecha_fin = new Date(fecha_fin).toISOString().split('T')[0];
@@ -174,6 +183,8 @@ const actualizarAnuncio = async () => {
     await axios.put(`http://localhost:3000/api/anuncios/editarAnuncio/${anuncio.id}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
+
       },
     });
     toast.add({ severity: 'success', summary: 'Éxito', detail: 'Anuncio actualizado correctamente', life: 1000 });
@@ -198,6 +209,8 @@ const agregarAnuncio = async () => {
     await axios.post('http://localhost:3000/api/anuncios/agregarAnuncio', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
+
       },
     });
     toast.add({ severity: 'success', summary: 'Éxito', detail: 'Anuncio agregado correctamente', life: 1000 });

@@ -45,6 +45,12 @@
         :rowsPerPageOptions="[4, 8, 12]"
         class="p-datatable-striped"
       >
+      <template #paginatorstart>
+                <Button type="button" icon="pi pi-refresh" text @click="reloadPage" />
+            </template>
+            <template #paginatorend>
+                <Button type="button" icon="pi pi-download" text @click="exportToExcel" />
+            </template>
         <Column header="#" sortable class="px-6 py-4">
           <template #body="rowData">
             {{ getRowIndex(rowData) }}
@@ -361,11 +367,13 @@
                 class="block text-sm font-medium text-gray-700 mb-1"
                 >Fecha de Nacimiento</label
               >
+              
               <DatePicker
-                v-model="selectedUsuario.fechaNacimiento"
-                dateFormat="dd/mm/yy"
+                v-model="formattedFechaNacimiento"
+                :dateFormat="'dd/mm/yy'"
                 showIcon
                 fluid
+
                 inputId="icondisplay"
                 id="fechaNacimiento"
                 class="-mt-0"
@@ -414,6 +422,10 @@ import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import CustomFileInput from "@/components/CustomFileInput.vue";
 import { useToast } from "primevue/usetoast";
+import { useAuthStore } from "@/stores/authStore";
+
+
+const authStore = useAuthStore();
 
 const usuarios = ref([]);
 const isModalOpen = ref(false);
@@ -422,6 +434,8 @@ const isConfirmModalOpen = ref(false);
 const toast = useToast();
 const showUserDetailsModal = ref(false);
 const selectedUser = ref(null);
+const token = authStore.token;
+
 
 const selectedUsuario = ref({
   nombres: "",
@@ -450,15 +464,57 @@ const showUserDetails = (user) => {
   selectedUser.value = user;
   showUserDetailsModal.value = true;
 };
-
+// Función para recargar la página
+const reloadPage = () => {
+  fetchData();
+};
 const closeUserDetailsModal = () => {
   showUserDetailsModal.value = false;
   selectedUser.value = null;
 };
+const formattedFechaNacimiento = computed({
+  get() {
+    return formatDate(selectedUsuario.value.fechaNacimiento);
+  },
+
+  set(value) {
+    return selectedUsuario.value.fechaNacimiento = formatToDateInput(value)
+  }
+});
+  
+
+const exportToExcel = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Anuncios');
+
+  // Agrega encabezados
+  worksheet.columns = [
+    { header: 'ID', key: 'id', width: 10 },
+    { header: 'Título', key: 'titulo', width: 30 },
+    { header: 'Miniatura', key: 'miniatura', width: 30 },
+    { header: 'Descripción', key: 'descripcion', width: 50 },
+    { header: 'Fecha Inicio', key: 'fecha_inicio', width: 15 },
+    { header: 'Fecha Fin', key: 'fecha_fin', width: 15 },
+    { header: 'Tipo', key: 'tipo', width: 10 }
+  ];
+
+  // Agrega filas
+  anuncios.value.forEach((anuncio) => {
+    worksheet.addRow(anuncio);
+  });
+
+  // Generar y descargar el archivo Excel
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buffer]), 'anuncios.xlsx');
+};
 const fetchData = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:3000/api/usuarios/usuario"
+      "http://localhost:3000/api/usuarios/usuario", {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+}
     );
     usuarios.value = response.data.filter(
       (usuario) => usuario.tipoUsuario === "admin"
@@ -516,14 +572,15 @@ const formatToDateInput = (dateString) => {
   const year = date.getUTCFullYear();
   return `${year}-${month}-${day}`;
 };
-function convertirFechaAMysql(fecha) {
+/*function convertirFechaAMysql(fecha) {
   const fechaObj = new Date(fecha);
+    fechaObj.setDate(fechaObj.getDate() - 1);
+
   const year = fechaObj.getFullYear();
   const month = String(fechaObj.getMonth() + 1).padStart(2, "0"); // Los meses comienzan en 0
   const day = String(fechaObj.getDate()).padStart(2, "0");
-
   return `${year}-${month}-${day}`;
-}
+}*/
 const closeModal = () => {
   isModalOpen.value = false;
 };
@@ -539,7 +596,7 @@ const addUsuario = async () => {
   formData.append("email", selectedUsuario.value.email);
   formData.append(
     "fechaNacimiento",
-    convertirFechaAMysql(selectedUsuario.value.fechaNacimiento)
+    formatToDateInput(selectedUsuario.value.fechaNacimiento)
   );
   formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
   formData.append("contrasenia", selectedUsuario.value.contrasenia); // Se envía al backend
@@ -557,6 +614,7 @@ const addUsuario = async () => {
       {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`
         },
       }
     );
@@ -603,7 +661,7 @@ const updateUsuario = async () => {
   formData.append("email", selectedUsuario.value.email);
   formData.append(
     "fechaNacimiento",
-    convertirFechaAMysql(selectedUsuario.value.fechaNacimiento)
+    formatToDateInput(selectedUsuario.value.fechaNacimiento)
   );
   formData.append("estado", selectedUsuario.value.estado);
   formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
@@ -624,6 +682,7 @@ const updateUsuario = async () => {
       {
         headers: {
           "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`
         },
       }
     );
@@ -662,7 +721,11 @@ const eliminarUsuario = (id) => {
 const deleteUsuario = async () => {
   try {
     await axios.delete(
-      `http://localhost:3000/api/usuarios/eliminarUsuario/${usuarioToDelete.value}`
+      `http://localhost:3000/api/usuarios/eliminarUsuario/${usuarioToDelete.value}`, {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+}
     );
     fetchData();
     closeConfirmModal();

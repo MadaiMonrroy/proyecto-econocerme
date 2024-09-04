@@ -154,6 +154,7 @@ watch(() => props.modelValue, (newVal) => {
 // Actualiza la vista previa cuando cambia imageUrl
 watch(() => props.imageUrl, (newVal) => {
   if (newVal) {
+    // Si la URL de la imagen es proporcionada, la asigna directamente
     imagePreview.value = newVal;
   }
 });

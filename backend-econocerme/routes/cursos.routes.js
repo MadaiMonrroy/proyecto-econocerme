@@ -3,12 +3,7 @@ import {listaCursos, obtenerCurso, editarCurso, eliminarCurso, agregarCurso } fr
 import expressFileUpload from 'express-fileupload'
 const router = Router();
 
-router.use(expressFileUpload(
-    {
-        limits: {fileSize: 1000000},
-        useTempFiles: true,
-    }
-))
+router.use(expressFileUpload());
 
 router.get('/curso', listaCursos)
 router.get('/obtenerCurso/:id', obtenerCurso)

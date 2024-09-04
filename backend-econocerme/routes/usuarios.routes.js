@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import {listaUsuarios, obtenerUsuario, editarUsuario, editarUsuariocoach, eliminarUsuario, agregarUsuario,agregarUsuariocoach, confirmarUsuario} from '../controllers/usuarios.controllers.js';
+import {listaUsuarios, listaUsuariosInscripciones, obtenerUsuario, editarUsuario, editarUsuariocoach, eliminarUsuario, agregarUsuario,agregarUsuariocoach, confirmarUsuario} from '../controllers/usuarios.controllers.js';
 import expressFileUpload from 'express-fileupload'
 
 const router = Router();
@@ -10,7 +10,9 @@ router.use(expressFileUpload(
     }
 ))
 
+
 router.get('/usuario', listaUsuarios)
+router.get('/usuarios', listaUsuariosInscripciones)
 router.get('/obtenerUsuario/:id', obtenerUsuario)
 router.put('/editarUsuario/:id', editarUsuario)
 router.put('/editarUsuariocoach/:id', editarUsuariocoach)

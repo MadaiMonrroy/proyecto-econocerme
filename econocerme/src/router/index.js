@@ -13,11 +13,13 @@ import listaCursos from '@/views/listaCursos.vue';
 import modulos from '@/views/adm.cursos/modulos.vue';
 import formCurso from '@/views/adm.cursos/formCurso.vue';
 import anuncios from '@/views/adm.anuncios/anuncios.vue';
-import formAnuncio from '@/views/adm.anuncios/formAnuncio.vue';  
-import menuBar from '@/components/menuBar.vue';
+import formAnuncio from '@/views/adm.anuncios/formAnuncio.vue'; 
+import inscripciones from '@/views/adm.inscripciones/inscripciones.vue';
+import formInscripcion from '@/views/adm.inscripciones/formInscripcion.vue';
+import panelUsuario from '@/components/panelUsuario.vue';
 import menuUser from '@/components/menuUser.vue';
 import prueba from '@/components/pruebas.vue';
-import vistaCurso from '@/views/user.curso/play_curso.vue';
+import curso from '@/views/user.curso/curso.vue';
 import main from '@/views/main.vue';
 import ConfirmarUsuario from '@/views/adm.usuarios/ConfirmarUsuario.vue';
 
@@ -32,7 +34,7 @@ const routes = [
       { path: 'estudiantes', component: estudiantes },
       { path: 'cursos', component: cursos },
       { path: 'modulos', component: listaCursos },
-      { path: 'modulos/:cursoId', component: modulos },
+      { path: 'modulos/:idCurso', component: modulos },
       { path: 'formCurso', component: formCurso },  // Ruta para agregar curso
       { path: 'formCurso/:idCurso', component: formCurso },
       { path: 'anuncios', component: anuncios },  // Ruta para editar curso
@@ -40,12 +42,17 @@ const routes = [
       { path: 'formAnuncio/:id', component: formAnuncio },
       { path: 'prueba', component: prueba },
       { path: 'main', component: main },
+      { path: 'inscripciones', component: inscripciones },
+      { path: 'formInscripcion', component: formInscripcion },  
       ]
    },
-  { path: '/menuBar', component: menuBar },
+  { path: '/panelUsuario', component: panelUsuario, 
+    children: [
+      { path: 'misCursos', component: curso },
+    ]
+  },
   { path: '/menuUser', component: menuUser },
   { path: '/prueba', component: prueba },
-  { path: '/vistaCurso', component: vistaCurso },
   { path: '/confirmar/:token', component: ConfirmarUsuario },
 ];
 

@@ -14,4 +14,4 @@ const verificarToken = (req, res, next) => {
   });
 };
 
-export default verificarToken; // Cambia a export default
+export default verificarToken; // Cambia a export default

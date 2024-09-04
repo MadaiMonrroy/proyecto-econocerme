@@ -25,20 +25,27 @@
         <button class="text-black hover:text-purple-950">
           <i class="pi pi-bell text-xl" style="font-size: 21px"></i>
         </button>
-        <theme-switcher></theme-switcher>
-        <Menu :model="profileItems" :popup="true" ref="menu">
-          <template #target="{ toggle }">
-            <button @click="toggle" class="p-link flex items-center">
-              <Avatar icon="pi pi-user" class="mr-2" />
-              <i class="pi pi-angle-down"></i>
-            </button>
-          </template>
-        </Menu>
-        <button
-          class="bg-red-400 hover:bg-red-500 text-white px-3 py-1 rounded transition-colors duration-300"
+        <theme-switcher class="w-14 h-14"></theme-switcher>
+        <div
+        class="flex justify-center items-center space-x-2 cursor-pointer group"
+        @click="toggle"
+          aria-haspopup="true"
+          aria-controls="overlay_menu"
         >
-          Salir
-        </button>
+          <img
+            :src="authStore.usuario.fotoPerfil"
+            alt="Perfil"
+            class="w-12 h-11 rounded-full group-hover:shadow-2xl transition duration-300"
+          />
+          <span class="text-base font-medium group-hover:shadow-xl  transition duration-300">{{ primerNombre }}</span>
+          <i class="pi pi-chevron-down group-hover:shadow-lg transition duration-300"></i>
+          <Menu
+            ref="menu"
+            id="overlay_menu"
+            :model="profileItems"
+            :popup="true"
+          />
+        </div>
       </div>
     </header>
 
@@ -54,13 +61,16 @@
         <br />
         <div
           v-if="!isSidebarCollapsed"
-          class="flex items-center justify-center mb-6"
+          class="flex  flex-col items-center  mb-6"
         >
           <img
-            src="@/assets/avatar3.png"
+            :src="authStore.usuario.fotoPerfil"
             alt="Avatar"
-            class="rounded-full w-[130px] h-[130px] object-cover"
+            class="!rounded-full w-[130px] h-[130px] object-cover shadow-2xl shadow-indigo-900"
           />
+          <h2 class="mt-2 text-lg font-semibold">{{ primerNombre }} {{ authStore.usuario.primerApellido }}</h2>
+          
+
         </div>
         <ul class="space-y-2">
           <li v-for="(item, index) in menuItems" :key="index" class="w-full">
@@ -110,21 +120,24 @@
         }"
         class=""
       >
-      <p>Usuario: {{ authStore.user }}</p>
+        <p>Usuario: {{ authStore.usuario.email }} </p>
         <router-view></router-view>
       </main>
     </div>
   </div>
 </template>
 <script>
-import { ref,onMounted} from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import Menu from "primevue/menu";
+
+
+
 import ThemeSwitcher from "./ThemeSwitcher.vue";
 import { useAuthStore } from "@/stores/authStore";
 
-
 export default {
-  components: { ThemeSwitcher },
+  components: { ThemeSwitcher, Menu },
   name: "PanelControl",
   setup() {
     const authStore = useAuthStore();
@@ -134,21 +147,22 @@ export default {
         router.push("/"); // Redirigir a la página de inicio o login
       }
     });
-    
+
     const menu = ref();
     const sublistOpen = ref({});
     const isSidebarCollapsed = ref(true);
     const isSidebarHovered = ref(false);
     const isSidebarFixed = ref(false);
 
-
     // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA asi se llama a la variable global store
     const usuario = authStore.usuario;
-    console.log("yo soy script",usuario)
-    console.log("yo soy convertido a json", JSON.stringify(usuario))
-    
+    console.log("yo soy script", usuario);
+    console.log("yo soy convertido a json", JSON.stringify(usuario));
 
-    
+    const primerNombre = computed(() => {
+      const nombres = usuario.nombres || ""; // Asegurarse de que `nombres` no sea undefined
+      return nombres.split(" ")[0]; // Dividir por espacios y retornar el primer elemento
+    });
 
     const menuItems = ref([
       {
@@ -177,11 +191,11 @@ export default {
         ],
       },
       {
-        key: "ventas",
-        label: "Ventas",
-        icon: "pi pi-shopping-cart",
-        route: "/prueba",
-      },
+        key: "inscripciones",
+        label: "Inscripciones",
+        icon: "pi pi-address-book",
+        route: "/panelControl/inscripciones",
+      },
       {
         key: "anuncios",
         label: "Anuncios",
@@ -195,14 +209,7 @@ export default {
         label: "Perfil",
         icon: "pi pi-user",
         command: () => {
-          // Acción al hacer clic en Perfil
-        },
-      },
-      {
-        label: "Configuración",
-        icon: "pi pi-cog",
-        command: () => {
-          // Acción al hacer clic en Configuración
+          // Add navigation to profile page or other logic here
         },
       },
       {
@@ -265,10 +272,14 @@ export default {
         isSidebarCollapsed.value = true;
       }
     };
+    const toggle = (event) => {
+      menu.value.toggle(event);
+    };
 
     return {
       authStore,
       menu,
+      toggle,
       sublistOpen,
       menuItems,
       profileItems,
@@ -281,6 +292,7 @@ export default {
       handleMenuClick,
       handleSidebarMouseEnter,
       handleSidebarMouseLeave,
+      primerNombre,
     };
   },
 };

@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-center items-center p-2">
-    <div class="w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
+    <div class="card w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
       <h2 class="text-2xl font-semibold mb-6 text-center">{{ curso.idCurso ? 'Editar Curso' : 'Agregar Nuevo Curso' }}</h2>
       <form @submit.prevent="curso.idCurso ? actualizarCurso() : agregarCurso()">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -112,9 +112,13 @@ import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 import InputNumber from 'primevue/inputnumber'; // Asegúrate de que InputNumber está importado
 import CustomFileInput from '@/components/CustomFileInput.vue';
+import { useAuthStore } from "@/stores/authStore";
+
+const authStore = useAuthStore();
 
 const route = useRoute();
 const router = useRouter();
+const token = authStore.token;
 
 const curso = reactive({
   idCurso: null,
@@ -151,6 +155,8 @@ const agregarCurso = async () => {
     await axios.post(`http://localhost:3000/api/cursos/agregarCurso`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
+
       },
     });
     logFormData(formData);  // Log the form data
@@ -163,7 +169,11 @@ const agregarCurso = async () => {
 
 const cargarCurso = async (idCurso) => {
   try {
-    const response = await axios.get(`http://localhost:3000/api/cursos/obtenerCurso/${idCurso}`);
+    const response = await axios.get(`http://localhost:3000/api/cursos/obtenerCurso/${idCurso}`, {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
     Object.assign(curso, response.data);
   } catch (error) {
     console.error(error);
@@ -185,6 +195,8 @@ const actualizarCurso = async () => {
     await axios.put(`http://localhost:3000/api/cursos/editarCurso/${curso.idCurso}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`
+
       },
     });
     router.push('/panelControl/cursos');
