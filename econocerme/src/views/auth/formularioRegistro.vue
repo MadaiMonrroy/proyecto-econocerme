@@ -142,8 +142,8 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
 import { useToast } from "primevue/usetoast";
+import api from '@/axiosConfig.js'
 
 const toast = useToast();
 const router = useRouter();
@@ -207,8 +207,8 @@ const handleSubmit = async () => {
       repetirContrasenia: repetirContraseña.value
     };
 
-    const response = await axios.post(
-      "http://localhost:3000/api/auth/registro",
+    const response = await api.post(
+      "/auth/registro",
       usuario,
       {
         headers: {
