@@ -10,6 +10,8 @@ import morgan from 'morgan';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv'; // Importa dotenv para manejar variables de entorno
 import path from 'path';
+import cookieParser from 'cookie-parser';
+
 import verificarToken from './middleware/verificarToken.js'; //
 
 // Obtener el directorio actual en módulos ES
@@ -22,10 +24,14 @@ import multer from 'multer';
 dotenv.config();
 
 const app = express();
+app.use(cookieParser(process.env.COOKIE_SECRET)); // Asegúrate de que COOKIE_SECRET está en tu archivo .env
+
 app.use(express.json());
 app.use(cors({
     origin: 'http://localhost:5173', // Cambia esto según sea necesario
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
+    credentials: true // Asegúrate de permitir el envío de cookies
+
 }));
 app.use(morgan('dev'))
 
