@@ -99,7 +99,6 @@ const handleSubmit = async () => {
 
   try {
     const response = await authStore.login(email.value, password.value); // Usa el método de login del store
-    console.log(response);
 
     if (response) {
       toast.add({
@@ -139,7 +138,6 @@ const handleSubmit = async () => {
 
 // Cargar el email y contraseña si están guardados
 onMounted(() => {
-  console.log(authStore.isAutenticated);
 });
 
 const goToRegister = () => {

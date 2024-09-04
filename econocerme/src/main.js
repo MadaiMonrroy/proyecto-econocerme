@@ -28,6 +28,7 @@ import Toast from 'primevue/toast';
 import Menu from 'primevue/menu';
 
 
+
 export const PrimeVitals = {
   install: (app) => {
     app.use(ConfirmationService);
@@ -94,7 +95,7 @@ import Toolbar from 'primevue/toolbar';
 import DatePicker from 'primevue/datepicker';
 import Image from 'primevue/image';
 import Tag from 'primevue/tag';
-
+import ProgressSpinner from 'primevue/progressspinner';
 
 
 
@@ -135,6 +136,8 @@ app.component('Toolbar', Toolbar);
 app.component('DatePicker',DatePicker);
 app.component('Image', Image);
 app.component('Tag', Tag);
+
+app.component('ProgressSpinner', ProgressSpinner);
 
 app.use(pinia);
 

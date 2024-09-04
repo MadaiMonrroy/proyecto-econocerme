@@ -41,9 +41,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from "@/stores/authStore";
+import api from '@/axiosConfig.js'
 
 const authStore = useAuthStore();
 
@@ -63,11 +63,7 @@ const openEditView = (curso) => {
 
 const eliminarCurso = async (idCurso) => {
   try {
-    await axios.delete(`http://localhost:3000/api/cursos/eliminarCurso/${idCurso}`, {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-});
+    await api.delete(`/cursos/eliminarCurso/${idCurso}`);
     cursos.value = cursos.value.filter(curso => curso.idCurso !== idCurso);
   } catch (error) {
     console.error(error);
@@ -108,11 +104,7 @@ const reloadPage = () => {
 };
 const fetchData = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/api/cursos/curso', {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-} );
+    const response = await api.get('/cursos/curso' );
     cursos.value = response.data;  // Aquí se espera que `response.data` sea el array de cursos
   } catch (error) {
     console.error(error);

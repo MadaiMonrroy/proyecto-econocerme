@@ -235,11 +235,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import axios from "axios";
 import { useRouter } from "vue-router";
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { useAuthStore } from "@/stores/authStore";
+import api from '@/axiosConfig.js'
 
 const authStore = useAuthStore();
 
@@ -272,12 +272,8 @@ const reloadPage = () => {
 };
 const eliminarAnuncio = async (id) => {
   try {
-    await axios.delete(
-      `http://localhost:3000/api/anuncios/eliminarAnuncio/${id}`, {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-}
+    await api.delete(
+      `/anuncios/eliminarAnuncio/${id}`
     );
     fetchAnuncios();
   } catch (error) {
@@ -336,12 +332,8 @@ const exportToExcel = async () => {
 };
 const fetchAnuncios = async () => {
   try {
-    const response = await axios.get(
-      "http://localhost:3000/api/anuncios/anuncio", {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-}
+    const response = await api.get(
+      "/anuncios/anuncio"
     );
     anuncios.value = response.data;
   } catch (error) {

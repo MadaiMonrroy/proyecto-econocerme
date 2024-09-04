@@ -42,8 +42,8 @@ const routes = [
       { path: 'formAnuncio/:id', component: formAnuncio },
       { path: 'prueba', component: prueba },
       { path: 'main', component: main },
-      { path: 'inscripciones', component: inscripciones },
-      { path: 'formInscripcion', component: formInscripcion },  
+     { path: 'inscripciones', component: inscripciones },
+      { path: 'formInscripcion', component: formInscripcion }, 
       ]
    },
   { path: '/panelUsuario', component: panelUsuario, 

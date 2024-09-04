@@ -143,8 +143,9 @@ export default {
     const authStore = useAuthStore();
     const router = useRouter();
     onMounted(() => {
-      if (!authStore.isAuthenticated) {
-        router.push("/"); // Redirigir a la página de inicio o login
+      authStore.loadUser(); // Asegúrate de que el usuario se carga antes de verificar la autenticación
+        if (!authStore.isAuthenticated) {
+            router.push("/"); // Redirigir a la página de inicio o login
       }
     });
 

@@ -108,11 +108,11 @@
 
 <script setup>
 import { reactive, onMounted } from 'vue';
-import axios from 'axios';
 import { useRouter, useRoute } from 'vue-router';
 import InputNumber from 'primevue/inputnumber'; // Asegúrate de que InputNumber está importado
 import CustomFileInput from '@/components/CustomFileInput.vue';
 import { useAuthStore } from "@/stores/authStore";
+import api from '@/axiosConfig.js'
 
 const authStore = useAuthStore();
 
@@ -152,10 +152,9 @@ const agregarCurso = async () => {
   formData.append('miniatura', selectedFile);
 
   try {
-    await axios.post(`http://localhost:3000/api/cursos/agregarCurso`, formData, {
+    await api.post(`/cursos/agregarCurso`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
 
       },
     });
@@ -169,11 +168,7 @@ const agregarCurso = async () => {
 
 const cargarCurso = async (idCurso) => {
   try {
-    const response = await axios.get(`http://localhost:3000/api/cursos/obtenerCurso/${idCurso}`, {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-});
+    const response = await api.get(`/cursos/obtenerCurso/${idCurso}`);
     Object.assign(curso, response.data);
   } catch (error) {
     console.error(error);
@@ -192,10 +187,9 @@ const actualizarCurso = async () => {
   }
 
   try {
-    await axios.put(`http://localhost:3000/api/cursos/editarCurso/${curso.idCurso}`, formData, {
+    await api.put(`/cursos/editarCurso/${curso.idCurso}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`
 
       },
     });

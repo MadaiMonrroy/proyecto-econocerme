@@ -413,10 +413,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import axios from "axios";
 import CustomFileInput from "@/components/CustomFileInput.vue";
 import { useToast } from "primevue/usetoast";
 import { useAuthStore } from "@/stores/authStore";
+import api from '@/axiosConfig.js'
 
 const authStore = useAuthStore();
 
@@ -462,13 +462,8 @@ const closeUserDetailsModal = () => {
 };
 const fetchData = async () => {
   try {
-    const response = await axios.get(
-      "http://localhost:3000/api/usuarios/usuario",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    const response = await api.get(
+      "/usuarios/usuario"
     );
     usuarios.value = response.data.filter(
       (usuario) => usuario.tipoUsuario === "coach"
@@ -587,13 +582,12 @@ const addUsuario = async () => {
   }
 
   try {
-    await axios.post(
-      "http://localhost:3000/api/usuarios/agregarUsuariocoach",
+    await api.post(
+      "/usuarios/agregarUsuariocoach",
       formData,
       {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -655,13 +649,12 @@ const updateUsuario = async () => {
   }
 
   try {
-    await axios.put(
-      `http://localhost:3000/api/usuarios/editarUsuariocoach/${selectedUsuario.value.id}`,
+    await api.put(
+      `/usuarios/editarUsuariocoach/${selectedUsuario.value.id}`,
       formData,
       {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -699,13 +692,8 @@ const eliminarUsuario = (id) => {
 
 const deleteUsuario = async () => {
   try {
-    await axios.delete(
-      `http://localhost:3000/api/usuarios/eliminarUsuario/${usuarioToDelete.value}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    await api.delete(
+      `/usuarios/eliminarUsuario/${usuarioToDelete.value}`
     );
     fetchData();
     closeConfirmModal();

@@ -1,8 +1,19 @@
 <template>
   <div class="p-4">
+    <!-- <div
+      v-if="mostrarSpinner"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <ProgressSpinner
+        style="width: 50px; height: 50px"
+        strokeWidth="8"
+        fill="transparent"
+        animationDuration=".5s"
+        aria-label="Custom ProgressSpinner"
+        class="z-50"
+      />
+    </div>-->
     <div class="card">
-
-    
       <h2 class="text-2xl mb-4">Estudiantes</h2>
     <Divider />
 
@@ -257,13 +268,14 @@
         </form>
       </div>
     </Dialog>
-
+    
     <Dialog
       v-model:visible="isModalOpen"
       :header="isEditMode ? 'Editar Usuario' : 'Agregar Usuario'"
       :visible="isModalOpen"
       modal
-      class="w-full max-w-lg"
+      class=" "
+      :style="{ zIndex: 10 }"
     >
       <form @submit.prevent="isEditMode ? updateUsuario() : addUsuario()">
         <div class="grid grid-cols-2 gap-4 p-4">
@@ -398,19 +410,22 @@
           >
         </div>
       </form>
+      
     </Dialog>
+    
     <Toast />
   </div>
+  
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import axios from "axios";
 import CustomFileInput from "@/components/CustomFileInput.vue";
 import { useToast } from "primevue/usetoast";
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { useAuthStore } from "@/stores/authStore";
+import api from '@/axiosConfig.js'
 const authStore = useAuthStore();
 
 const usuarios = ref([]);
@@ -420,6 +435,8 @@ const isConfirmModalOpen = ref(false);
 const toast = useToast();
 const showUserDetailsModal = ref(false);
 const selectedUser = ref(null);
+
+/* const mostrarSpinner = ref(false); Controla la visibilidad del spinner*/
 
 
 const token = authStore.token;
@@ -460,23 +477,24 @@ const closeUserDetailsModal = () => {
   selectedUser.value = null;
 };
 const fetchData = async () => {
+
   try {
-    const response = await axios.get(
-      "http://localhost:3000/api/usuarios/usuario", {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-}
+    const response = await api.get(
+      "/usuarios/usuario"
+  
     );
+    
     usuarios.value = response.data.filter(
       (usuario) => usuario.tipoUsuario === "usuario"
     );
+
   } catch (error) {
     console.error(error);
   }
 };
 
-onMounted(fetchData);
+onMounted(fetchData
+);
 
 const openAddModal = () => {
   isEditMode.value = false;
@@ -546,7 +564,11 @@ const reloadPage = () => {
   fetchData();
 };
 
+
 const addUsuario = async () => {
+  closeModal();
+
+  /* mostrarSpinner.value = true;*/
   const formData = new FormData();
   formData.append("nombres", selectedUsuario.value.nombres);
   formData.append("primerApellido", selectedUsuario.value.primerApellido);
@@ -566,18 +588,18 @@ const addUsuario = async () => {
   }
 
   try {
-    await axios.post(
-      "http://localhost:3000/api/usuarios/agregarUsuario",
+    await api.post(
+      "/usuarios/agregarUsuario",
       formData,
       {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
         },
+
       }
     );
     fetchData();
-    closeModal();
+
     toast.add({
       severity: "info",
       summary: "Usuario Añadido",
@@ -611,7 +633,10 @@ const filteredUsuarios = computed(() => {
   });
 });
 
+
 const updateUsuario = async () => {
+  closeModal();
+
   const formData = new FormData();
   formData.append("nombres", selectedUsuario.value.nombres);
   formData.append("primerApellido", selectedUsuario.value.primerApellido);
@@ -637,17 +662,17 @@ const updateUsuario = async () => {
   }
 
   try {
-    await axios.put(
-      `http://localhost:3000/api/usuarios/editarUsuario/${selectedUsuario.value.id}`,
+    await api.put(
+      `/usuarios/editarUsuario/${selectedUsuario.value.id}`,
       formData,
       {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
+
+        }
       }
     );
-
+   
     // Actualizar el usuario en la lista local
     const index = usuarios.value.findIndex(
       (usuario) => usuario.id === selectedUsuario.value.id
@@ -656,7 +681,6 @@ const updateUsuario = async () => {
       usuarios.value[index] = { ...selectedUsuario.value }; // Actualizar el usuario en la lista
     }
     fetchData();
-    closeModal();
     toast.add({
       severity: "success",
       summary: "Datos Actuaizados del Usuario",
@@ -681,12 +705,8 @@ const eliminarUsuario = (id) => {
 
 const deleteUsuario = async () => {
   try {
-    await axios.delete(
-      `http://localhost:3000/api/usuarios/eliminarUsuario/${usuarioToDelete.value}`, {
-  headers: {
-    Authorization: `Bearer ${token}`
-  }
-}
+    await api.delete(
+      `/usuarios/eliminarUsuario/${usuarioToDelete.value}`
     );
     fetchData();
     closeConfirmModal();
@@ -742,23 +762,24 @@ const exportToExcel = async () => {
 
   // Agrega encabezados
   worksheet.columns = [
-    { header: 'ID', key: 'id', width: 10 },
-    { header: 'Título', key: 'titulo', width: 30 },
-    { header: 'Miniatura', key: 'miniatura', width: 30 },
-    { header: 'Descripción', key: 'descripcion', width: 50 },
-    { header: 'Fecha Inicio', key: 'fecha_inicio', width: 15 },
-    { header: 'Fecha Fin', key: 'fecha_fin', width: 15 },
-    { header: 'Tipo', key: 'tipo', width: 10 }
+    { header: '#', key: 'id', width: 10 },
+    { header: 'Foto de Perfil', key: 'fotoPerfil', width: 30 },
+    { header: 'Nombres', key: 'nombres', width: 20 },
+    { header: 'Primer Apellido', key: 'primerApellido', width: 15 },
+    { header: 'Segundo Apellido', key: 'segundoApellido', width: 15 },
+    { header: 'Estado', key: 'estado', width: 10 },
+    { header: 'Email', key: 'email', width: 20 },
+    { header: 'Fecha de Nacimiento', key: 'fechaNacimiento', width: 5 }
   ];
 
   // Agrega filas
-  anuncios.value.forEach((anuncio) => {
-    worksheet.addRow(anuncio);
+  usuarios.value.forEach((usuario) => {
+    worksheet.addRow(usuario);
   });
 
   // Generar y descargar el archivo Excel
   const buffer = await workbook.xlsx.writeBuffer();
-  saveAs(new Blob([buffer]), 'anuncios.xlsx');
+  saveAs(new Blob([buffer]), 'usuarios.xlsx');
 };
 const handlePasswordChange = () => {
   selectedUsuario.value.contrasenia = generatePassword();
