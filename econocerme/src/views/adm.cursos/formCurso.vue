@@ -1,5 +1,5 @@
 <template>
-  <Toast/>
+
   <div class="flex justify-center items-center p-2">
     <div class="card w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
       <h2 class="text-2xl font-semibold mb-6 text-center">{{ curso.idCurso ? 'Editar Curso' : 'Agregar Nuevo Curso' }}</h2>
@@ -199,15 +199,15 @@ const agregarCurso = async () => {
       },
     });
     logFormData(formData);  // Log the form data
+    router.push('/panelControl/cursos');
+
     toast.add({
       severity: "success",
       summary: "Curso Añadido",
       detail: "El curso ha sido agregado con éxito.",
       life: 3000
     });
-    setTimeout(() => {
-      router.push('/panelControl/cursos');
-    }, 3000);
+
     } catch (error) {
     console.error(error.response.data.mensaje);
     toast.add({

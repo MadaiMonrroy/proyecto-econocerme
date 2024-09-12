@@ -134,7 +134,6 @@
           />
         </div>
       </form>
-      <Toast />
     </div>
   </div>
 </template>
@@ -228,7 +227,7 @@ const handleSubmit = async () => {
       });
 
       // Esperar 3 segundos antes de redirigir
-      setTimeout(() => {
+
         // Limpiar los campos del formulario
         primerNombre.value = "";
         segundoNombre.value = "";
@@ -238,7 +237,6 @@ const handleSubmit = async () => {
         contraseña.value = "";
         repetirContraseña.value = "";
         router.push("/");
-      }, 3000);
     }
   } catch (error) {
     if (error.response && error.response.data && error.response.data.mensaje) {

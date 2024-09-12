@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-center items-center p-7">
     <div class=" card p-6 max-w-4xl mx-auto bg-white bg-opacity-40 shadow-md rounded-lg">
-      <Toast />
+
       <h2 class="text-2xl font-semibold mb-6">
         {{ anuncio.id ? "Editar Anuncio" : "Agregar Nuevo Anuncio" }}
       </h2>
@@ -183,7 +183,6 @@ const actualizarAnuncio = async () => {
       },
     });
     toast.add({ severity: 'success', summary: 'Éxito', detail: 'Anuncio actualizado correctamente', life: 1000 });
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo
     router.push('/panelControl/anuncios');
   } catch (error) {
     toast.add({ severity: 'error', summary: 'Error', detail: 'Error al actualizar el anuncio', life: 2000 });
@@ -208,7 +207,6 @@ const agregarAnuncio = async () => {
       },
     });
     toast.add({ severity: 'success', summary: 'Éxito', detail: 'Anuncio agregado correctamente', life: 1000 });
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Espera 1 segundo
     router.push('/panelControl/anuncios');
   } catch (error) {
     toast.add({ severity: 'error', summary: 'Error', detail: 'Error al agregar el anuncio', life: 2000 });

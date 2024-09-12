@@ -201,14 +201,34 @@
           <label for="videoIntro" class="block text-sm font-medium"
             >Video de Introducción</label
           >
+          <!-- Visualizar el video cargado -->
+          <div v-if="modulo.videoIntroURL" class="relative w-full h-0 pb-[56.25%]">
+            <video
+              controls
+              class="absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-lg"
+              controlsList="nodownload"
+              poster="/src/assets/fondo.jpg"
+              playsinline
+              loop
+
+              style="max-height: 300px"
+            >
+            
+
+              <source :src="modulo.videoIntroURL" type="video/mp4" />
+              Tu navegador no soporta la visualización de videos.
+            </video>
+          </div>
+
+          <!-- Componente FileUpload de PrimeVue -->
           <FileUpload
-            name="videoIntro"
-            @upload="onTemplatedUpload"
+            name="videoUploader"
+            @upload="onUpload"
             accept="video/*"
             :maxFileSize="50000000"
-            :multiple="false"
-            @select="onSelectedFiles"
-            @progress="onProgress"
+            :auto="false"
+            :customUpload="true"
+            @select="onFileSelect"
             class="border-2 border-gray-300 rounded-md"
           >
             <template
@@ -222,14 +242,16 @@
                     rounded
                     outlined
                     severity="secondary"
+                    label="Elegir Video"
                   ></Button>
                   <Button
-                    @click="uploadEvent(uploadCallback)"
+                    @click="uploadCallback()"
                     icon="pi pi-cloud-upload"
                     rounded
                     outlined
                     severity="success"
                     :disabled="!files || files.length === 0"
+                    label="Subir Video"
                   ></Button>
                   <Button
                     @click="clearCallback()"
@@ -238,6 +260,7 @@
                     outlined
                     severity="danger"
                     :disabled="!files || files.length === 0"
+                    label="Limpiar"
                   ></Button>
                 </div>
                 <ProgressBar
@@ -245,7 +268,7 @@
                   :showValue="false"
                   class="w-full md:w-2/3 h-1"
                 >
-                  <span class="whitespace-nowrap">{{ totalSize }}B / 50Mb</span>
+                  <span class="whitespace-nowrap">{{ totalSize }}B / 50MB</span>
                 </ProgressBar>
               </div>
             </template>
@@ -400,6 +423,7 @@ const props = defineProps({
 onMounted(async () => {
   const response = await api.get(`/modulos/modulo/${props.cursoId}`);
   modulos.value = response.data;
+
 });
 
 const guardarCambios = async () => {
