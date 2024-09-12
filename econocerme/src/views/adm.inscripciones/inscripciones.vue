@@ -42,10 +42,10 @@
   
   <script setup>
   import { ref, computed, onMounted } from 'vue';
-  import axios from 'axios';
   import { useRouter } from 'vue-router';
   import { useAuthStore } from "@/stores/authStore";
-  
+  import api from "@/axiosConfig.js";
+
   const authStore = useAuthStore();
   const inscripciones = ref([]);
   const router = useRouter();
@@ -65,11 +65,7 @@
   
   const eliminarInscripcion = async (idInscripcion) => {
     try {
-      await axios.delete(`http://localhost:3000/api/inscripciones/eliminarInscripcion/${idInscripcion}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      await api.delete(`/inscripciones/eliminarInscripcion/${idInscripcion}`);
       inscripciones.value = inscripciones.value.filter(inscripcion => inscripcion.idInscripcion !== idInscripcion);
     } catch (error) {
       console.error(error);
@@ -88,11 +84,7 @@
   
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/inscripciones/inscripcion', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await api.get('/inscripciones/inscripcion');
       inscripciones.value = response.data.data;  
     } catch (error) {
       console.error(error);

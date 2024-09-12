@@ -21,7 +21,9 @@ import menuUser from '@/components/menuUser.vue';
 import prueba from '@/components/pruebas.vue';
 import curso from '@/views/user.curso/curso.vue';
 import main from '@/views/main.vue';
+import leccion from '@/views/adm.cursos/lecciones.vue'
 import ConfirmarUsuario from '@/views/adm.usuarios/ConfirmarUsuario.vue';
+
 
 
 const routes = [
@@ -34,6 +36,7 @@ const routes = [
       { path: 'estudiantes', component: estudiantes },
       { path: 'cursos', component: cursos },
       { path: 'modulos', component: listaCursos },
+      { path: 'leccion', component: leccion },
       { path: 'modulos/:idCurso', component: modulos },
       { path: 'formCurso', component: formCurso },  // Ruta para agregar curso
       { path: 'formCurso/:idCurso', component: formCurso },

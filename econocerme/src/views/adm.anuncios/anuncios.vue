@@ -21,13 +21,13 @@
           </IconField>
         </div>
         <div class="flex-none">
-        <Button
-          class="bg-green-500 text-white p-button-rounded p-button-success flex items-center"
-          @click="openAddView"
-        >
-          <i class="pi pi-plus-circle mr-2"></i>
-          Agregar
-        </Button>
+          <Button
+            class="bg-green-500 text-white p-button-rounded p-button-success flex items-center"
+            @click="openAddView"
+          >
+            <i class="pi pi-plus-circle mr-2"></i>
+            Agregar
+          </Button>
         </div>
       </div>
       <Divider />
@@ -39,12 +39,22 @@
           :rowsPerPageOptions="[4, 8, 12]"
           class="p-datatable-striped min-w-[600px]"
         >
-        <template #paginatorstart>
-                <Button type="button" icon="pi pi-refresh" text @click="reloadPage" />
-            </template>
-            <template #paginatorend>
-                <Button type="button" icon="pi pi-download" text @click="exportToExcel" />
-            </template>
+          <template #paginatorstart>
+            <Button
+              type="button"
+              icon="pi pi-refresh"
+              text
+              @click="reloadPage"
+            />
+          </template>
+          <template #paginatorend>
+            <Button
+              type="button"
+              icon="pi pi-download"
+              text
+              @click="exportToExcel"
+            />
+          </template>
           <!-- Columnas de la tabla -->
           <Column header="#" class="px-3 py-2 sm:px-6 sm:py-4">
             <template #body="rowData">
@@ -91,12 +101,20 @@
               </div>
             </template>
           </Column>
-          <Column header="Fecha de Inicio" sortable class="px-3 py-2 sm:px-6 sm:py-4">
+          <Column
+            header="Fecha de Inicio"
+            sortable
+            class="px-3 py-2 sm:px-6 sm:py-4"
+          >
             <template #body="rowData">
               {{ formatDate(rowData.data.fecha_inicio) }}
             </template>
           </Column>
-          <Column header="Fecha de Fin" sortable class="px-3 py-2 sm:px-6 sm:py-4">
+          <Column
+            header="Fecha de Fin"
+            sortable
+            class="px-3 py-2 sm:px-6 sm:py-4"
+          >
             <template #body="rowData">
               {{ formatDate(rowData.data.fecha_fin) }}
             </template>
@@ -143,10 +161,7 @@
           <!-- Parte izquierda: Campos del formulario -->
           <div class="space-y-6">
             <div>
-              <label
-                for="titulo"
-                >Título</label
-              >
+              <label for="titulo">Título</label>
               <InputText
                 v-model="selectedAnuncio.titulo"
                 type="text"
@@ -156,10 +171,7 @@
               />
             </div>
             <div>
-              <label
-                for="tipo"
-                >Tipo de Anuncio</label
-              >
+              <label for="tipo">Tipo de Anuncio</label>
               <InputText
                 v-model="selectedAnuncio.tipo"
                 id="tipo"
@@ -169,10 +181,7 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label
-                  for="fecha_inicio"
-                  >Fecha de Inicio</label
-                >
+                <label for="fecha_inicio">Fecha de Inicio</label>
                 <InputText
                   v-model="selectedAnuncio.fecha_inicio"
                   type="date"
@@ -182,10 +191,7 @@
                 />
               </div>
               <div>
-                <label
-                  for="fecha_fin"
-                  >Fecha de Fin</label
-                >
+                <label for="fecha_fin">Fecha de Fin</label>
                 <InputText
                   v-model="selectedAnuncio.fecha_fin"
                   type="date"
@@ -200,10 +206,7 @@
           <!-- Parte derecha: Carga de imagen y descripción -->
           <div class="flex flex-col items-start space-y-2">
             <div class="w-full">
-              <label
-                for="miniatura"
-                >Miniatura</label
-              >
+              <label for="miniatura">Miniatura</label>
               <div class="border rounded-xl flex justify-center">
                 <img
                   v-if="selectedAnuncio.miniatura"
@@ -214,10 +217,7 @@
               </div>
             </div>
             <div class="w-full">
-              <label
-                for="descripcion"
-                >Descripción</label
-              >
+              <label for="descripcion">Descripción</label>
               <textarea
                 v-model="selectedAnuncio.descripcion"
                 id="descripcion"
@@ -236,10 +236,10 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import { useAuthStore } from "@/stores/authStore";
-import api from '@/axiosConfig.js'
+import api from "@/axiosConfig.js";
 
 const authStore = useAuthStore();
 
@@ -272,9 +272,7 @@ const reloadPage = () => {
 };
 const eliminarAnuncio = async (id) => {
   try {
-    await api.delete(
-      `/anuncios/eliminarAnuncio/${id}`
-    );
+    await api.delete(`/anuncios/eliminarAnuncio/${id}`);
     fetchAnuncios();
   } catch (error) {
     console.error("Error al eliminar el anuncio:", error);
@@ -308,17 +306,17 @@ const filteredAnunciosConNumeracion = computed(() =>
 );
 const exportToExcel = async () => {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Anuncios');
+  const worksheet = workbook.addWorksheet("Anuncios");
 
   // Agrega encabezados
   worksheet.columns = [
-    { header: 'ID', key: 'id', width: 10 },
-    { header: 'Título', key: 'titulo', width: 30 },
-    { header: 'Miniatura', key: 'miniatura', width: 30 },
-    { header: 'Descripción', key: 'descripcion', width: 50 },
-    { header: 'Fecha Inicio', key: 'fecha_inicio', width: 15 },
-    { header: 'Fecha Fin', key: 'fecha_fin', width: 15 },
-    { header: 'Tipo', key: 'tipo', width: 10 }
+    { header: "ID", key: "id", width: 10 },
+    { header: "Título", key: "titulo", width: 30 },
+    { header: "Miniatura", key: "miniatura", width: 30 },
+    { header: "Descripción", key: "descripcion", width: 50 },
+    { header: "Fecha Inicio", key: "fecha_inicio", width: 15 },
+    { header: "Fecha Fin", key: "fecha_fin", width: 15 },
+    { header: "Tipo", key: "tipo", width: 10 },
   ];
 
   // Agrega filas
@@ -328,13 +326,11 @@ const exportToExcel = async () => {
 
   // Generar y descargar el archivo Excel
   const buffer = await workbook.xlsx.writeBuffer();
-  saveAs(new Blob([buffer]), 'anuncios.xlsx');
+  saveAs(new Blob([buffer]), "anuncios.xlsx");
 };
 const fetchAnuncios = async () => {
   try {
-    const response = await api.get(
-      "/anuncios/anuncio"
-    );
+    const response = await api.get("/anuncios/anuncio");
     anuncios.value = response.data;
   } catch (error) {
     console.error("Error al obtener anuncios:", error);

@@ -13,9 +13,7 @@
         class="z-50"
       />
     </div>-->
-    <div>
-      
-    </div>
+
     <div class="card">
 
       <h2 class="text-2xl mb-4">Estudiantes</h2>
@@ -49,16 +47,24 @@
       </div>
     </div>
  
-    
+    <!-- v-model:selection="selectedRow"
+        selection-mode="multiple" -->
+                <!-- <Column header="#" sortable class="px-6 py-4"> </Column>-->
+
       
       <Divider />
+      <div class="card">
       <DataTable
         :value="filteredUsuarios"
-        tableStyle="min-width: 50rem"
+        :tableStyle="{'min-width': '50rem'}"
         :rows="4"
         :paginator="true"
         :rowsPerPageOptions="[4, 8, 12]"
         class="p-datatable-striped"
+        scrollable
+        scrollHeight = "61vh"
+        stripedRows
+        lazy
       >
       <template #paginatorstart>
                 <Button type="button" icon="pi pi-refresh" text @click="reloadPage" />
@@ -66,18 +72,17 @@
             <template #paginatorend>
                 <Button type="button" icon="pi pi-download" text @click="exportToExcel" />
             </template>
-        <Column header="#" sortable class="px-6 py-4">
           <template #body="rowData">
             {{ getRowIndex(rowData) }}
           </template>
-        </Column>
+       
         <Column header="Foto de Perfil" class="px-6 py-4">
           <template #body="rowData">
             <Image
               v-if="rowData.data.fotoPerfil"
               :src="rowData.data.fotoPerfil"
               alt="Foto de Perfil"
-              class="h-16 w-20 object-cover rounded"
+              class="h-16 w-20 object-cover rounded-full"
               preview
             />
           </template>
@@ -152,6 +157,7 @@
           </template>
         </Column>
       </DataTable>
+      </div>
     </div>
     <!-- Modal para Confirmar Eliminación -->
     <Dialog
@@ -349,7 +355,7 @@
                 @change="handleFileUpload"
                 type="file"
                 id="fotoPerfil"
-                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
+                class="mt-1 block w-full border border-gray-300 rounded-full shadow-sm px-3 py-1 "
               />
               <!-- Vista previa de la foto -->
               <div
@@ -445,7 +451,8 @@ const selectedUser = ref(null);
 
 const token = authStore.token;
 const idUsuario = authStore.usuario.id;
-
+/* esto es para seleccionar varios datos de una tabla
+const selectedRow = ref();*/
 const selectedUsuario = ref({
   nombres: "",
   primerApellido: "",
@@ -531,6 +538,7 @@ const handleFileUpload = (event) => {
 };
 
 const openEditModal = (usuario) => {
+  console.log(usuario)
   isEditMode.value = true;
   selectedUsuario.value = { ...usuario };
   selectedUsuario.value.fechaNacimiento = formatToDateInput(
@@ -538,7 +546,7 @@ const openEditModal = (usuario) => {
   );
   selectedUsuario.value.idUsuario = idUsuario
   console.log(selectedUsuario.value.idUsuario)
-  previewFotoPerfil.value = usuario.fotoPerfil ? usuario.fotoPerfil : "";
+  previewFotoPerfil.value = usuario.fotoPerfil ?  "": usuario.fotoPerfil;
   isModalOpen.value = true;
 };
 const formatToDateInput = (dateString) => {

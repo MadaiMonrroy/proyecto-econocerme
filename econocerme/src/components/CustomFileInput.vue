@@ -31,8 +31,13 @@
             d="M12 8v4.25m0 0L9.75 10.5M12 12.25l2.25-1.75M3 12l2.5-6h15l2.5 6m-15 0v6a2 2 0 002 2h12a2 2 0 002-2v-6"
           />
         </svg>
-        Elegir archivo
+        Elegir Imagen
       </button>
+      <!-- Ícono y texto de arrastrar archivo, oculto cuando hay imagen cargada -->
+      <div v-if="!imagePreview && !valueimg" class="flex items-center justify-center flex-col pt-4">
+        <i class="pi pi-image !border-2 !rounded-full !p-8 !text-4xl !text-muted-color" />
+        <p class="mt-6 mb-0">Arrastre el archivo de imagen aquí para subir.</p>
+      </div>
       <!-- Indicador de carga -->
       <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-gray-50 opacity-75 rounded-md">
         <svg
@@ -59,6 +64,13 @@
     <div v-if="imagePreview" class="mt-2">
       <img
         :src="imagePreview"
+        alt="Vista previa de la imagen"
+        class="w-full h-auto max-h-48 border rounded-md shadow-md object-contain"
+      />
+    </div>
+    <div v-else-if="valueimg" class="mt-2">
+      <img
+        :src="valueimg"
         alt="Vista previa de la imagen"
         class="w-full h-auto max-h-48 border rounded-md shadow-md object-contain"
       />
@@ -93,6 +105,10 @@ const props = defineProps({
   maxSizeMB: {
     type: Number,
     default: 5 // Tamaño máximo del archivo en MB
+  },
+  valueimg: {
+    type: String,
+    required: false,
   }
 });
 

@@ -168,9 +168,9 @@ export default {
     const menuItems = ref([
       {
         key: "main",
-        label: "Main",
+        label: "Principal",
         icon: "pi pi-home",
-        route: "/panelControl/prueba",
+        route: "/panelControl/main",
       },
       {
         key: "usuarios",
@@ -186,10 +186,7 @@ export default {
         key: "cursos",
         label: "Cursos",
         icon: "pi pi-book",
-        items: [
-          { label: "Cursos", route: "/panelControl/cursos" },
-          { label: "Módulos", route: "/panelControl/modulos" },
-        ],
+        route: "/panelControl/cursos",
       },
       {
         key: "inscripciones",

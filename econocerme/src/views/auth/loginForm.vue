@@ -138,6 +138,14 @@ const handleSubmit = async () => {
 
 // Cargar el email y contraseña si están guardados
 onMounted(() => {
+  if (authStore.isAuthenticated == true) {
+    const userTipo = authStore.usuario.tipoUsuario
+    if (userTipo === "admin") {
+          router.push("/panelControl/main");
+        } else {
+          router.push("/menuBar");
+        }
+  }
 });
 
 const goToRegister = () => {

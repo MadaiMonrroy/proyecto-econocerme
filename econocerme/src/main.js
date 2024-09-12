@@ -7,6 +7,8 @@ import '@fortawesome/fontawesome-free/css/all.css';
 import { useAuthStore } from './stores/authStore';
 
 
+
+
 const app = createApp(App)
 const pinia = createPinia();
 
@@ -96,9 +98,24 @@ import DatePicker from 'primevue/datepicker';
 import Image from 'primevue/image';
 import Tag from 'primevue/tag';
 import ProgressSpinner from 'primevue/progressspinner';
+import Accordion from 'primevue/accordion';
+import AccordionPanel from 'primevue/accordionpanel';
+import AccordionHeader from 'primevue/accordionheader';
+import AccordionContent from 'primevue/accordioncontent';
+import Fieldset from 'primevue/fieldset';
+import Breadcrumb from 'primevue/breadcrumb';
 
-
-
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
+import Message from 'primevue/message';
+import DynamicDialog from 'primevue/dynamicdialog';
+import DataView from 'primevue/dataview';
+import SelectButton from 'primevue/selectbutton';
+import ProgressBar from 'primevue/progressbar';
+import ScrollPanel from 'primevue/scrollpanel';
 
 
 
@@ -138,9 +155,29 @@ app.component('Image', Image);
 app.component('Tag', Tag);
 
 app.component('ProgressSpinner', ProgressSpinner);
+app.component('Accordion', Accordion);
+app.component('AccordionPanel', AccordionPanel);
+app.component('AccordionHeader',AccordionHeader);
+app.component('AccordionContent',AccordionContent);
+app.component('Fieldset',Fieldset);
+app.component('Breadcrumb',Breadcrumb);
+
+app.component('Tabs', Tabs);
+app.component('TabList', TabList);
+app.component('Tab', Tab);
+app.component('TabPanels', TabPanels);
+app.component('TabPanel', TabPanel);
+app.component('Message', Message);
+app.component('DynamicDialog',DynamicDialog);
+app.component('DataView',DataView);
+app.component('SelectButton',SelectButton);
+app.component('ProgressBar',ProgressBar);
+app.component('ScrollPanel',ScrollPanel);
+
+
+app.component('Editor', Editor);
 
 app.use(pinia);
-
 const authStore = useAuthStore();
 authStore.loadUser(); // Cargar el usuario y token desde localStorage
 app.mount('#app');

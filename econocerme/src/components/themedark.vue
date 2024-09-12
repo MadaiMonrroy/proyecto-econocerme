@@ -43,7 +43,7 @@
       <div
         class="flex-col justify-start items-start gap-2 inline-flex pr-2"
       >
-        <span class="text-sm font-medium">Surface Colors</span>
+        <span class="text-sm font-medium">surface Colors</span>
         <div
           class="self-stretch justify-start items-start gap-2 inline-flex"
         >
@@ -57,7 +57,7 @@
             :style="{
               backgroundColor: `${surface.palette['500']}`,
               outlineColor: `${
-                selectedSurfaceColor === surface.name
+                selectedsurfaceColor === surface.name
                   ? 'var(--p-primary-color)'
                   : ''
               }`,
@@ -94,7 +94,7 @@
 </template>
 
 <script>
-import { $t, updatePreset, updateSurfacePalette } from '@primevue/themes';
+import { $t, updatePreset, updatesurfacePalette } from '@primevue/themes';
 import Aura from '@primevue/themes/aura';
 import Lara from '@primevue/themes/lara';
 import Nora from '@primevue/themes/nora';
@@ -110,7 +110,7 @@ return {
   iconClass: 'pi-moon',
   presets: Object.keys(presets),
   selectedPrimaryColor: 'noir',
-  selectedSurfaceColor: null,
+  selectedsurfaceColor: null,
   primaryColors: [
     { name: 'noir', palette: {} },
     {
@@ -290,7 +290,7 @@ return {
       },
     },
     {
-      name: 'violet',
+      name: 'surface',
       palette: {
         50: '#f5f3ff',
         100: '#ede9fe',
@@ -650,7 +650,7 @@ getPresetExt() {
 },
 updateColors(type, color) {
   if (type === 'primary') this.selectedPrimaryColor = color.name;
-  else if (type === 'surface') this.selectedSurfaceColor = color.name;
+  else if (type === 'surface') this.selectedsurfaceColor = color.name;
 
   this.applyTheme(type, color);
 },
@@ -658,7 +658,7 @@ applyTheme(type, color) {
   if (type === 'primary') {
     updatePreset(this.getPresetExt());
   } else if (type === 'surface') {
-    updateSurfacePalette(color.palette);
+    updatesurfacePalette(color.palette);
   }
 },
 onRippleChange(value) {
@@ -668,7 +668,7 @@ onPresetChange(value) {
   this.$appState.theme = value;
   const preset = presets[value];
   const surfacePalette = this.surfaces.find(
-    (s) => s.name === this.selectedSurfaceColor
+    (s) => s.name === this.selectedsurfaceColor
   )?.palette;
 
   $t()
