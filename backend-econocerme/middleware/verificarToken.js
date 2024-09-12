@@ -10,9 +10,9 @@ const desencriptar = (ciphertext) => {
 };
 
 const verificarToken = (req, res, next) => {
-  console.log('Verificando token...');
+  // console.log('Verificando token...');
   const encryptedCookie = req.cookies?.auth; // Lee la cookie 'auth'
-  console.log('Cookie encriptada recibida:', encryptedCookie);
+  // console.log('Cookie encriptada recibida:', encryptedCookie);
 
   if (!encryptedCookie) return res.status(403).send('Cookie requerida');
 

@@ -5,7 +5,7 @@ const router = Router();
 
 router.use(expressFileUpload());
 
-router.get('/modulo', listaModulos)
+router.get('/modulo/:idCurso', listaModulos)
 router.get('/obtenerModulo/:id', obtenerModulo)
 router.put('/editarModulo/:id', editarModulo)
 router.patch('/editarModulo/:id', editarModulo)

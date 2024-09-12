@@ -1,24 +1,57 @@
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import connection from "../db.js";
-import { upload } from "../helpers/cloudinary.js";
 import fs from "fs-extra";
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+
+// Obtener el directorio actual en módulos ES
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Carpeta donde se guardarán las imágenes
+const UPLOAD_DIR = path.join(__dirname, '../uploads/modulos');
+// Carpeta donde se guardarán los videos
+const VIDEO_UPLOAD_DIR = path.join(__dirname, '../uploads/modulos/videos');
+
+// Crear carpeta si no existe
+fs.ensureDirSync(VIDEO_UPLOAD_DIR);
+
+// Crear carpeta si no existe
+fs.ensureDirSync(UPLOAD_DIR);
 
 // Obtener todos los módulos de un curso
 export const listaModulos = async (req, res) => {
-    const idCurso = req.params.idCurso;
-    try {
-      const [result] = await connection.query(
-        "SELECT idModulo, nombre, descripcion, videoIntroURL, imagen, estado, fechaCreacion, ultimaActualizacion FROM modulo WHERE idCurso = ? AND estado = 1",
-        [idCurso]
-      );
-      res.json(result);
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        mensaje: "Ocurrió un error en el servidor",
-      });
+  const idCurso = req.params.idCurso;
+  console.log("ID del curso recibido:", idCurso); // Agrega esta línea
+
+
+  // Validar que el idCurso sea un número válido
+  if (isNaN(idCurso)) {
+    return res.status(400).json({ mensaje: "El id del curso es inválido" });
+  }
+
+  try {
+    const [result] = await connection.query(
+      "SELECT idModulo, nombre, descripcion, videoIntroURL, imagen, estado, fechaCreacion, ultimaActualizacion FROM modulo WHERE idCurso = ? AND estado = 1",
+      [idCurso]
+    );
+
+    // Verificar si hay resultados
+    if (result.length === 0) {
+      return res.status(404).json({ mensaje: "No se encontraron módulos para este curso" });
     }
-    console.log("aqui estoy")
-  };
+
+    // Responder con los módulos encontrados
+    res.json(result);
+  } catch (error) {
+    console.error("Error al obtener los módulos:", error);
+    return res.status(500).json({
+      mensaje: "Ocurrió un error en el servidor",
+    });
+  }
+};
+
 
 // Obtener un módulo por ID
 export const obtenerModulo = async (req, res) => {
@@ -44,34 +77,37 @@ export const obtenerModulo = async (req, res) => {
 
 // Agregar un nuevo módulo
 export const agregarModulo = async (req, res) => {
-  const { idCurso, nombre, descripcion, videoIntroURL, idUsuario } = req.body;
-
+  
+  const { idCurso, nombre, descripcion, idUsuario } = req.body;
   try {
-    if (!req.files) {
-      return res.json({ msg: "Por Favor Debe Subir Un Archivo de Imagen" });
+    if (!req.files || !req.files.imagen) {
+      return res.status(400).json({ mensaje: "Por favor debe subir una imagen" });
     }
+   
+    // Subir imagen
+    const fileImagen = req.files.imagen;
+    const extImagen = path.extname(fileImagen.name);
+    const fileNameImagen = `${uuidv4()}${extImagen}`;
+    const filePathImagen = path.join(UPLOAD_DIR, fileNameImagen);
+    await fileImagen.mv(filePathImagen);
+    const imageUrl = `http://localhost:3000/uploads/modulos/${fileNameImagen}`;
 
-    const fileTypes = ["image/jpeg", "image/png", "image/jpg"];
-    const imageSize = 1024;
-
-    let imagen = null;
-    if (req.files.imagen) {
-      const file = req.files.imagen;
-      if (!fileTypes.includes(file.mimetype)) {
-        return res.status(400).json({ mensaje: 'Formato de imagen no soportado' });
-      }
-      if (file.size / 1024 > imageSize) {
-        return res.status(400).json({ mensaje: `La imagen debe ser menor a ${imageSize} KB` });
-      }
-      const cloudFile = await upload(file.tempFilePath, "Modulos");
-      await fs.unlink(file.tempFilePath);
-      imagen = cloudFile.secure_url;
+    // Subir video (si existe)
+    let videoUrl = req.files.videoIntroURL;
+    console.log(videoUrl)
+    if (req.files && req.files.videoIntroURL) {
+      const fileVideo = req.files.videoIntroURL;
+      const extVideo = path.extname(fileVideo.name);
+      const fileNameVideo = `${uuidv4()}${extVideo}`;
+      const filePathVideo = path.join(VIDEO_UPLOAD_DIR, fileNameVideo);
+      await fileVideo.mv(filePathVideo);
+      videoUrl = `http://localhost:3000/uploads/modulos/videos/${fileNameVideo}`;
     }
 
     // Insertar el nuevo módulo
     const [result] = await connection.query(
       "INSERT INTO modulo (idCurso, nombre, descripcion, videoIntroURL, imagen, estado, idUsuario) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [idCurso, nombre, descripcion, videoIntroURL, imagen, 1, idUsuario]
+      [idCurso, nombre, descripcion, videoUrl, imageUrl, 1, idUsuario]
     );
 
     res.json({
@@ -92,13 +128,26 @@ export const editarModulo = async (req, res) => {
   const { nombre, descripcion, videoIntroURL, idUsuario } = req.body;
 
   let imagen = req.body.imagen;
+  let video = req.body.video; // Aquí capturamos la URL del video
 
   // Solo procesar la nueva imagen si se ha enviado un archivo
   if (req.files && req.files.imagen) {
     const file = req.files.imagen;
-    const cloudFile = await upload(file.tempFilePath, "Modulos");
-    await fs.unlink(file.tempFilePath);
-    imagen = cloudFile.secure_url;
+    const ext = path.extname(file.name);
+    const fileName = `${uuidv4()}${ext}`;
+    const filePath = path.join(UPLOAD_DIR, fileName);
+    await file.mv(filePath);
+    imagen = `http://localhost:3000/uploads/modulos/${fileName}`;
+  }
+
+  // Solo procesar el nuevo video si se ha enviado un archivo
+  if (req.files && req.files.video) {
+    const fileVideo = req.files.video;
+    const extVideo = path.extname(fileVideo.name);
+    const fileNameVideo = `${uuidv4()}${extVideo}`;
+    const filePathVideo = path.join(VIDEO_UPLOAD_DIR, fileNameVideo);
+    await fileVideo.mv(filePathVideo);
+    video = `http://localhost:3000/uploads/modulos/videos/${fileNameVideo}`;
   }
 
   try {
@@ -111,7 +160,7 @@ export const editarModulo = async (req, res) => {
                 estado = 1,
                 idUsuario = ?
             WHERE idModulo = ?`,
-      [nombre, descripcion, videoIntroURL, imagen, idUsuario, idModulo]
+      [nombre, descripcion, video, imagen, idUsuario, idModulo]
     );
     if (result.affectedRows === 0) {
       return res.status(404).json({
@@ -128,6 +177,7 @@ export const editarModulo = async (req, res) => {
     });
   }
 };
+
 
 // Eliminar un módulo por ID
 export const eliminarModulo = async (req, res) => {

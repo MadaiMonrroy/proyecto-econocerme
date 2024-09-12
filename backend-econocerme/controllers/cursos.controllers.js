@@ -117,7 +117,6 @@ export const editarCurso = async (req, res) => {
     precio,
     idUsuario
   } = req.body;
-
   let miniatura = req.body.miniatura;
 
   // Solo procesar la nueva imagen si se ha enviado un archivo
@@ -172,12 +171,14 @@ export const editarCurso = async (req, res) => {
 // Eliminar un curso por ID
 export const eliminarCurso = async (req, res) => {
   const idCurso = req.params.id;
+  const { idUsuario } = req.query;
+
 
   try {
     // Actualizar el estado del curso a inactivo (estado = 0)
     const [result] = await connection.query(
-      "UPDATE curso SET estado = 0 WHERE idCurso = ?",
-      [idCurso]
+      "UPDATE curso SET estado = 0, idUsuario = ? WHERE idCurso = ?",
+      [idUsuario, idCurso]
     );
 
     if (result.affectedRows === 0) {
