@@ -1,41 +1,45 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-custom">
-    <div class="w-full max-w-xl p-9 bg-white bg-opacity-80 rounded-3xl shadow-[0_4px_10px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.06)] relative z-10">
+    <div
+      class="w-full max-w-xl p-9 bg-white bg-opacity-80 rounded-3xl shadow-[0_4px_10px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.06)] relative z-10"
+    >
       <h1 class="text-1xl font-bold mb-6 text-center text-gray-800">
         Regístrate y únete a nuestra comunidad
       </h1>
       <div class="mb-6 text-center">
-        <img src="@/assets/logoec.png" alt="Login Logo" class="mx-auto h-20 w-auto" />
+        <img
+          src="@/assets/logoec.png"
+          alt="Login Logo"
+          class="mx-auto h-20 w-auto"
+        />
       </div>
       <form @submit.prevent="handleSubmit">
         <!-- Nombres -->
         <div class="mb-4">
-          <label for="nombres" class="block text-base font-semibold text-gray-700 mb-1">
+          <label
+            for="nombres"
+            class="block text-base font-semibold text-gray-700 mb-1"
+          >
             Nombres <span class="text-red-500">*</span>
           </label>
           <div class="flex gap-6">
             <InputText
-              v-model="primerNombre"
-              id="primerNombre"
-              placeholder="Primer Nombre"
+              v-model="nombres"
+              id="nombres"
+              placeholder="Nombres"
               class="w-full"
               size="large"
               required
-              @input="validarCaracteresAlfabeticos($event, 'primerNombre')"
-            />
-            <InputText
-              v-model="segundoNombre"
-              id="segundoNombre"
-              placeholder="Segundo Nombre"
-              class="w-full"
-              size="large"
-              @input="validarCaracteresAlfabeticos($event, 'segundoNombre')"
+              @input="validarCaracteresAlfabeticos($event, 'nombres')"
             />
           </div>
         </div>
         <!-- Apellidos -->
         <div class="mb-4">
-          <label for="apellidos" class="block text-base font-semibold text-gray-700 mb-1">
+          <label
+            for="apellidos"
+            class="block text-base font-semibold text-gray-700 mb-1"
+          >
             Apellidos <span class="text-red-500">*</span>
           </label>
           <div class="flex gap-6">
@@ -59,13 +63,16 @@
         </div>
         <!-- Email -->
         <div class="mb-4">
-          <label for="email" class="block text-base font-semibold text-gray-700 mb-1">
+          <label
+            for="email"
+            class="block text-base font-semibold text-gray-700 mb-1"
+          >
             Correo Electrónico: <span class="text-red-500">*</span>
           </label>
           <InputText
             v-model="email"
             id="email"
-            type="email"
+            
             placeholder="nombre@ejemplo.com"
             class="w-full max-w-lg"
             size="large"
@@ -75,7 +82,10 @@
         <!-- Contraseña -->
         <div class="mb-4 flex gap-8">
           <div class="flex-grow">
-            <label for="contraseña" class="block text-base font-semibold text-gray-700 mb-1">
+            <label
+              for="contraseña"
+              class="block text-base font-semibold text-gray-700 mb-1"
+            >
               Contraseña: <span class="text-red-500">*</span>
             </label>
             <Password
@@ -88,7 +98,9 @@
               required
             >
               <template #header>
-                <div class="font-semibold text-lg mb-4">Elige una contraseña</div>
+                <div class="font-semibold text-lg mb-4">
+                  Elige una contraseña
+                </div>
               </template>
               <template #footer>
                 <Divider />
@@ -102,7 +114,10 @@
           </div>
           <!-- Repetir Contraseña -->
           <div class="flex-grow">
-            <label for="repetirContraseña" class="block text-base font-semibold text-gray-700 mb-1">
+            <label
+              for="repetirContraseña"
+              class="block text-base font-semibold text-gray-700 mb-1"
+            >
               Repetir Contraseña: <span class="text-red-500">*</span>
             </label>
             <Password
@@ -142,83 +157,77 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
-import api from '@/axiosConfig.js'
+import api from "@/axiosConfig.js";
 
 const toast = useToast();
 const router = useRouter();
 
-const primerNombre = ref("");
-const segundoNombre = ref("");
+const nombres = ref("");
 const primerApellido = ref("");
 const segundoApellido = ref("");
 const email = ref("");
 const contraseña = ref("");
 const repetirContraseña = ref("");
 
-const validarNombre = (nombre) => /^[a-zA-Z]+$/.test(nombre);
+const validarNombre = (nombre) => /^[a-zA-Z\s]+$/.test(nombre);
 const validarEmail = (email) =>
   /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email);
 
 const handleSubmit = async () => {
-  // Validar campos
-  if (
-    !primerNombre.value ||
-    !validarNombre(primerNombre.value) ||
-    (segundoNombre.value && !validarNombre(segundoNombre.value)) ||
-    !primerApellido.value ||
-    !validarNombre(primerApellido.value) ||
-    (segundoApellido.value && !validarNombre(segundoApellido.value)) ||
-    !email.value ||
-    !validarEmail(email.value) ||
-    !contraseña.value ||
-    !repetirContraseña.value ||
-    contraseña.value !== repetirContraseña.value
-  ) {
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail:
-        "Por favor completa todos los campos obligatorios correctamente.",
-      life: 3000,
-    });
+  // Validar campos requeridos y formato correcto
+  if (!nombres.value || !validarNombre(nombres.value)) {
+    toast.add({ severity: "error", summary: "Error", detail: "Por favor, ingresa un nombre válido. El nombre debe contener solo letras y no estar vacío.", life: 3000 });
     return;
   }
-
-  // Validar contraseña
-  if (contraseña.value.length < 8) {
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: "La contraseña debe tener al menos 8 caracteres.",
-      life: 3000,
-    });
+  if (!primerApellido.value || !validarNombre(primerApellido.value)) {
+    toast.add({ severity: "error", summary: "Error", detail: "Por favor, ingresa un primer apellido válido. El apellido debe contener solo letras y no estar vacío.", life: 3000 });
     return;
   }
+  if (segundoApellido.value && !validarNombre(segundoApellido.value)) {
+    toast.add({ severity: "error", summary: "Error", detail: "Si decides ingresar un segundo apellido, asegúrate de que sea válido. Debe contener solo letras.", life: 3000 });
+    return;
+  }
+  if (!email.value || !validarEmail(email.value)) {
+    toast.add({ severity: "error", summary: "Error", detail: "Por favor, ingresa un correo electrónico válido. Asegúrate de incluir '@' y un dominio.", life: 3000 });
+    return;
+  }
+  if (contraseña.value !== repetirContraseña.value) {
+    toast.add({ severity: "error", summary: "Error", detail: "Las contraseñas ingresadas no coinciden. Por favor, verifica que sean iguales.", life: 3000 });
+    return;
+  }
+  if (!contraseña.value || contraseña.value.length < 8) {
+    toast.add({ severity: "error", summary: "Error", detail: "La contraseña debe tener al menos 8 caracteres y es recomendable que tenga letras, números y caracteres especiales.", life: 3000 });
+    return;
+  }
+  
 
   try {
     const usuario = {
-      primerNombre: primerNombre.value,
-      segundoNombre: segundoNombre.value,
+      nombres: nombres.value,
       primerApellido: primerApellido.value,
       segundoApellido: segundoApellido.value,
       email: email.value,
       contrasenia: contraseña.value,
-      repetirContrasenia: repetirContraseña.value
+      repetirContrasenia: repetirContraseña.value,
     };
 
-    const response = await api.post(
-      "/auth/registro",
-      usuario,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await api.post("/auth/registro", usuario, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (response.status === 201) {
-      localStorage.setItem('token', response.data.token);
 
+      localStorage.setItem("token", response.data.token);
+// Limpiar los campos del formulario
+      nombres.value = "";
+      primerApellido.value = "";
+      segundoApellido.value = "";
+      email.value = "";
+      contraseña.value = "";
+      repetirContraseña.value = "";
+      router.push("/");
       toast.add({
         severity: "success",
         summary: "Éxito",
@@ -228,15 +237,7 @@ const handleSubmit = async () => {
 
       // Esperar 3 segundos antes de redirigir
 
-        // Limpiar los campos del formulario
-        primerNombre.value = "";
-        segundoNombre.value = "";
-        primerApellido.value = "";
-        segundoApellido.value = "";
-        email.value = "";
-        contraseña.value = "";
-        repetirContraseña.value = "";
-        router.push("/");
+      
     }
   } catch (error) {
     if (error.response && error.response.data && error.response.data.mensaje) {
@@ -270,10 +271,11 @@ const validarCaracteresAlfabeticos = (event, inputName) => {
   if (!regex.test(value)) {
     // Remover caracteres no válidos
     event.target.value = value.replace(/[^a-zA-Z\s]/g, "");
-    if (inputName === "primerNombre") primerNombre.value = event.target.value;
-    if (inputName === "segundoNombre") segundoNombre.value = event.target.value;
-    if (inputName === "primerApellido") primerApellido.value = event.target.value;
-    if (inputName === "segundoApellido") segundoApellido.value = event.target.value;
+    if (inputName === "nombres") nombres.value = event.target.value;
+    if (inputName === "primerApellido")
+      primerApellido.value = event.target.value;
+    if (inputName === "segundoApellido")
+      segundoApellido.value = event.target.value;
   }
 };
 </script>

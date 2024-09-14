@@ -113,7 +113,7 @@ const handleSubmit = async () => {
         if (tipoUsuario === "admin") {
           router.push("/panelControl/main");
         } else {
-          router.push("/menuBar");
+          router.push("/panelEstudiante");
         }
       }, 1000);
       if (remember.value) {

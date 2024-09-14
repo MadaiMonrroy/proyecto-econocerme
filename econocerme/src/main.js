@@ -28,7 +28,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import Toast from 'primevue/toast';
 
 import Menu from 'primevue/menu';
-
+import MultiSelect from 'primevue/multiselect';
 
 
 export const PrimeVitals = {
@@ -44,7 +44,7 @@ export const PrimeVitals = {
 
 app.use(PrimeVitals);
 app.directive('ripple', Ripple);
-app.use(router)
+app.use(router);
 
 
 app.use(PrimeVue, {
@@ -116,8 +116,11 @@ import DataView from 'primevue/dataview';
 import SelectButton from 'primevue/selectbutton';
 import ProgressBar from 'primevue/progressbar';
 import ScrollPanel from 'primevue/scrollpanel';
-
-
+// import as component
+import Badge from 'primevue/badge';
+import OverlayBadge from 'primevue/overlaybadge';
+import Tooltip from 'primevue/tooltip';
+import Drawer from 'primevue/drawer';
 
 
 
@@ -173,9 +176,14 @@ app.component('DataView',DataView);
 app.component('SelectButton',SelectButton);
 app.component('ProgressBar',ProgressBar);
 app.component('ScrollPanel',ScrollPanel);
+app.component('MultiSelect', MultiSelect);
+app.component('Drawer', Drawer);
 
+app.component('Badge', Badge);
+app.component('OverlayBadge', OverlayBadge);
 
 app.component('Editor', Editor);
+app.directive('tooltip', Tooltip);
 
 app.use(pinia);
 const authStore = useAuthStore();

@@ -99,7 +99,11 @@
             header="Especialidad"
             class="px-6 py-4"
           />
-          <Column field="descripcion" header="Descripción" class="px-6 py-4" />
+          <Column field="descripcion" header="Descripción" class="px-6 py-4" >                    
+            <ScrollPanel style="width: 100%; height: 90px" field="descripcion">
+
+            </ScrollPanel>
+          </Column>
           <Column field="duracion" header="Duración" class="px-6 py-4" />
           <Column field="precio" header="Precio" class="px-6 py-4" />
           <Column header="Acciones" class="px-6 py-4">
@@ -108,20 +112,34 @@
                 <Button
                   icon="pi pi-pencil"
                   rounded
+                   raised
                   severity="info"
                   @click="openEditView(slotProps.data)"
+                  v-tooltip.left="{ value: 'Editar', showDelay: 0, hideDelay: 100 }"
                 />
                 <Button
                   icon="pi pi-trash"
                   severity="danger"
                   rounded
+                   raised
                   @click="eliminarCurso(slotProps.data)"
+                  v-tooltip.top="{ value: 'Eliminar', showDelay: 0, hideDelay: 100 }"
+                />
+                <Button
+                  icon="pi pi-file-check"
+                  severity="warn"
+                  rounded
+                   raised
+                  @click="openModulosView(slotProps.data)"
+                  v-tooltip.top="{ value: 'Evaluaciones', showDelay: 0, hideDelay: 100 }"
                 />
                 <Button
                   icon="pi pi-plus-circle"
                   severity="help"
                   rounded
+                   raised
                   @click="openModulosView(slotProps.data)"
+                  v-tooltip.right="{ value: 'Modulos', showDelay: 0, hideDelay: 100 }"
                 />
               </div>
             </template>

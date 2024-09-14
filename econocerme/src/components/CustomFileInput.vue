@@ -109,6 +109,7 @@ const props = defineProps({
   valueimg: {
     type: String,
     required: false,
+    
   }
 });
 

@@ -21,39 +21,61 @@
       </template>
     </Breadcrumb>
     <card class="mb-4">
-  <template #content>
-    <!-- Botón de "Volver" -->
-    <button
-      @click="volverACursos"
-      class="mb-4 px-4 py-2 rounded"
-    >
-      ← Volver a Cursos
-    </button>
-    <div class="flex items-center justify-between">
-      <div class="flex items-center">
-        <img
-          :src="curso.miniatura"
-          alt="Logo"
-          class="w-28 h-28 "
-        />
-        <h1 class="ml-4 text-2xl font-bold">{{ curso.titulo }}</h1>
-        <Divider layout="vertical" class="h-28" />
-        <!-- Descripción del curso -->
-        <p class="m-0">{{ curso.descripcion }}</p>
-      </div>
-    </div>
+      <template #content>
+        <!-- Botón de "Volver" -->
+        <button @click="volverACursos">
+          <i class="pi pi-arrow-left mr-2 pb-6"></i>
+          Volver
+        </button>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <img :src="curso.miniatura" alt="Logo" class="w-28 h-28" />
+            <h1 class="ml-4 text-2xl font-bold">{{ curso.titulo }}</h1>
+            <Divider layout="vertical" class="h-28" />
+            <!-- Descripción del curso -->
+            <p class="m-0">{{ curso.descripcion }}</p>
+          </div>
+        </div>
 
-    <!-- Sección inferior con especialidad, precio y duración alineados abajo -->
-    <div class="mt-4 flex items-center justify-between">
-      <Message severity="secondary" rounded>{{ curso.especialidad }}</Message>
-      <div class="flex space-x-4">
-        <Message severity="success" rounded>Precio: {{ curso.precio }}</Message>
-        <Message severity="info" rounded>Duración: {{ curso.duracion }}</Message>
-      </div>
-    </div>
-  </template>
-</card>
-
+        <!-- Sección inferior con especialidad, precio y duración alineados abajo -->
+        <div class="mt-4 flex items-center justify-between">
+          <Message severity="secondary" rounded>{{
+            curso.especialidad
+          }}</Message>
+          <div class="flex space-x-4">
+            <Message severity="success" rounded
+              >Precio: {{ curso.precio }}</Message
+            >
+            <Message severity="info" rounded
+              >Duración: {{ curso.duracion }}</Message
+            >
+            <Message severity="secondary" rounded
+              >Estado:
+              
+                <Tag
+                  v-if="curso.estado === 1"
+                  value="Activo"
+                  severity="success"
+                  class="px-2 py-1"
+                />
+                <Tag
+                  v-else-if="curso.estado === 2"
+                  value="Inactivo"
+                  severity="warn"
+                  class="px-2 py-1"
+                />
+                <Tag
+                  v-else
+                  value="Desconocido"
+                  severity="warning"
+                  class="px-2 py-1"
+                />
+              
+            </Message>
+          </div>
+        </div>
+      </template>
+    </card>
 
     <card>
       <template #content>
@@ -94,9 +116,6 @@
         >
           prueba
         </button>-->
-
-        
-        
       </template>
     </card>
   </div>
@@ -147,7 +166,7 @@ export default {
     const activeModuloIndex = ref(null);
     const volverACursos = () => {
       router.push(`/panelControl/cursos`);
-    }
+    };
     const cargarCurso = async () => {
       try {
         const response = await api.get(`/cursos/obtenerCurso/${cursoId}`);
@@ -161,8 +180,10 @@ export default {
             descripcion: response.data.descripcion,
             duracion: response.data.duracion,
             precio: response.data.precio,
+            estado: response.data.estado,
             fechaCreacion: response.data.fechaCreacion,
           };
+          console.log(curso.precio);
         }
       } catch (error) {
         console.error(error);
@@ -182,12 +203,9 @@ export default {
       }
     };
 
-
-
     onMounted(() => {
       cargarCurso();
       obtenerModulos();
-      
     });
 
     return {
@@ -200,7 +218,7 @@ export default {
       value,
       home,
       items,
-      volverACursos
+      volverACursos,
     };
   },
 };

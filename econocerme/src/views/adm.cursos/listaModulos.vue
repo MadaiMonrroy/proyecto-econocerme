@@ -58,20 +58,33 @@
                 <div class="flex flex-col md:items-end gap-8">
                   <div class="flex justify-end gap-2">
                     <Button
-                      @click="abrirDialog(modulo)"
-                      severity="help"
+                      @click="abrirDialog(modulo.idModulo)"
+                      severity="info"
                       icon="pi pi-pencil"
                       raised
                       outlined
                       rounded
+                      v-tooltip.left="{ value: 'Editar', showDelay: 200, hideDelay: 100 }"
+
                     ></Button>
                     <Button
                       @click="eliminarModulo(modulo.idModulo)"
-                      severity="help"
+                      severity="danger"
                       icon="pi pi-trash"
                       raised
                       outlined
                       rounded
+                      v-tooltip.top="{ value: 'Eliminar', showDelay: 200, hideDelay: 100 }"
+
+                    ></Button>
+                    <Button
+                      @click="verLecciones(modulo.idModulo)"
+                      severity="help"
+                      icon="pi pi-plus-circle"
+                      raised
+                      outlined
+                      rounded
+                      v-tooltip.right="{ value: 'Lecciones', showDelay: 200, hideDelay: 100 }"
                     ></Button>
                   </div>
                 </div>
@@ -128,6 +141,8 @@
                       raised
                       outlined
                       rounded
+                      v-tooltip.left="{ value: 'Editar', showDelay: 200, hideDelay: 100 }"
+
                     ></Button>
                     <Button
                       @click="eliminarModulo(modulo.idModulo)"
@@ -136,6 +151,8 @@
                       raised
                       outlined
                       rounded
+                      v-tooltip.top="{ value: 'Eliminar', showDelay: 200, hideDelay: 100 }"
+
                     ></Button>
                     <Button
                       @click="verLecciones(modulo.idModulo)"
@@ -144,6 +161,7 @@
                       raised
                       outlined
                       rounded
+                      v-tooltip.right="{ value: 'Lecciones', showDelay: 200, hideDelay: 100 }"
                     ></Button>
                   </div>
                 </div>
@@ -197,83 +215,84 @@
           />
         </div>
 
-        <div>
-          <label for="videoIntro" class="block text-sm font-medium"
-            >Video de Introducción</label
-          >
-          <!-- Visualizar el video cargado -->
-          <div v-if="modulo.videoIntroURL" class="relative w-full h-0 pb-[56.25%]">
-            <video
-              controls
-              class="absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-lg"
-              controlsList="nodownload"
-              poster="/src/assets/fondo.jpg"
-              playsinline
-              loop
+        <!-- Aquí está el bloque del video -->
+  <div>
+    <label for="videoIntro" class="block text-sm font-medium">
+      Video de Introducción
+    </label>
 
-              style="max-height: 300px"
-            >
-            
+    <!-- Si hay un video ya cargado y no estamos cambiándolo -->
+    <div v-if="(modulo.videoIntroURL || videoPreview) && !cambiandoVideo">
+      <div class="relative w-full h-0 pb-[56.25%]">
+        <video
+          controls
+          class="absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-lg"
+          controlsList="nodownload"
+          poster="/src/assets/fondo.jpg"
+          playsinline
+          loop
+          style="max-height: 300px"
+        >
+          <source :src="modulo.videoIntroURL || videoPreview" type="video/mp4" />
+          Tu navegador no soporta la visualización de videos.
+        </video>
+      </div>
+      <!-- Botón para cambiar el video -->
+      <Button 
+        label="Cambiar" 
+        @click="cambiarVideo" 
+        severity="warning" 
+        class="mt-2" 
+        icon="pi pi-pencil" 
+        rounded 
+        outlined />
+    </div>
 
-              <source :src="modulo.videoIntroURL" type="video/mp4" />
-              Tu navegador no soporta la visualización de videos.
-            </video>
+    <!-- Si el usuario ha presionado "Cambiar", mostrar FileUpload -->
+    <div v-if="cambiandoVideo">
+      <FileUpload
+        name="videoIntro"
+        @upload="onTemplatedUpload"
+        accept="video/*"
+        :maxFileSize="50000000"
+        :multiple="false"
+        @select="onSelectedFiles"
+        @progress="onProgress"
+      >
+        <template #header="{ chooseCallback, uploadCallback, clearCallback, files }">
+          <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
+            <div class="flex gap-2">
+              <Button @click="chooseCallback()" icon="pi pi-video" rounded outlined severity="secondary"></Button>
+              <Button @click="uploadEvent(uploadCallback)" icon="pi pi-cloud-upload" rounded outlined severity="success" :disabled="!files || files.length === 0"></Button>
+              <Button @click="clearCallback()" icon="pi pi-times" rounded outlined severity="danger" :disabled="!files || files.length === 0"></Button>
+            </div>
+            <ProgressBar :value="progress" :showValue="false" class="md:w-20rem h-1 w-full md:ml-auto">
+              <span class="whitespace-nowrap">{{ totalSize }}B / 50Mb</span>
+            </ProgressBar>
           </div>
+        </template>
 
-          <!-- Componente FileUpload de PrimeVue -->
-          <FileUpload
-            name="videoUploader"
-            @upload="onUpload"
-            accept="video/*"
-            :maxFileSize="50000000"
-            :auto="false"
-            :customUpload="true"
-            @select="onFileSelect"
-            class="border-2 border-gray-300 rounded-md"
-          >
-            <template
-              #header="{ chooseCallback, uploadCallback, clearCallback, files }"
-            >
-              <div class="flex justify-between items-center gap-4">
-                <div class="flex gap-2">
-                  <Button
-                    @click="chooseCallback()"
-                    icon="pi pi-video"
-                    rounded
-                    outlined
-                    severity="secondary"
-                    label="Elegir Video"
-                  ></Button>
-                  <Button
-                    @click="uploadCallback()"
-                    icon="pi pi-cloud-upload"
-                    rounded
-                    outlined
-                    severity="success"
-                    :disabled="!files || files.length === 0"
-                    label="Subir Video"
-                  ></Button>
-                  <Button
-                    @click="clearCallback()"
-                    icon="pi pi-times"
-                    rounded
-                    outlined
-                    severity="danger"
-                    :disabled="!files || files.length === 0"
-                    label="Limpiar"
-                  ></Button>
-                </div>
-                <ProgressBar
-                  :value="progress"
-                  :showValue="false"
-                  class="w-full md:w-2/3 h-1"
-                >
-                  <span class="whitespace-nowrap">{{ totalSize }}B / 50MB</span>
-                </ProgressBar>
-              </div>
-            </template>
-          </FileUpload>
-        </div>
+        <template #content="{ files, removeFileCallback }">
+          <div v-if="files.length > 0">
+            <h5>Pending</h5>
+            <div v-for="(file, index) of files" :key="file.name + file.type + file.size">
+              <span>{{ file.name }}</span>
+              <div>{{ formatSize(file.size) }}</div>
+              <Badge value="Pending" severity="warn" />
+              <Button icon="pi pi-times" @click="onRemoveTemplatingFile(file, removeFileCallback, index)" outlined rounded severity="danger" />
+            </div>
+          </div>
+        </template>
+
+        <template #empty>
+          <div class="flex items-center justify-center flex-col">
+            <i class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color" />
+            <p class="mt-6 mb-0">Arrastre el archivo de video aquí para subir.</p>
+          </div>
+        </template>
+      </FileUpload>
+    </div>
+  </div>
 
         <Button
           label="Guardar Cambios"
@@ -292,11 +311,13 @@ import api from "@/axiosConfig.js";
 import { useToast } from "primevue/usetoast";
 import CustomFileInput from "@/components/CustomFileInput.vue";
 import { useAuthStore } from "@/stores/authStore";
+import { useRouter } from "vue-router";
 
 const modulos = ref([]);
 const layout = ref("grid");
 const options = ref(["list", "grid"]);
 const optionLabel = ref("");
+const router = useRouter();
 
 //esto hay que eliminar
 const toast = useToast();
@@ -307,7 +328,11 @@ const modulo = ref({
   imagen: null,
   videoIntroURL: null,
 });
+const videoPreview = ref(null); // Nueva referencia para la vista previa del video
+const cambiandoVideo = ref(false); // Nuevo estado para manejar el cambio de video
 let selectedFile = null;
+let selectedVideoFile = null;
+
 const totalSize = ref(0);
 const progress = ref(0);
 const isUploading = ref(false);
@@ -317,10 +342,29 @@ const isFormValid = computed(() => {
     modulo.value.nombre &&
     modulo.value.descripcion &&
     modulo.value.imagen &&
-    modulo.value.videoIntroURL &&
+    (!modulo.videoIntroURL ||videoPreview.value)&& // Asegura que haya un video
     isUploading.value
   );
 });
+// Lógica para el botón "Cambiar video"
+const cambiarVideo = () => {
+  cambiandoVideo.value = true;
+};
+const formatSize = (bytes) => {
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+};
+
+
+
+const verLecciones = (idModulo) => {
+  router.push({
+    path: `/panelControl/lecciones/${idModulo}`,
+    query: { cursoId: props.cursoId } // Pasamos idCurso como parámetro de consulta
+  });
+};
 
 // Función para abrir el diálogo y cargar los datos del módulo
 const abrirDialog = async (moduloId) => {
@@ -328,7 +372,6 @@ const abrirDialog = async (moduloId) => {
     // Realizar una consulta al backend para obtener los datos del módulo
     const response = await api.get(`/modulos/obtenerModulo/${moduloId}`);
     modulo.value = response.data;
-
     visible.value = true;
   } catch (error) {
     console.error("Error al cargar los datos del módulo:", error);
@@ -351,27 +394,42 @@ const onFileChange = (event) => {
   modulo.value.imagen = selectedFile;
 };
 
-const onSelectedFiles = (event) => {
-  if (event.files.length > 0) {
-    modulo.value.videoIntroURL = event.files[0];
-    totalSize.value = event.files[0].size;
-  }
-};
+
+
 
 const onTemplatedUpload = () => {
-  isUploading.value = false;
-  toast.add({
-    severity: "info",
-    summary: "Éxito",
-    detail: "Video subido",
-    life: 3000,
-  });
+  isUploading.value = false; // Termina la subida
+  cambiandoVideo.value = false; // Restablece el estado
+  toast.add({ severity: 'info', summary: 'Éxito', detail: 'Video subido', life: 3000 });
+};
+
+const onSelectedFiles = (event) => {
+  if (event.files.length > 0) {
+    modulo.value.videoIntroURL = null; // Limpiamos la URL anterior, ya que estamos cambiando el video
+    totalSize.value = event.files[0].size;
+  }
 };
 
 const onProgress = (event) => {
   if (event.lengthComputable) {
     progress.value = Math.round((event.loaded * 100) / event.total);
   }
+};
+const uploadEvent = async (uploadCallback) => {
+  isUploading.value = true; // Comienza la subida
+  // Aquí puedes inicializar la barra de progreso si es necesario
+  progress.value = 0; // Reinicia el progreso a 0 antes de comenzar
+
+  try {
+    //await uploadCallback(); // Llama a la función de carga
+  } catch (error) {
+    console.error('Error durante la carga:', error);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el video', life: 3000 });
+  }
+};
+const onRemoveTemplatingFile = (file, removeFileCallback, index) => {
+  removeFileCallback(index);
+  totalSize.value -= file.size; // Resta el tamaño al eliminar
 };
 
 const submitForm = async () => {
@@ -380,12 +438,15 @@ const submitForm = async () => {
   formData.append("nombre", modulo.value.nombre);
   formData.append("descripcion", modulo.value.descripcion);
 
-  if (modulo.value.imagen) {
-    formData.append("imagen", selectedFile);
+  if (selectedFile) {
+    formData.append("imagen", selectedFile); // Si se ha cambiado la imagen
   }
 
-  if (modulo.value.videoIntroURL) {
-    formData.append("videoIntroURL", modulo.value.videoIntroURL);
+  // Video
+  if (!cambiandoVideo.value && modulo.value.videoIntroURL) {
+    formData.append("videoIntroURL", modulo.value.videoIntroURL); // Mantén el video actual si no se cambia
+  } else if (videoPreview.value) {
+    formData.append("videoIntro", selectedVideoFile); // Si se cambia, usa el nuevo archivo
   }
 
   try {
@@ -428,7 +489,7 @@ onMounted(async () => {
 
 const guardarCambios = async () => {
   try {
-    console.log("Cambios guardados:", moduloSeleccionado.value);
+    console.log("Cambios guardados:", modulo.value);
     cerrarDialog();
   } catch (error) {
     console.error("Error al guardar los cambios:", error);
