@@ -19,9 +19,37 @@ fs.ensureDirSync(UPLOAD_DIR);
 export const listaCursos = async (req, res) => {
   try {
     const [result] = await connection.query(
-      "SELECT idCurso, titulo, miniatura, especialidad, descripcion, duracion, precio FROM curso WHERE estado = 1"
+      "SELECT idCurso, titulo, miniatura, especialidad, descripcion, duracion, precio FROM curso"
     );
     res.json(result);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      mensaje: "Ocurrió un error en el servidor",
+    });
+  }
+};
+export const cursosLibresporUsuario = async (req, res) => {
+  const { usuarioId } = req.params;
+  console.log(usuarioId);
+  console.log("FUI CONSULTADO");
+
+  try {
+    const [cursos] = await connection.query(
+      `
+      SELECT C.idCurso, C.titulo, C.miniatura, C.descripcion, C.duracion, C.precio
+      FROM curso C
+      WHERE C.idCurso NOT IN (
+        SELECT DI.idCurso
+        FROM detalle_inscripcion DI
+        JOIN inscripcion I ON DI.idInscripcion = I.idInscripcion
+        WHERE I.idUsuario = ?
+      )
+      `,
+      [usuarioId]
+    );
+
+    res.status(200).json(cursos);
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -35,7 +63,7 @@ export const obtenerCurso = async (req, res) => {
   const idCurso = req.params.id;
   try {
     const [result] = await connection.query(
-      "SELECT idCurso, titulo, miniatura, especialidad, descripcion, duracion, precio FROM curso WHERE idCurso = ?",
+      "SELECT idCurso, titulo, miniatura, especialidad, descripcion, duracion, precio, estado FROM curso WHERE idCurso = ?",
       [idCurso]
     );
     if (result.length === 0) {
@@ -106,7 +134,7 @@ export const agregarCurso = async (req, res) => {
   }
 };
 
-// Editar curso
+// Editar curso y eliminar la imagen anterior si se sube una nueva
 export const editarCurso = async (req, res) => {
   const idCurso = req.params.id;
   const {
@@ -119,18 +147,38 @@ export const editarCurso = async (req, res) => {
   } = req.body;
   let miniatura = req.body.miniatura;
 
-  // Solo procesar la nueva imagen si se ha enviado un archivo
-  if (req.files && req.files.miniatura) {
-    const file = req.files.miniatura;
-    const ext = path.extname(file.name);
-    miniatura = `${uuidv4()}${ext}`;
-    const filePath = path.join(UPLOAD_DIR, miniatura);
-    await file.mv(filePath);
-    miniatura = `http://localhost:3000/uploads/cursos/${miniatura}`;
-
-  }
-
   try {
+    // Obtener la URL de la miniatura actual antes de actualizar
+    const [oldCurso] = await connection.query(
+      "SELECT miniatura FROM curso WHERE idCurso = ?",
+      [idCurso]
+    );
+
+    if (oldCurso.length === 0) {
+      return res.status(404).json({
+        mensaje: "Curso no encontrado",
+      });
+    }
+
+    const oldMiniaturaUrl = oldCurso[0].miniatura;
+
+    // Si se sube una nueva imagen, eliminar la anterior y guardar la nueva
+    if (req.files && req.files.miniatura) {
+      const file = req.files.miniatura;
+      const ext = path.extname(file.name);
+      miniatura = `${uuidv4()}${ext}`;
+      const filePath = path.join(UPLOAD_DIR, miniatura);
+      await file.mv(filePath);
+      miniatura = `http://localhost:3000/uploads/cursos/${miniatura}`;
+
+      // Eliminar la imagen anterior del servidor
+      const oldMiniaturaPath = path.join(UPLOAD_DIR, path.basename(oldMiniaturaUrl));
+      if (fs.existsSync(oldMiniaturaPath)) {
+        fs.removeSync(oldMiniaturaPath);  // Eliminar el archivo del servidor
+      }
+    }
+
+    // Actualizar el curso con la nueva imagen o mantener la actual si no se cambia
     const [result] = await connection.query(
       `UPDATE curso SET
                 titulo = ?,
@@ -152,11 +200,13 @@ export const editarCurso = async (req, res) => {
         idCurso,
       ]
     );
+
     if (result.affectedRows === 0) {
       return res.status(404).json({
         mensaje: "Curso no encontrado",
       });
     }
+
     res.json({
       mensaje: "Curso actualizado correctamente",
     });
@@ -167,6 +217,7 @@ export const editarCurso = async (req, res) => {
     });
   }
 };
+
 
 // Eliminar un curso por ID
 export const eliminarCurso = async (req, res) => {

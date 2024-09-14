@@ -125,32 +125,58 @@ export const agregarModulo = async (req, res) => {
 // Editar un módulo
 export const editarModulo = async (req, res) => {
   const idModulo = req.params.id;
-  const { nombre, descripcion, videoIntroURL, idUsuario } = req.body;
+  const { nombre, descripcion, idUsuario } = req.body;
 
   let imagen = req.body.imagen;
-  let video = req.body.video; // Aquí capturamos la URL del video
-
-  // Solo procesar la nueva imagen si se ha enviado un archivo
-  if (req.files && req.files.imagen) {
-    const file = req.files.imagen;
-    const ext = path.extname(file.name);
-    const fileName = `${uuidv4()}${ext}`;
-    const filePath = path.join(UPLOAD_DIR, fileName);
-    await file.mv(filePath);
-    imagen = `http://localhost:3000/uploads/modulos/${fileName}`;
-  }
-
-  // Solo procesar el nuevo video si se ha enviado un archivo
-  if (req.files && req.files.video) {
-    const fileVideo = req.files.video;
-    const extVideo = path.extname(fileVideo.name);
-    const fileNameVideo = `${uuidv4()}${extVideo}`;
-    const filePathVideo = path.join(VIDEO_UPLOAD_DIR, fileNameVideo);
-    await fileVideo.mv(filePathVideo);
-    video = `http://localhost:3000/uploads/modulos/videos/${fileNameVideo}`;
-  }
+  let video = req.body.videoIntroURL; // Aquí capturamos la URL del video
 
   try {
+    // Obtener los datos actuales del módulo antes de actualizar
+    const [oldModulo] = await connection.query(
+      "SELECT videoIntroURL, imagen FROM modulo WHERE idModulo = ?",
+      [idModulo]
+    );
+
+    if (oldModulo.length === 0) {
+      return res.status(404).json({ mensaje: "Módulo no encontrado" });
+    }
+
+    const oldVideoUrl = oldModulo[0].videoIntroURL;
+    const oldImagenUrl = oldModulo[0].imagen;
+
+    // Si se sube una nueva imagen, eliminar la anterior y guardar la nueva
+    if (req.files && req.files.imagen) {
+      const fileImagen = req.files.imagen;
+      const extImagen = path.extname(fileImagen.name);
+      const fileNameImagen = `${uuidv4()}${extImagen}`;
+      const filePathImagen = path.join(UPLOAD_DIR, fileNameImagen);
+      await fileImagen.mv(filePathImagen);
+      imagen = `http://localhost:3000/uploads/modulos/${fileNameImagen}`;
+
+      // Eliminar la imagen anterior del servidor
+      const oldImagenPath = path.join(UPLOAD_DIR, path.basename(oldImagenUrl));
+      if (fs.existsSync(oldImagenPath)) {
+        fs.removeSync(oldImagenPath);  // Eliminar el archivo del servidor
+      }
+    }
+
+    // Si se sube un nuevo video, eliminar el anterior y guardar el nuevo
+    if (req.files && req.files.video) {
+      const fileVideo = req.files.video;
+      const extVideo = path.extname(fileVideo.name);
+      const fileNameVideo = `${uuidv4()}${extVideo}`;
+      const filePathVideo = path.join(VIDEO_UPLOAD_DIR, fileNameVideo);
+      await fileVideo.mv(filePathVideo);
+      video = `http://localhost:3000/uploads/modulos/videos/${fileNameVideo}`;
+
+      // Eliminar el video anterior del servidor
+      const oldVideoPath = path.join(VIDEO_UPLOAD_DIR, path.basename(oldVideoUrl));
+      if (fs.existsSync(oldVideoPath)) {
+        fs.removeSync(oldVideoPath);  // Eliminar el archivo del servidor
+      }
+    }
+
+    // Actualizar el módulo en la base de datos
     const [result] = await connection.query(
       `UPDATE modulo SET
                 nombre = ?,
@@ -162,14 +188,17 @@ export const editarModulo = async (req, res) => {
             WHERE idModulo = ?`,
       [nombre, descripcion, video, imagen, idUsuario, idModulo]
     );
+
     if (result.affectedRows === 0) {
       return res.status(404).json({
         mensaje: "Módulo no encontrado",
       });
     }
+
     res.json({
       mensaje: "Módulo actualizado correctamente",
     });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -177,6 +206,7 @@ export const editarModulo = async (req, res) => {
     });
   }
 };
+
 
 
 // Eliminar un módulo por ID

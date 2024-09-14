@@ -6,6 +6,11 @@ import rutasAnuncios from './routes/anuncios.routes.js';
 import rutasUsuarios from './routes/usuarios.routes.js';
 import rutasModulos from './routes/modulos.routes.js';
 import rutasInscripciones from './routes/inscripciones.routes.js';
+import rutasPagos from './routes/pagos.routes.js';
+import rutasLecciones from './routes/lecciones.routes.js';
+import misCursos from './routes/misCursos.routes.js';
+
+
 import morgan from 'morgan';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv'; // Importa dotenv para manejar variables de entorno
@@ -49,6 +54,11 @@ app.use('/api/anuncios', verificarToken, rutasAnuncios); // Protege esta ruta
 app.use('/api/usuarios', verificarToken, rutasUsuarios); // Protege esta ruta
 app.use('/api/modulos', verificarToken, rutasModulos); 
 app.use('/api/inscripciones', verificarToken, rutasInscripciones); // Protege esta ruta
+app.use('/api/pagos', verificarToken, rutasPagos); // Protege esta ruta
+app.use('/api/lecciones', verificarToken, rutasLecciones); // Protege esta ruta
+app.use('/api/misCursos', verificarToken, misCursos); // Protege esta ruta
+
+
 // app.use('/usuarios', usuariosRoutes);
 
 

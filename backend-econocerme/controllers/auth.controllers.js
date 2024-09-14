@@ -62,19 +62,18 @@ export const confirmarUsuario = async (req, res) => {
 };
 
 // Función de login
-// Función de login
 export const login = async (req, res) => {
   const { email, contrasenia } = req.body;
 
   try {
     const [result] = await connection.query(
-      "SELECT * FROM usuario WHERE email = ?",
+      `SELECT id, nombres, contrasenia,  primerApellido, segundoApellido, email, tipoUsuario, IFNULL(fotoPerfil, '${process.env.BASE_URL}/uploads/usuarios/avatar3.png') AS fotoPerfil, biografia, especialidad, experiencia, fechaNacimiento, estado  FROM usuario WHERE email = ?`,
       [email]
     );
-
+    
     if (result.length === 0) {
       return res.status(400).json({
-        mensaje: "Correo electrónico o contraseña incorrectos",
+        mensaje: "Correo electrónico incorrecto",
       });
     }
 
@@ -84,19 +83,19 @@ export const login = async (req, res) => {
       contrasenia,
       usuario.contrasenia
     );
-
+    
     if (!contraseniaValida) {
       return res.status(400).json({
-        mensaje: "Correo electrónico o contraseña incorrectos",
+        mensaje: "Contraseña incorrecta",
       });
     }
-
     if (usuario.estado !== 1) {
       return res.status(403).json({
         mensaje:
           "Cuenta inactiva. Por favor, verifica tu correo electrónico para activar tu cuenta.",
       });
     }
+    
 
     const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -123,11 +122,8 @@ export const login = async (req, res) => {
         biografia: usuario.biografia,
         especialidad: usuario.especialidad,
         experiencia: usuario.experiencia,
-        videoPresentacion: usuario.videoPresentacion,
         fechaNacimiento: usuario.fechaNacimiento,
         estado: usuario.estado,
-        fechaCreacion: usuario.fechaCreacion,
-        fechaActualizacion: usuario.fechaActualizacion,
       },
       token,
     });
@@ -143,8 +139,7 @@ export const login = async (req, res) => {
 // Función para registrar un nuevo usuario
 export const registro = async (req, res) => {
   const {
-    primerNombre,
-    segundoNombre,
+    nombres,
     primerApellido,
     segundoApellido,
     email,
@@ -182,7 +177,7 @@ export const registro = async (req, res) => {
                 nombres, primerApellido, segundoApellido, email, contrasenia, estado, tokenConfirmacion
             ) VALUES (?, ?, ?, ?, ?, 2, ?)`,
       [
-        primerNombre + (segundoNombre ? " " + segundoNombre : ""),
+        nombres,
         primerApellido,
         segundoApellido,
         email,

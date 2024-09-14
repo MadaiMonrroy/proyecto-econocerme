@@ -1,40 +1,60 @@
 import connection from "../db.js";
 
-// Obtener todos los cursos
+// Obtener todos las Inscripciones
+
 export const listaInscripciones = async (req, res) => {
   try {
-    // Realizar la consulta a la base de datos
-    const [rows] = await connection.query(`
+    const [inscripciones] = await connection.query(`
       SELECT 
         I.idInscripcion,
         CONCAT(U.nombres, ' ', U.primerApellido, ' ', U.segundoApellido) AS nombreCompleto,
-        U.fotoPerfil,
+        IFNULL(U.fotoPerfil, '${process.env.BASE_URL}/uploads/usuarios/avatar3.png') AS fotoPerfil,
         I.observacion,
-        C.titulo AS tituloCurso,
-        C.miniatura AS miniaturaCurso
-      FROM 
-        inscripcion I
-      JOIN 
-        usuario U ON I.idUsuario = U.id
-      JOIN 
-        detalle_inscripcion DI ON I.idInscripcion = DI.idInscripcion
-      JOIN 
-        curso C ON DI.idCurso = C.idCurso;
+        I.fechaInscripcion,
+        I.estado,
+        P.montoTotal,
+        IFNULL(COUNT(CP.idCuotaPago), 0) AS cuotas
+      FROM inscripcion I
+      INNER JOIN usuario U ON U.id = I.idUsuario
+      INNER JOIN pago P ON P.idInscripcion = I.idInscripcion
+      LEFT JOIN cuota_pago CP ON P.idPago = CP.idPago
+      GROUP BY I.idInscripcion, nombreCompleto, fotoPerfil, I.observacion, I.fechaInscripcion, P.montoTotal;
     `);
 
-    // Enviar la respuesta con los datos obtenidos
-    res.json({
-      mensaje: "Lista de inscripciones obtenida correctamente",
-      data: rows
+    const [cursos] = await connection.query(`
+      SELECT 
+        DI.idInscripcion,
+        C.idCurso,
+        C.titulo,
+        C.miniatura,
+        C.descripcion,
+        C.duracion,
+        C.precio
+      FROM detalle_inscripcion DI
+      INNER JOIN curso C ON DI.idCurso = C.idCurso;
+    `);
+
+    // Combinar los resultados
+    const inscripcionesConCursos = inscripciones.map(inscripcion => {
+      const cursosRelacionados = cursos.filter(curso => curso.idInscripcion === inscripcion.idInscripcion);
+      return {
+        ...inscripcion,
+        cursos: cursosRelacionados,
+      };
     });
 
+    // Enviar la respuesta con los datos obtenidos
+    res.status(200).json({
+      mensaje: "Lista de inscripciones obtenida correctamente",
+      data: inscripcionesConCursos
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       mensaje: "Ocurrió un error en el servidor",
     });
   }
-};
+}
 
 // Obtener un inscripcion por ID
 export const obtenerInscripcion = async (req, res) => {
@@ -55,48 +75,71 @@ export const obtenerInscripcion = async (req, res) => {
 
 
 export const agregarInscripcion = async (req, res) => {
-  const { idUsuario, idCurso, observacion } = req.body;
-  const conn = await connection.getConnection(); // Obtener una conexión del pool
+  let montoCuota = 0;
+  const {
+    idUsuario,
+    idCurso,
+    observacion,
+    cantidadCuotas,
+    montoTotal,
+    idUsuarioModificacion,
+  } = req.body;
+  console.log(req.body);
+  const conn = await connection.getConnection();
   try {
-
-
-    // Comprobar si el usuario ya está inscrito en el curso
-    const [inscripcionExistente] = await conn.query(
-      `SELECT 1 
-       FROM detalle_inscripcion di
-       JOIN inscripcion i ON i.idInscripcion = di.idInscripcion
-       WHERE i.idUsuario = ? AND di.idCurso = ?`,
-      [idUsuario, idCurso]
-    );
-
-    // Si ya existe una inscripción, retornar un mensaje de error
-    if (inscripcionExistente.length > 0) {
-      return res.status(400).json({
-        mensaje: 'El usuario ya está registrado en este curso.',
-      });
-    }
-
-    console.log(idUsuario, idCurso, observacion);
-    await conn.beginTransaction(); // Iniciar transacción
+    await conn.beginTransaction();
 
     // Insertar en la tabla inscripcion
-    const [resultInscripcion] = await conn.query(
-      'INSERT INTO inscripcion (idUsuario, observacion) VALUES (?, ?)',
-      [idUsuario, observacion]
-    );
-    const idInscripcion = resultInscripcion.insertId; // Obtener el ID de la inscripción
-
-    // Insertar en la tabla detalle_inscripcion
-    await conn.query(
-      'INSERT INTO detalle_inscripcion (idInscripcion, idCurso) VALUES (?, ?)',
-      [idInscripcion, idCurso]
+    const [inscripcionResult] = await conn.execute(
+      `INSERT INTO inscripcion (idUsuario, observacion, idUsuarioModificacion) VALUES (?, ?, ?)`,
+      [idUsuario, observacion, idUsuarioModificacion]
     );
 
-    await conn.commit(); // Confirmar la transacción
+    const idInscripcion = inscripcionResult.insertId;
 
-    res.json({
+    // Insertar en la tabla detalle_inscripcion para cada curso
+    for (const curso of idCurso) {
+      await conn.execute(
+        `INSERT INTO detalle_inscripcion (idInscripcion, idCurso) VALUES (?, ?)`,
+        [idInscripcion, curso.idCurso]
+      );
+    }
+
+    // Insertar en la tabla pago
+    const [pagoResult] = await conn.execute(
+      `INSERT INTO pago (idInscripcion, montoTotal, idUsuarioModificacion) VALUES (?, ?, ?)`,
+      [idInscripcion, montoTotal, idUsuarioModificacion]
+    );
+
+    const idPago = pagoResult.insertId;
+if(cantidadCuotas>1){
+// Insertar en la tabla cuota_pago
+ montoCuota = ((montoTotal / cantidadCuotas) * 1.05);
+}else{
+   montoCuota = (montoTotal / cantidadCuotas);
+
+}
+    
+
+
+
+    let fechaVencimiento = new Date();
+    for (let i = 0; i < cantidadCuotas; i++) {
+      const fechaCuota = new Date(fechaVencimiento);
+      fechaCuota.setMonth(fechaVencimiento.getMonth() + i);
+      await conn.execute(
+        `INSERT INTO cuota_pago (idPago, montoCuota, fechaVencimiento, idUsuarioModificacion) VALUES (?, ?, ?, ?)`,
+        [idPago, montoCuota, fechaCuota, idUsuarioModificacion]
+      );
+    }
+
+    await conn.commit();
+
+
+
+    res.status(200).json({
       mensaje: 'Inscripción agregada correctamente',
-      idInscripcion,
+      idInscripcion: idInscripcion,
     });
   } catch (error) {
     await conn.rollback(); // Revertir en caso de error
@@ -104,17 +147,27 @@ export const agregarInscripcion = async (req, res) => {
     res.status(500).json({
       mensaje: 'Ocurrió un error en el servidor',
     });
+
   } finally {
     conn.release(); // Liberar la conexión
   }
 };
 
+
+
+
+
+
+
+
+
+
 export const editarInscripcion = async (req, res) => {
   const idInscripcion = req.params.id;
   const {
-	idUsuario,
-	idCurso,
-	observacion
+    idUsuario,
+    idCurso,
+    observacion
   } = req.body;
   try {
     // const [result] = await connection.query(
@@ -141,10 +194,10 @@ export const editarInscripcion = async (req, res) => {
     //     mensaje: "Curso no encontrado",
     //   });
     // }
-	console.log(idUsuario, idCurso, observacion);
-	res.json({
-		mensaje: "Inscripcion editada correctamente",
-	});
+    console.log(idUsuario, idCurso, observacion);
+    res.json({
+      mensaje: "Inscripcion editada correctamente",
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
