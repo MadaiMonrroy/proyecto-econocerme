@@ -143,7 +143,7 @@ onMounted(() => {
     if (userTipo === "admin") {
           router.push("/panelControl/main");
         } else {
-          router.push("/menuBar");
+          router.push("/panelEstudiante/dashboard");
         }
   }
 });

@@ -3,7 +3,9 @@
     <h2 class="text-xl font-bold mb-4">Agregar Módulo</h2>
     <form @submit.prevent="submitForm" class="space-y-4">
       <div>
-        <label for="nombre" class="block text-sm font-medium">Nombre del Módulo</label>
+        <label for="nombre" class="block text-sm font-medium"
+          >Nombre del Módulo</label
+        >
         <InputText
           id="nombre"
           v-model="modulo.nombre"
@@ -14,7 +16,9 @@
       </div>
 
       <div>
-        <label for="descripcion" class="block text-sm font-medium">Descripción</label>
+        <label for="descripcion" class="block text-sm font-medium"
+          >Descripción</label
+        >
         <Editor
           v-model="modulo.descripcion"
           editorStyle="height: 320px"
@@ -34,9 +38,11 @@
       </div>
 
       <div>
-        <label for="videoIntro" class="block text-sm font-medium">Video de Introducción</label>
+        <label for="videoIntro" class="block text-sm font-medium"
+          >Video de Introducción</label
+        >
         <FileUpload
-        ref="fileUploadRef"
+          ref="fileUploadRef"
           name="videoIntro"
           @upload="onTemplatedUpload"
           accept="video/*"
@@ -46,57 +52,111 @@
           @select="onSelectedFiles"
           @progress="onProgress"
         >
-          <template #header="{ chooseCallback, uploadCallback, clearCallback, files }">
-            <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
+          <template
+            #header="{ chooseCallback, uploadCallback, clearCallback, files }"
+          >
+            <div
+              class="flex flex-wrap justify-between items-center flex-1 gap-4"
+            >
               <div class="flex gap-2">
-                <Button @click="chooseCallback()" icon="pi pi-video" rounded outlined severity="secondary"></Button>
-                <Button @click="uploadEvent(uploadCallback)" icon="pi pi-cloud-upload" rounded outlined severity="success" :disabled="!files || files.length === 0"></Button>
-                <Button @click="clearCallback()" icon="pi pi-times" rounded outlined severity="danger" :disabled="!files || files.length === 0"></Button>
+                <Button
+                  @click="chooseCallback()"
+                  icon="pi pi-video"
+                  rounded
+                  outlined
+                  severity="secondary"
+                ></Button>
+                <Button
+                  @click="uploadEvent(uploadCallback)"
+                  icon="pi pi-cloud-upload"
+                  rounded
+                  outlined
+                  severity="success"
+                  :disabled="!files || files.length === 0"
+                ></Button>
+                <Button
+                  @click="clearCallback()"
+                  icon="pi pi-times"
+                  rounded
+                  outlined
+                  severity="danger"
+                  :disabled="!files || files.length === 0"
+                ></Button>
               </div>
-              <ProgressBar :value="progress" :showValue="false" class="md:w-20rem h-1 w-full md:ml-auto">
+              <ProgressBar
+                :value="progress"
+                :showValue="false"
+                class="md:w-20rem h-1 w-full md:ml-auto"
+              >
                 <span class="whitespace-nowrap">{{ totalSize }}B / 50Mb</span>
               </ProgressBar>
             </div>
           </template>
 
           <template #content="{ files, removeFileCallback }">
-  <div class="flex flex-col gap-8 pt-4" v-if="files.length > 0">
-    <h5 v-if="!isUploading">Completado</h5>
-    <h5 v-if="isUploading">pendiente</h5>
-    <div class="flex flex-wrap gap-4">
-      <div v-for="(file, index) of files" :key="file.name + file.type + file.size" class="p-8 rounded-border flex flex-col border border-surface items-center gap-4">
-        <span class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden">{{ file.name }}</span>
-        <div>{{ formatSize(file.size) }}</div>
-        <Badge :value="isUploading ? 'Pendiente' : 'Completado'" :severity="isUploading ? 'warn' : 'success'" />
-        <Button icon="pi pi-times" @click="onRemoveTemplatingFile(file, removeFileCallback, index)" outlined rounded severity="danger" />
-      </div>
-    </div>
-  </div>
-</template>
-
+            <div class="flex flex-col gap-8 pt-4" v-if="files.length > 0">
+              <h5 v-if="!isUploading">Completado</h5>
+              <h5 v-if="isUploading">pendiente</h5>
+              <div class="flex flex-wrap gap-4">
+                <div
+                  v-for="(file, index) of files"
+                  :key="file.name + file.type + file.size"
+                  class="p-8 rounded-border flex flex-col border border-surface items-center gap-4"
+                >
+                  <span
+                    class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
+                    >{{ file.name }}</span
+                  >
+                  <div>{{ formatSize(file.size) }}</div>
+                  <Badge
+                    :value="isUploading ? 'Pendiente' : 'Completado'"
+                    :severity="isUploading ? 'warn' : 'success'"
+                  />
+                  <Button
+                    icon="pi pi-times"
+                    @click="
+                      onRemoveTemplatingFile(file, removeFileCallback, index)
+                    "
+                    outlined
+                    rounded
+                    severity="danger"
+                  />
+                </div>
+              </div>
+            </div>
+          </template>
 
           <template #empty>
             <div class="flex items-center justify-center flex-col">
-              <i class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color" />
-              <p class="mt-6 mb-0">Arrastre el archivo de video aquí para subir.</p>
+              <i
+                class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"
+              />
+              <p class="mt-6 mb-0">
+                Arrastre el archivo de video aquí para subir.
+              </p>
             </div>
           </template>
         </FileUpload>
       </div>
 
-      <Button label="Agregar Módulo" type="submit" severity="help" :disabled="!isFormValid" />
+      <Button
+        label="Agregar Módulo"
+        type="submit"
+        severity="help"
+        :disabled="!isFormValid"
+      />
     </form>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useToast } from 'primevue/usetoast';
-import CustomFileInput from '@/components/CustomFileInput.vue';
+import { ref, computed } from "vue";
+import { useToast } from "primevue/usetoast";
+import CustomFileInput from "@/components/CustomFileInput.vue";
 import { useRouter } from "vue-router";
 
-import api from '@/axiosConfig.js';
-import { useAuthStore } from '@/stores/authStore';
+import api from "@/axiosConfig.js";
+import { useAuthStore } from "@/stores/authStore";
 
 const authStore = useAuthStore();
 const toast = useToast();
@@ -106,13 +166,13 @@ const router = useRouter();
 const props = defineProps({
   cursoId: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const modulo = ref({
-  nombre: '',
-  descripcion: '',
+  nombre: "",
+  descripcion: "",
   imagen: null,
   videoIntroURL: null,
 });
@@ -124,11 +184,13 @@ const isUploading = ref(true);
 
 // Computed property to validate form
 const isFormValid = computed(() => {
-  return modulo.value.nombre && 
-         modulo.value.descripcion && 
-         modulo.value.imagen && 
-         modulo.value.videoIntroURL && 
-         !isUploading.value;
+  return (
+    modulo.value.nombre &&
+    modulo.value.descripcion &&
+    modulo.value.imagen &&
+    modulo.value.videoIntroURL &&
+    !isUploading.value
+  );
 });
 
 // Manejo de archivos
@@ -146,17 +208,20 @@ const onSelectedFiles = (event) => {
 
 const onTemplatedUpload = () => {
   isUploading.value = false; // Termina la subida
-  toast.add({ severity: 'info', summary: 'Éxito', detail: 'Video subido', life: 3000 });
+  toast.add({
+    severity: "info",
+    summary: "Éxito",
+    detail: "Video subido",
+    life: 3000,
+  });
 };
 
 // Actualiza la función de progreso
 const onProgress = (event) => {
   if (event.lengthComputable) {
     progress.value = Math.round((event.loaded * 100) / event.total);
-
   }
 };
-
 
 // Función que simula la carga del video
 const uploadEvent = async (uploadCallback) => {
@@ -169,11 +234,15 @@ const uploadEvent = async (uploadCallback) => {
       if (progress.value < 100) {
         progress.value += 10; // Incrementa el progreso
         isUploading.value = true; // Termina la subida
-
       } else {
         clearInterval(interval);
         isUploading.value = false; // Termina la subida
-        toast.add({ severity: 'info', summary: 'Éxito', detail: 'Video cargado exitosamente', life: 3000 });
+        toast.add({
+          severity: "info",
+          summary: "Éxito",
+          detail: "Video cargado exitosamente",
+          life: 3000,
+        });
       }
     }, 500); // Incrementa cada medio segundo
     progress.value = 0;
@@ -184,17 +253,20 @@ const uploadEvent = async (uploadCallback) => {
     // Aquí puedes llamar a la función de carga si necesitas
     // await uploadCallback();
   } catch (error) {
-    console.error('Error durante la carga:', error);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el video', life: 3000 });
+    console.error("Error durante la carga:", error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "No se pudo cargar el video",
+      life: 3000,
+    });
   }
 };
-
-
 
 // Formatear el tamaño del archivo
 const formatSize = (bytes) => {
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 };
@@ -203,50 +275,51 @@ const formatSize = (bytes) => {
 const onRemoveTemplatingFile = (file, removeFileCallback, index) => {
   removeFileCallback(index);
   totalSize.value -= file.size; // Resta el tamaño al eliminar
-
 };
 
 // Función para enviar el formulario
 const submitForm = async () => {
   const formData = new FormData();
-  formData.append('idCurso', props.cursoId);
-  formData.append('nombre', modulo.value.nombre);
-  formData.append('descripcion', modulo.value.descripcion);
+  formData.append("idCurso", props.cursoId);
+  formData.append("nombre", modulo.value.nombre);
+  formData.append("descripcion", modulo.value.descripcion);
 
   if (modulo.value.imagen) {
-    formData.append('imagen', selectedFile);
+    formData.append("imagen", selectedFile);
   }
 
   if (modulo.value.videoIntroURL) {
-    formData.append('videoIntroURL', modulo.value.videoIntroURL);
+    formData.append("videoIntroURL", modulo.value.videoIntroURL);
   }
 
-  formData.append('idUsuario', idUsuario);
+  formData.append("idUsuario", idUsuario);
 
   try {
-    const response = await api.post('/modulos/agregarModulo', formData, {
+    const response = await api.post("/modulos/agregarModulo", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
       onUploadProgress: onProgress,
-      
     });
-    toast.add({ severity: 'success', summary: 'Éxito', detail: 'Módulo agregado correctamente', life: 3000 });
+    toast.add({
+      severity: "success",
+      summary: "Éxito",
+      detail: "Módulo agregado correctamente",
+      life: 3000,
+    });
 
     setTimeout(() => {
-      console.log('Módulo agregado:', response.data);
-
+      console.log("Módulo agregado:", response.data);
     }, 3000);
     window.location.href = window.location.href;
-
-    
- 
-
-    
   } catch (error) {
-    console.error('Error al agregar el módulo:', error);
-    toast.add({ severity: 'error', summary: 'Error', detail:'No se pudo agregar el módulo', life: 3000 });
-
+    console.error("Error al agregar el módulo:", error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "No se pudo agregar el módulo",
+      life: 3000,
+    });
   }
 };
 </script>

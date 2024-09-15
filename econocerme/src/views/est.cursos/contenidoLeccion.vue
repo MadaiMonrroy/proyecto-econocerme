@@ -28,10 +28,12 @@
       </div>
   
       <!-- Sección de Navegación del Curso -->
-      <div class="flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-lg shadow-md">
+      <div class="card flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-lg shadow-md">
         <Button label="Lección Anterior" icon="pi pi-arrow-left" class="p-button-outlined mb-4 lg:mb-0" />
         <Button label="Lección Siguiente" icon="pi pi-arrow-right" iconPos="right" class="p-button-outlined" />
       </div>
+
+      
     </div>
   </template>
   

@@ -117,7 +117,6 @@ export default {
         await cargarModulos(idCurso);
       }
 
-
       window.addEventListener("popstate", handlePopState);
     });
 
@@ -175,6 +174,17 @@ export default {
       const selectedModuloId = event.value;
       if (selectedModuloId) {
         await cargarLecciones(selectedModuloId);
+        // Verifica si la lección "Introducción" está presente
+        if (
+          lecciones.value.some(
+            (leccion) => leccion.idLeccion === "introduccion"
+          )
+        ) {
+          selectedLeccion.value = "introduccion";
+          router.replace(
+            `/panelEstudiante/panelCurso/${idCurso}/modulo/${selectedModuloId}`
+          );
+        }
       }
     };
 

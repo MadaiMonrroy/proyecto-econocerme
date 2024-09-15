@@ -61,6 +61,7 @@
             'especialidad',
             'descripcion',
             'duracion',
+            'estado',
             'precio',
           ]"
           class="p-datatable-striped"
@@ -99,12 +100,52 @@
             header="Especialidad"
             class="px-6 py-4"
           />
-          <Column field="descripcion" header="Descripción" class="px-6 py-4" >                    
-            <ScrollPanel style="width: 100%; height: 90px" field="descripcion">
-
-            </ScrollPanel>
-          </Column>
-          <Column field="duracion" header="Duración" class="px-6 py-4" />
+          <Column header="Descripción" class="px-6 py-4">
+          <template #body="slotProps">
+            <div>
+              <p v-if="!expandedCourses[slotProps.data.idCurso]">
+                {{ slotProps.data.descripcion.slice(0, 120) }}...
+                <button
+                  @click="toggleExpand(slotProps.data.idCurso)"
+                  class="text-blue-500 hover:underline focus:outline-none"
+                >
+                  Ver más
+                </button>
+              </p>
+              <p v-else>
+                {{ slotProps.data.descripcion }}
+                <button
+                  @click="toggleExpand(slotProps.data.idCurso)"
+                  class="text-blue-500 hover:underline focus:outline-none"
+                >
+                  Ver menos
+                </button>
+              </p>
+            </div>
+          </template>
+        </Column>
+          <Column field="estado" header="Estado" class="px-6 py-4">
+          <template #body="rowData">
+            <Tag
+              v-if="rowData.data.estado === 1"
+              value="Activo"
+              severity="success"
+              class="px-2 py-1"
+            />
+            <Tag
+              v-else-if="rowData.data.estado === 2"
+              value="Inactivo"
+              severity="warn"
+              class="px-2 py-1"
+            />
+            <Tag
+              v-else
+              value="Desconocido"
+              severity="warning"
+              class="px-2 py-1"
+            />
+          </template>
+        </Column>          <Column field="duracion" header="Duración" class="px-6 py-4" />
           <Column field="precio" header="Precio" class="px-6 py-4" />
           <Column header="Acciones" class="px-6 py-4">
             <template #body="slotProps">
@@ -179,6 +220,8 @@ import { ref, computed, onMounted } from "vue";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
+import ExcelJS from "exceljs";
+
 import api from "@/axiosConfig.js";
 const toast = useToast();
 const authStore = useAuthStore();
@@ -252,27 +295,28 @@ const openModulosView = (curso) => {
 };
 const exportToExcel = async () => {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Anuncios");
+  const worksheet = workbook.addWorksheet("Cursos");
 
   // Agrega encabezados
   worksheet.columns = [
-    { header: "ID", key: "id", width: 10 },
     { header: "Título", key: "titulo", width: 30 },
     { header: "Miniatura", key: "miniatura", width: 30 },
-    { header: "Descripción", key: "descripcion", width: 50 },
-    { header: "Fecha Inicio", key: "fecha_inicio", width: 15 },
-    { header: "Fecha Fin", key: "fecha_fin", width: 15 },
-    { header: "Tipo", key: "tipo", width: 10 },
+    { header: "Especialidad", key: "especialidad", width: 30 },
+    { header: "Descripción", key: "descripcion", width: 40 },
+    { header: "Estado", key: "estado", width: 10 },
+    { header: "Duración", key: "duracion", width: 10 },
+    { header: "Precio", key: "precio", width: 10 },
+
   ];
 
   // Agrega filas
-  anuncios.value.forEach((anuncio) => {
-    worksheet.addRow(anuncio);
+  cursos.value.forEach((curso) => {
+    worksheet.addRow(curso);
   });
 
   // Generar y descargar el archivo Excel
   const buffer = await workbook.xlsx.writeBuffer();
-  saveAs(new Blob([buffer]), "anuncios.xlsx");
+  saveAs(new Blob([buffer]), "cursos.xlsx");
 };
 // Función para recargar la página
 const reloadPage = () => {
@@ -287,7 +331,10 @@ const fetchData = async () => {
     // Manejar el error de forma adecuada
   }
 };
-
+const expandedCourses = ref({}); // Para manejar la expansión de las descripciones
+const toggleExpand = (idCurso) => {
+  expandedCourses.value[idCurso] = !expandedCourses.value[idCurso];
+};
 onMounted(fetchData);
 
 const cursosConNumeracion = computed(() => {
@@ -299,13 +346,19 @@ const cursosConNumeracion = computed(() => {
         curso.titulo.toLowerCase().includes(filter) ||
         curso.especialidad.toLowerCase().includes(filter) ||
         curso.descripcion.toLowerCase().includes(filter) ||
+        curso.estado.toString().includes(filter) || // Filtrar por duración
         curso.duracion.toString().includes(filter) || // Filtrar por duración
         curso.precio.toString().includes(filter) // Filtrar por precio
+        
       );
+      
     })
+    
     .map((curso, index) => ({
       ...curso,
       index: index + 1,
+      expanded: false // Añadir la propiedad `expanded` por defecto
+
     }));
 });
 </script>

@@ -2,7 +2,7 @@
     <div  class="card min-h-screen flex flex-col p-6 lg:p-12 bg-gray-100">
       <!-- Título de la Lección -->
       <div class="mb-8">
-        <h1 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">{{ modulo.nombre }}</h1>
+        <h1 class="text-3xl lg:text-4xl font-bold  mb-4">{{ modulo.nombre }}</h1>
         <p class="text-sm text-gray-500">Última actualización: {{ formatearFecha(modulo.ultimaActualizacion) }}</p>
       </div>
       
@@ -27,11 +27,7 @@
         <p class="text-gray-700 leading-relaxed">{{ modulo.descripcion }}</p>
       </div>
   
-      <!-- Sección de Navegación del Curso -->
-      <div class="flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-lg shadow-md">
-        <Button label="Lección Anterior" icon="pi pi-arrow-left" class="p-button-outlined mb-4 lg:mb-0" />
-        <Button label="Lección Siguiente" icon="pi pi-arrow-right" iconPos="right" class="p-button-outlined" />
-      </div>
+      
     </div>
   </template>
   
@@ -66,7 +62,7 @@
         console.log("ya entre")
       });
   
-      watch(() => route.params.idLeccion, (nuevoValor) => {
+      watch(() => route.params.idModulo, (nuevoValor) => {
         idModulo.value = nuevoValor;
         cargarModulo();
       });

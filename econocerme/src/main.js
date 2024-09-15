@@ -121,6 +121,8 @@ import Badge from 'primevue/badge';
 import OverlayBadge from 'primevue/overlaybadge';
 import Tooltip from 'primevue/tooltip';
 import Drawer from 'primevue/drawer';
+import Carousel from 'primevue/carousel';
+import ConfirmDialog from 'primevue/confirmdialog';
 
 
 
@@ -178,10 +180,11 @@ app.component('ProgressBar',ProgressBar);
 app.component('ScrollPanel',ScrollPanel);
 app.component('MultiSelect', MultiSelect);
 app.component('Drawer', Drawer);
+app.component('Carousel',Carousel);
 
 app.component('Badge', Badge);
 app.component('OverlayBadge', OverlayBadge);
-
+app.component('ConfirmDialog', ConfirmDialog);
 app.component('Editor', Editor);
 app.directive('tooltip', Tooltip);
 

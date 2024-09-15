@@ -15,7 +15,6 @@
                 id="titulo"
                 class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Ingrese título"
-                required
                 @input="validarTitulo"
               />
             </div>
@@ -89,7 +88,18 @@
               :valueimg="curso.miniatura"
               @change="onFileChange"
             />
+            <label for="estado" class="block text-sm font-medium mb-2 pt-3">Estado</label>
+              <Select
+                v-model="curso.estado"
+                :options="estadoOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Seleccione el estado"
+                checkmark :highlightOnSelect="false"
+                class="w-full  rounded-md shadow-sm"
+              />
           </div>
+
         </div>
 
         <div class="mt-6 flex justify-end space-x-4">
@@ -139,6 +149,7 @@ const curso = reactive({
   descripcion: '',
   duracion: '',
   precio: '',
+  estado: null,
   idUsuario: idUsuario,
 });
 let selectedFile = null;
@@ -157,6 +168,11 @@ const especialidadOptions = ref([
 { label: 'Creatividad y Autoexpresión', value: 'Creatividad y Autoexpresión' },
 { label: 'Productividad y Gestión del Tiempo', value: 'Productividad y Gestión del Tiempo' },
 { label: 'Otro', value: 'Otro' }
+]);
+// Opciones para el campo "estado"
+const estadoOptions = ref([
+  { label: 'Activo', value: 1 },
+  { label: 'Inactivo', value: 2 }
 ]);
 const validarTitulo = (event) => {
   // Expresión regular para permitir solo letras y espacios
@@ -181,6 +197,8 @@ const logFormData = (formData) => {
 };
 
 const agregarCurso = async () => {
+  if (!validarCampos()) return; // Verifica los campos antes de continuar
+
   const formData = new FormData();
   formData.append('titulo', curso.titulo);
   formData.append('especialidad', curso.especialidad);
@@ -188,6 +206,7 @@ const agregarCurso = async () => {
   formData.append('duracion', curso.duracion);
   formData.append('precio', curso.precio);
   formData.append('miniatura', selectedFile);
+  formData.append('estado', curso.estado); // Aquí mandamos el estado seleccionado
   formData.append("idUsuario", curso.idUsuario);
 
 
@@ -230,6 +249,8 @@ const cargarCurso = async (idCurso) => {
 };
 
 const actualizarCurso = async () => {
+  if (!validarCamposAct()) return; // Verifica los campos antes de continuar
+
   const formData = new FormData();
   formData.append('titulo', curso.titulo);
   formData.append('especialidad', curso.especialidad);
@@ -237,6 +258,8 @@ const actualizarCurso = async () => {
   formData.append('duracion', curso.duracion);
   formData.append('precio', curso.precio);
   formData.append("idUsuario", curso.idUsuario);
+  formData.append('estado', curso.estado); // También en la actualización
+
   if (selectedFile) {
     formData.append('miniatura', selectedFile);
   }
@@ -270,7 +293,30 @@ const actualizarCurso = async () => {
     });
   }
 };
-
+const validarCampos = () => {
+  if (!curso.titulo || !curso.especialidad || !curso.descripcion || !curso.duracion || !curso.precio || !curso.estado || !selectedFile || !curso.miniatura) {
+    toast.add({
+      severity: "error",
+      summary: "Campos incompletos",
+      detail: "Por favor completa el formulario, todos los campos requeridos!.",
+      life: 3000
+    });
+    return false;
+  }
+  return true;
+};
+const validarCamposAct = () => {
+  if (!curso.titulo || !curso.especialidad || !curso.descripcion || !curso.duracion || !curso.precio || !curso.estado || !curso.miniatura) {
+    toast.add({
+      severity: "error",
+      summary: "Campos incompletos",
+      detail: "Por favor completa el formulario, todos los campos requeridos!.",
+      life: 3000
+    });
+    return false;
+  }
+  return true;
+};
 const cancelarEdicion = () => {
   router.push('/panelControl/cursos');
 };
@@ -280,7 +326,6 @@ onMounted(() => {
   if (idCurso) {
     cargarCurso(idCurso);
   }
-  console.log("yo soy", idUsuario)
   
 });
 </script>

@@ -56,6 +56,7 @@
                     <Button
                       icon="pi pi-external-link"
                       label="Acceder al curso"
+                      severity="help" raised
                       class="flex-auto md:flex-initial whitespace-nowrap"
                       @click="accederCurso(curso.idCurso)"
                     />
