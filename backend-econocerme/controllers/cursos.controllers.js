@@ -1,16 +1,16 @@
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import fs from 'fs-extra';
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-import connection from '../db.js';
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import fs from "fs-extra";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
+import connection from "../db.js";
 
 // Obtener el directorio actual en módulos ES
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Carpeta donde se guardarán las imágenes
-const UPLOAD_DIR = path.join(__dirname, '../uploads/cursos');
+const UPLOAD_DIR = path.join(__dirname, "../uploads/cursos");
 
 // Crear carpeta si no existe
 fs.ensureDirSync(UPLOAD_DIR);
@@ -18,8 +18,10 @@ fs.ensureDirSync(UPLOAD_DIR);
 // Obtener todos los cursos
 export const listaCursos = async (req, res) => {
   try {
+   
+
     const [result] = await connection.query(
-      "SELECT idCurso, titulo, miniatura, especialidad, descripcion, duracion, precio FROM curso"
+      "SELECT idCurso, titulo, miniatura, especialidad, descripcion, duracion, precio, estado FROM curso WHERE estado = 1 OR estado = 2"
     );
     res.json(result);
   } catch (error) {
@@ -88,7 +90,8 @@ export const agregarCurso = async (req, res) => {
     descripcion,
     duracion,
     precio,
-    idUsuario
+    estado,
+    idUsuario,
   } = req.body;
 
   try {
@@ -118,8 +121,17 @@ export const agregarCurso = async (req, res) => {
 
     // Insertar el curso en la base de datos
     const [result] = await connection.query(
-      "INSERT INTO curso (titulo, miniatura, especialidad, descripcion, duracion, precio, idUsuario) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [titulo, imageUrl, especialidad, descripcion, duracion, precio, idUsuario]
+      "INSERT INTO curso (titulo, miniatura, especialidad, descripcion, duracion, precio, estado, idUsuario) VALUES (?, ?, ?, ?, ?, ?,?, ?)",
+      [
+        titulo,
+        imageUrl,
+        especialidad,
+        descripcion,
+        duracion,
+        precio,
+        estado,
+        idUsuario,
+      ]
     );
 
     res.json({
@@ -143,7 +155,8 @@ export const editarCurso = async (req, res) => {
     descripcion,
     duracion,
     precio,
-    idUsuario
+    estado,
+    idUsuario,
   } = req.body;
   let miniatura = req.body.miniatura;
 
@@ -172,9 +185,12 @@ export const editarCurso = async (req, res) => {
       miniatura = `http://localhost:3000/uploads/cursos/${miniatura}`;
 
       // Eliminar la imagen anterior del servidor
-      const oldMiniaturaPath = path.join(UPLOAD_DIR, path.basename(oldMiniaturaUrl));
+      const oldMiniaturaPath = path.join(
+        UPLOAD_DIR,
+        path.basename(oldMiniaturaUrl)
+      );
       if (fs.existsSync(oldMiniaturaPath)) {
-        fs.removeSync(oldMiniaturaPath);  // Eliminar el archivo del servidor
+        fs.removeSync(oldMiniaturaPath); // Eliminar el archivo del servidor
       }
     }
 
@@ -187,6 +203,7 @@ export const editarCurso = async (req, res) => {
                 descripcion = ?,
                 duracion = ?,
                 precio = ?,
+                estado = ?,
                 idUsuario = ?
             WHERE idCurso = ?`,
       [
@@ -196,6 +213,7 @@ export const editarCurso = async (req, res) => {
         descripcion,
         duracion,
         precio,
+        estado,
         idUsuario,
         idCurso,
       ]
@@ -218,12 +236,10 @@ export const editarCurso = async (req, res) => {
   }
 };
 
-
 // Eliminar un curso por ID
 export const eliminarCurso = async (req, res) => {
   const idCurso = req.params.id;
   const { idUsuario } = req.query;
-
 
   try {
     // Actualizar el estado del curso a inactivo (estado = 0)

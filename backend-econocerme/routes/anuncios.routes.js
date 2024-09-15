@@ -3,12 +3,8 @@ import {listaAnuncios, obtenerAnuncio, editarAnuncio, eliminarAnuncio, agregarAn
 import expressFileUpload from 'express-fileupload'
 
 const router = Router();
-router.use(expressFileUpload(
-    {
-        limits: {fileSize: 1000000},
-        useTempFiles: true,
-    }
-))
+router.use(expressFileUpload());
+
 
 router.get('/anuncio', listaAnuncios)
 router.get('/obtenerAnuncio/:id', obtenerAnuncio)

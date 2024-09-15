@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --env-file .env  --watch index.js",
-    "env": "node --env-file .env index.js"
+    "env": "node --env-file .env index.js",
+    "nm": "nodemon --env-file .env index.js"
   },
   "author": "",
   "license": "ISC",
@@ -30,5 +31,8 @@
     "nodemailer": "^6.9.14",
     "pg": "^8.11.5",
     "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
   }
 }
