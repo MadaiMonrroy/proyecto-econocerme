@@ -1,9 +1,22 @@
 import connection from "../db.js";
 import bcrypt from "bcryptjs";
-import { upload, borrarImagen } from "../helpers/cloudinary.js";
 import nodemailer from "nodemailer"; // Para enviar correos
 import crypto from "crypto"; // Para generar tokens únicos
 import fs from "fs-extra";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
+
+// Obtener el directorio actual
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Carpeta donde se guardarán las imágenes
+const UPLOAD_DIR = path.join(__dirname, "../uploads/usuarios");
+
+// Crear carpeta si no existe
+fs.ensureDirSync(UPLOAD_DIR);
 
 // Configurar el transporte de nodemailer
 const transporter = nodemailer.createTransport({
@@ -126,7 +139,7 @@ export const obtenerUsuario = async (req, res) => {
   const id = req.params.id;
   try {
     const [result] = await connection.query(
-      `SELECT id, nombres, primerApellido, segundoApellido, email, IFNULL(fotoPerfil, '${process.env.BASE_URL}/uploads/usuarios/avatar3.png') AS fotoPerfil, fechaNacimiento, tipoUsuario, estado FROM usuario WHERE id = ?`,
+      `SELECT id, nombres, primerApellido, segundoApellido, email, fotoPerfil, fechaNacimiento, tipoUsuario, estado FROM usuario WHERE id = ?`,
       [id]
     );
     if (result.length === 0) {
@@ -177,32 +190,13 @@ export const agregarUsuario = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
 
-    let fotoPerfilUrl = null;
-    if (req.files && req.files.fotoPerfil) {
-      const file = req.files.fotoPerfil;
-      const fileTypes = ["image/jpeg", "image/png", "image/jpg"];
-      const imageSize = 1024;
+    const file = req.files.fotoPerfil;
 
-      if (!fileTypes.includes(file.mimetype)) {
-        return res
-          .status(400)
-          .json({ mensaje: "Formato de imagen no soportado" });
-      }
-      if (file.size / 1024 > imageSize) {
-        return res
-          .status(400)
-          .json({ mensaje: `La imagen debe ser menor de ${imageSize} KB` });
-      }
-
-      try {
-        const cloudFile = await upload(file.tempFilePath, "Usuarios");
-        await fs.unlink(file.tempFilePath);
-        fotoPerfilUrl = cloudFile.secure_url;
-      } catch (uploadError) {
-        console.error("Error al subir la imagen:", uploadError);
-        return res.status(500).json({ mensaje: "Error al subir la imagen" });
-      }
-    }
+    const ext = path.extname(file.name);
+    const fileName = `${uuidv4()}${ext}`;
+    const filePath = path.join(UPLOAD_DIR, fileName);
+    await file.mv(filePath);
+    const fotoPerfilUrl = `http://localhost:3000/uploads/usuarios/${fileName}`;
 
     // Generar un token de confirmación único
     const tokenConfirmacion = crypto.randomBytes(20).toString("hex");
@@ -366,7 +360,10 @@ export const editarUsuario = async (req, res) => {
     if (existingUser.length === 0) {
       return res.status(404).json({ mensaje: "Usuario no encontrado" });
     }
-
+    const [oldFotPerfil] = await connection.query(
+      "SELECT fotoPerfil FROM usuario WHERE id = ?",
+      [id]
+    );
     let hashedPassword = existingUser[0].contrasenia; // Mantener la contraseña actual por defecto
 
     // Si se proporciona una nueva contraseña, actualizarla y enviar correo
@@ -376,33 +373,28 @@ export const editarUsuario = async (req, res) => {
       await enviarCorreoNuevaContrasenia(email, contrasenia);
     }
 
-    let fotoPerfilUrl = null;
+    const oldFotoPerfilUrl = oldFotPerfil[0].fotoPerfil;
+    let fotoPerfil = oldFotoPerfilUrl;
+    // Si se sube una nueva imagen, eliminar la anterior y guardar la nueva
     if (req.files && req.files.fotoPerfil) {
       const file = req.files.fotoPerfil;
-      const fileTypes = ["image/jpeg", "image/png", "image/jpg"];
-      const imageSize = 1024;
+      const ext = path.extname(file.name);
+      fotoPerfil = `${uuidv4()}${ext}`;
+      const filePath = path.join(UPLOAD_DIR, fotoPerfil);
+      await file.mv(filePath);
+      fotoPerfil = `http://localhost:3000/uploads/usuarios/${fotoPerfil}`;
 
-      if (!fileTypes.includes(file.mimetype)) {
-        return res
-          .status(400)
-          .json({ mensaje: "Formato de imagen no soportado" });
-      }
-      if (file.size / 1024 > imageSize) {
-        return res
-          .status(400)
-          .json({ mensaje: `La imagen debe ser menor de ${imageSize} KB` });
-      }
-
-      try {
-        const cloudFile = await upload(file.tempFilePath, "Usuarios");
-        await fs.unlink(file.tempFilePath);
-        fotoPerfilUrl = cloudFile.secure_url;
-      } catch (uploadError) {
-        console.error("Error al subir la imagen:", uploadError);
-        return res.status(500).json({ mensaje: "Error al subir la imagen" });
+      // Eliminar la imagen anterior del servidor solo si hay una existente
+      if (oldFotoPerfilUrl && oldFotoPerfilUrl !== 'null') {
+        const oldFotoPerfilPath = path.join(
+          UPLOAD_DIR,
+          path.basename(oldFotoPerfilUrl)
+        );
+        if (fs.existsSync(oldFotoPerfilPath)) {
+          fs.unlinkSync(oldFotoPerfilPath); // Eliminar el archivo del servidor
+        }
       }
     }
-
     const [result] = await connection.query(
       `UPDATE usuario SET
                 nombres = ?,
@@ -421,7 +413,7 @@ export const editarUsuario = async (req, res) => {
         segundoApellido,
         email,
         hashedPassword,
-        fotoPerfilUrl,
+        fotoPerfil,
         fechaNacimiento,
         tipoUsuario,
         idUsuario,

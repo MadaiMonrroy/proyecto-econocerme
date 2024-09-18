@@ -3,12 +3,8 @@ import {listaUsuarios, listaUsuariosInscripciones, obtenerUsuario, editarUsuario
 import expressFileUpload from 'express-fileupload'
 
 const router = Router();
-router.use(expressFileUpload(
-    {
-        limits: {fileSize: 1000000},
-        useTempFiles: true,
-    }
-))
+router.use(expressFileUpload());
+
 
 
 router.get('/usuario', listaUsuarios)

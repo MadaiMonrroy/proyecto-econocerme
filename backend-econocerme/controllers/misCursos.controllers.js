@@ -11,7 +11,7 @@ export const obtenerMisCursos = async (req, res) => {
         FROM curso c
         JOIN detalle_inscripcion di ON c.idCurso = di.idCurso
         JOIN inscripcion i ON di.idInscripcion = i.idInscripcion
-        WHERE i.idUsuario = ? AND i.estado = 1 AND c.estado = 1
+        WHERE i.idUsuario = ? AND i.estado = 1 AND c.estado = 1 
       `,
       [idUsuario]
     );

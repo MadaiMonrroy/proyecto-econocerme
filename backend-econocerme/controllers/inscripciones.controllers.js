@@ -112,13 +112,7 @@ export const agregarInscripcion = async (req, res) => {
     );
 
     const idPago = pagoResult.insertId;
-if(cantidadCuotas>1){
-// Insertar en la tabla cuota_pago
- montoCuota = ((montoTotal / cantidadCuotas) * 1.05);
-}else{
-   montoCuota = (montoTotal / cantidadCuotas);
-
-}
+    const montoCuota = montoTotal/cantidadCuotas;
     
 
 

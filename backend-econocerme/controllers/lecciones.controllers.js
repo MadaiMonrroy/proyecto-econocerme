@@ -72,12 +72,12 @@ export const agregarLeccion = async (req, res) => {
   
   const { idModulo, tituloSeccion, descripcion, idUsuario } = req.body;
   try {
-    if (!req.files || !req.files.video) {
+    if (!req.files || !req.files.videoURL) {
       return res.status(400).json({ mensaje: "Por favor debe subir un video" });
     }
    
     // Subir video
-    const fileVideo = req.files.video;
+    const fileVideo = req.files.videoURL;
     const extVideo = path.extname(fileVideo.name);
     const fileNameVideo = `${uuidv4()}${extVideo}`;
     const filePathVideo = path.join(LESSON_VIDEO_UPLOAD_DIR, fileNameVideo);
@@ -85,6 +85,7 @@ export const agregarLeccion = async (req, res) => {
     const videoUrl = `http://localhost:3000/uploads/lecciones/videos/${fileNameVideo}`;
 
     // Insertar la nueva lección
+    
     const [result] = await connection.query(
       "INSERT INTO leccion (idModulo, tituloSeccion, videoURL, descripcion, estado, idUsuario) VALUES (?, ?, ?, ?, ?, ?)",
       [idModulo, tituloSeccion, videoUrl, descripcion, 1, idUsuario]

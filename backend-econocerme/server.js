@@ -9,6 +9,9 @@ import rutasInscripciones from './routes/inscripciones.routes.js';
 import rutasPagos from './routes/pagos.routes.js';
 import rutasLecciones from './routes/lecciones.routes.js';
 import misCursos from './routes/misCursos.routes.js';
+import rutasEvaluaciones from './routes/evaluaciones.routes.js'
+import rutasCuotas from './routes/cuotas.routes.js';
+
 
 
 import morgan from 'morgan';
@@ -57,7 +60,8 @@ app.use('/api/inscripciones', verificarToken, rutasInscripciones); // Protege e
 app.use('/api/pagos', verificarToken, rutasPagos); // Protege esta ruta
 app.use('/api/lecciones', verificarToken, rutasLecciones); // Protege esta ruta
 app.use('/api/misCursos', verificarToken, misCursos); // Protege esta ruta
-
+app.use('/api/evaluaciones', verificarToken, rutasEvaluaciones)
+app.use('/api/cuotas', verificarToken, rutasCuotas); // Protege esta ruta
 
 // app.use('/usuarios', usuariosRoutes);
 

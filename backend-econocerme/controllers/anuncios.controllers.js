@@ -1,6 +1,5 @@
 import connection from "../db.js";
 import { fileURLToPath } from "url";
-
 import { dirname } from "path";
 import fs from "fs-extra";
 import path from "path";
@@ -19,19 +18,34 @@ fs.ensureDirSync(UPLOAD_DIR);
 export const listaAnuncios = async (req, res) => {
   try {
     const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Establecemos la fecha actual a la medianoche
+    // Restar un día para obtener la fecha de ayer
+    const formatoFechaHoy = hoy.toISOString().split('T')[0]; // Formato 'YYYY-MM-DD'
+
+    // Actualiza los anuncios que tienen fecha_fin menor a hoy y no están en estado 2 ni 0
     await connection.query(
       "UPDATE anuncio SET estado = '2' WHERE fecha_fin < ? AND estado != '2' AND estado != '0'",
       [hoy]
     );
+    
+    // Actualiza los anuncios que tienen fecha_fin mayor o igual a hoy y no están en estado 0
+    await connection.query(
+      "UPDATE anuncio SET estado = '1' WHERE fecha_fin >= ? AND estado != '1' AND estado != '0'",
+      [formatoFechaHoy]
+    );
+
+    // Selecciona los anuncios que tienen estado 1 o 2
     const [result] = await connection.query(
       "SELECT id, titulo, miniatura, descripcion, fecha_inicio, fecha_fin, tipo, estado FROM anuncio WHERE estado = 1 OR estado = 2"
     );
+    
     res.json(result);
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Ocurrió un error en el servidor" });
   }
 };
+
 
 // Obtener un anuncio por ID
 export const obtenerAnuncio = async (req, res) => {

@@ -46,7 +46,7 @@ export const cursosLibresporUsuario = async (req, res) => {
         FROM detalle_inscripcion DI
         JOIN inscripcion I ON DI.idInscripcion = I.idInscripcion
         WHERE I.idUsuario = ?
-      )
+        ) AND C.estado = 1
       `,
       [usuarioId]
     );
