@@ -23,21 +23,21 @@
     <card class="mb-4">
       <template #content>
         <!-- Botón de "Volver" -->
-        <button @click="volverAModulos" label="Volver">
+        <button @click="volverACursos">
           <i class="pi pi-arrow-left mr-2 pb-6"></i>
           Volver
         </button>
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <img :src="modulo.imagen" alt="Logo" class="w-28 h-28" />
-            <h1 class="pl-8 w-3/6  text-2xl font-bold"><strong>Modulo:</strong> {{ modulo.nombre }}</h1>
+            <img :src="curso.miniatura" alt="Logo" class="w-28 h-28" />
+            <h1 class="ml-4 text-2xl font-bold">{{ curso.titulo }}</h1>
             <Divider layout="vertical" class="h-28" />
             <!-- Descripción del curso -->
-            <p v-html="modulo.descripcion" class="m-4"></p>
+            <p class="m-0">{{ curso.descripcion }}</p>
           </div>
         </div>
 
-        <!-- Sección inferior con especialidad, precio y duración alineados abajo 
+        <!-- Sección inferior con especialidad, precio y duración alineados abajo -->
         <div class="mt-4 flex items-center justify-between">
           <Message severity="secondary" rounded>{{
             curso.especialidad
@@ -49,8 +49,30 @@
             <Message severity="info" rounded
               >Duración: {{ curso.duracion }}</Message
             >
+            <Message severity="secondary" rounded
+              >Estado:
+
+              <Tag
+                v-if="curso.estado === 1"
+                value="Activo"
+                severity="success"
+                class="px-2 py-1"
+              />
+              <Tag
+                v-else-if="curso.estado === 2"
+                value="Inactivo"
+                severity="warn"
+                class="px-2 py-1"
+              />
+              <Tag
+                v-else
+                value="Desconocido"
+                severity="warning"
+                class="px-2 py-1"
+              />
+            </Message>
           </div>
-        </div>-->
+        </div>
       </template>
     </card>
 
@@ -74,15 +96,15 @@
         </div>
         <Tabs v-model:value="value">
           <TabList>
-            <Tab value="0">Lista de Lecciones</Tab>
-            <Tab value="1">Agregar Leccion</Tab>
+            <Tab value="0">Evaluación</Tab>
+            <Tab value="1">Vista Previa</Tab>
           </TabList>
           <TabPanels>
             <TabPanel value="0">
-              <listaLecciones :idModulo="idModulo" />
+              <formEvaluacion :cursoId="cursoId" />
             </TabPanel>
             <TabPanel value="1">
-              <formLeccion :idModulo="idModulo" />
+              <formModulo :cursoId="cursoId" />
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -103,26 +125,20 @@ import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/axiosConfig.js";
-import listaLecciones from "@/views/adm.cursos/listaLecciones.vue";
-import formLeccion from "@/views/adm.cursos/formLeccion.vue";
-
+import formEvaluacion from "@/views/adm.cursos/formEvaluacion.vue";
 export default {
   components: {
-    listaLecciones,
-    formLeccion,
+    formEvaluacion,
   },
+
   setup() {
     const authStore = useAuthStore();
     const route = useRoute();
     const router = useRouter();
     const value = ref("0");
-
-    const modulo = ref({});
-    const modulos = ref([]);
+    const curso = ref({});
     const mostrarModal = ref(false);
-    const moduloSeleccionado = ref(null);
-    const idModulo = route.params.idModulo;
-    const cursoId = route.query.cursoId;
+    const cursoId = route.params.idCurso;
     const home = ref({
       icon: "pi pi-home",
       route: "/panelControl/main",
@@ -130,43 +146,32 @@ export default {
     const items = ref([
       { label: "Cursos", icon: "pi pi-book", route: "/panelControl/cursos" },
       {
-        label: "modulos",
-        icon: "pi pi-folder-open",
-        route: `/panelControl/modulos/${cursoId}`,
-      },
-      {
-        label: "lecciones",
-        icon: "pi pi-folder-open",
-        route: `/panelControl/lecciones/${idModulo}`,
+        label: "Evaluacion",
+        icon: "pi pi-file-check",
+        route: `/panelControl/evaluacion/${cursoId}`,
       },
     ]);
-    const moduloForm = ref({
-      nombre: "",
-      descripcion: "",
-      videoURL: "",
-      contenidoExtra: "",
-    });
-    const activeModuloIndex = ref(null);
-    const volverAModulos = () => {
-      router.push(`/panelControl/modulos/${cursoId}`);
-    };
 
-    const cargarModulo = async () => {
+    const volverACursos = () => {
+      router.push(`/panelControl/cursos`);
+    };
+    const cargarCurso = async () => {
       try {
-        const response = await api.get(`/modulos/obtenerModulo/${idModulo}`);
-        Object.assign(modulo, response.data);
-        if (idModulo) {
-          modulo.value = {
-            id: idModulo,
-            idCurso: response.data.idCurso,
-            nombre: response.data.nombre,
+        const response = await api.get(`/cursos/obtenerCurso/${cursoId}`);
+        Object.assign(curso, response.data);
+        if (cursoId) {
+          curso.value = {
+            id: cursoId,
+            titulo: response.data.titulo,
+            miniatura: response.data.miniatura,
+            especialidad: response.data.especialidad,
             descripcion: response.data.descripcion,
-            videoIntroURL: response.data.videoIntroURL,
-            imagen: response.data.imagen,
+            duracion: response.data.duracion,
+            precio: response.data.precio,
             estado: response.data.estado,
             fechaCreacion: response.data.fechaCreacion,
-            fechaActualizacion: response.data.fechaActualizacion,
           };
+          console.log(curso.precio);
         }
       } catch (error) {
         console.error(error);
@@ -175,34 +180,21 @@ export default {
     const pruebavista = () => {
       router.push(`/panelControl/leccion`);
     };
-    const obtenerModulos = async () => {
-      if (cursoId) {
-        try {
-          const response = await api.get(`/modulos/modulo/${cursoId}`);
-          modulos.value = response.data;
-        } catch (error) {
-          console.error("Error al obtener los módulos:", error);
-        }
-      }
-    };
+
 
     onMounted(() => {
-      cargarModulo();
-      obtenerModulos();
+      cargarCurso();
     });
 
     return {
-      modulo,
-      modulos,
-      moduloSeleccionado,
+      curso,
+
       cursoId,
-      idModulo,
-      moduloForm,
       pruebavista,
       value,
       home,
       items,
-      volverAModulos,
+      volverACursos,
     };
   },
 };

@@ -82,8 +82,8 @@
               @click="exportToExcel"
             />
           </template>
-          <Column field="index" header="#" class="px-6 py-4" />
-          <Column field="titulo" header="Título" class="px-6 py-4" />
+          <Column field="index" header="#" sortable class="px-6 py-4" />
+          <Column field="titulo" header="Título" sortable class="px-6 py-4" />
           <Column header="Miniatura" class="px-6 py-4">
             <template #body="slotProps">
               <Image
@@ -98,6 +98,7 @@
           <Column
             field="especialidad"
             header="Especialidad"
+            sortable
             class="px-6 py-4"
           />
           <Column header="Descripción" class="px-6 py-4">
@@ -145,8 +146,8 @@
               class="px-2 py-1"
             />
           </template>
-        </Column>          <Column field="duracion" header="Duración" class="px-6 py-4" />
-          <Column field="precio" header="Precio" class="px-6 py-4" />
+        </Column>          <Column field="duracion" header="Duración" sortable class="px-6 py-4" />
+          <Column field="precio" header="Precio" sortable class="px-6 py-4" />
           <Column header="Acciones" class="px-6 py-4">
             <template #body="slotProps">
               <div class="flex items-center space-x-2 align-middle">
@@ -171,8 +172,8 @@
                   severity="warn"
                   rounded
                    raised
-                  @click="openModulosView(slotProps.data)"
-                  v-tooltip.top="{ value: 'Evaluaciones', showDelay: 0, hideDelay: 100 }"
+                  @click="openEvaluacionView(slotProps.data)"
+                  v-tooltip.top="{ value: 'Evaluación', showDelay: 0, hideDelay: 100 }"
                 />
                 <Button
                   icon="pi pi-plus-circle"
@@ -292,6 +293,9 @@ const deletecurso = async (idCurso) => {
 
 const openModulosView = (curso) => {
   router.push(`/panelControl/modulos/${curso.idCurso}`);
+};
+const openEvaluacionView = (curso) => {
+  router.push(`/panelControl/evaluacion/${curso.idCurso}`);
 };
 const exportToExcel = async () => {
   const workbook = new ExcelJS.Workbook();

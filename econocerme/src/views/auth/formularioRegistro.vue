@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gradient-custom">
-    <div
-      class="w-full max-w-xl p-9 bg-white bg-opacity-80 rounded-3xl shadow-[0_4px_10px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.06)] relative z-10"
+    <div v-animateonscroll="{ enterClass: 'animate-fadein', leaveClass: 'animate-fadeout' }"
+      class="w-full max-w-xl p-9 bg-white bg-opacity-80 rounded-3xl shadow-[0_4px_10px_rgba(0,0,0,0.1),0_1px_3px_rgba(0,0,0,0.06)] relative z-10 animate-duration-2000"
     >
       <h1 class="text-1xl font-bold mb-6 text-center text-gray-800">
         Regístrate y únete a nuestra comunidad

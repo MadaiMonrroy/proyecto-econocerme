@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card" v-if="modulos.length > 0">
     <DataView :value="modulos" :layout="layout">
       <template #header>
         <div class="flex justify-end">
@@ -303,6 +303,8 @@
       </form>
     </Dialog>
   </div>
+  <!-- Mensaje cuando no hay módulos -->
+  <p v-else>No hay módulos disponibles.</p>
 </template>
 
 <script setup>
@@ -350,6 +352,7 @@ const isFormValid = computed(() => {
 const cambiarVideo = () => {
   cambiandoVideo.value = true;
 };
+
 const formatSize = (bytes) => {
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];

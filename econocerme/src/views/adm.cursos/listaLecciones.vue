@@ -32,11 +32,18 @@
               >
               </Button>
             </div>
-            <div class="mt-4">
-              <p><strong>Descripción:</strong> {{ leccion.descripcion }}</p>
+            <div class="mt-0 pt-10">
+              <p><strong>Descripción:</strong></p>
+              <p v-html="leccion.descripcion" class="text-md"></p>
               <p>
                 <strong>Video URL:</strong>
-                <Button label="Ver Video" @click="visible = true" severity="help" text   link  />
+                <Button
+                  label="Ver Video"
+                  @click="visible = true"
+                  severity="help"
+                  text
+                  link
+                />
 
                 <Dialog
                   v-model:visible="visible"
@@ -46,25 +53,24 @@
                   :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
                   class="uppercase"
                 >
-                  <video
-                    controls
-                    class="top-0 left-0 w-full h-full object-cover rounded-md shadow-lg"
-                    controlsList="nodownload"
-                    poster="/src/assets/fondo.jpg"
-                    playsinline
-                    loop
-                    style="max-height: 300px"
-                  >
-                    <source
-                      :src="leccion.videoURL"
-                      type="video/mp4"
-                    />
-                    Tu navegador no soporta la visualización de videos.
-                  </video>
+                  <div class="flex justify-center">
+                    <video
+                      controls
+                      class="w-[770px] h-[375px] object-contain rounded-md shadow-lg"
+                      controlsList="nodownload"
+                      poster="/src/assets/fondo.jpg"
+                      playsinline
+                      loop
+                    >
+                      <source :src="leccion.videoURL" type="video/mp4" />
+                      Tu navegador no soporta la visualización de videos.
+                    </video>
+                  </div>
                 </Dialog>
               </p>
               <p>
-                <strong>Fecha de Creación:</strong> {{ new Date(leccion.fechaCreacion).toLocaleDateString() }}
+                <strong>Fecha de Creación:</strong>
+                {{ new Date(leccion.fechaCreacion).toLocaleDateString() }}
               </p>
               <p>
                 <strong>Última Actualización:</strong>
@@ -77,11 +83,7 @@
     </Accordion>
 
     <!-- Dialog para editar el módulo -->
-    <Dialog
-      modal
-      header="Editar Módulo"
-      :style="{ width: '30rem' }"
-    >
+    <Dialog modal header="Editar Módulo" :style="{ width: '30rem' }">
       <div class="flex flex-col">
         <div class="flex items-center gap-4 mb-4">
           <label for="nombre" class="font-semibold w-24">Nombre</label>
@@ -151,7 +153,7 @@
     </Dialog>
   </div>
   <!-- Mensaje cuando no hay módulos -->
-  <p v-else>No hay módulos disponibles.</p>
+  <p v-else>No hay lecciones disponibles.</p>
 </template>
 
 <script>
@@ -160,7 +162,7 @@ import api from "@/axiosConfig.js";
 
 export default {
   props: {
-    moduloId: {
+    idModulo: {
       type: String,
       required: true,
     },
@@ -173,10 +175,10 @@ export default {
 
     // Función para obtener los módulos del curso
     const obtenerLecciones = async () => {
-      if (props.moduloId) {
+      if (props.idModulo) {
         try {
           const response = await api.get(
-            `/lecciones/leccion/${props.moduloId}`
+            `/lecciones/leccion/${props.idModulo}`
           );
           lecciones.value = response.data;
           console.log(lecciones.value);

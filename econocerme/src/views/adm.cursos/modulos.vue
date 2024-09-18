@@ -27,13 +27,13 @@
           <i class="pi pi-arrow-left mr-2 pb-6"></i>
           Volver
         </button>
-        <div class="flex items-center justify-between">
+        <div class="flex items-center ">
           <div class="flex items-center">
             <img :src="curso.miniatura" alt="Logo" class="w-28 h-28" />
-            <h1 class="ml-4 text-2xl font-bold">{{ curso.titulo }}</h1>
+            <h1 class="pl-5 w-3/6 text-2xl font-bold"><strong>Curso:</strong>  {{ curso.titulo }}</h1>
             <Divider layout="vertical" class="h-28" />
             <!-- Descripción del curso -->
-            <p class="m-0">{{ curso.descripcion }}</p>
+            <p class="m-4">{{ curso.descripcion }}</p>
           </div>
         </div>
 

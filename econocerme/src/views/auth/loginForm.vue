@@ -2,7 +2,7 @@
   <div class="flex w-full min-h-screen bg-gradient-custom items-center justify-center">
     <div class="w-full max-w-md bg-white bg-opacity-35 rounded-3xl shadow-2xl overflow-hidden p-8">
       <!-- Formulario de login -->
-      <form @submit.prevent="handleSubmit" class="space-y-6">
+      <form @submit.prevent="handleSubmit" class="space-y-6" animate-fadein animate-duration-1000>
         <h1 class="text-1xl mb-6 text-center text-gray-950">
           Ingrese su credencial para acceder a su cuenta.
         </h1>

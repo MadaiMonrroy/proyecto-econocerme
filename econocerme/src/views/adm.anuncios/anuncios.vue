@@ -1,5 +1,20 @@
 <template>
   <div class="p-4">
+    <div class=" ">
+      <Breadcrumb :home="home" :model="items" class="card h-14">
+      <template #item="{ item, props }">
+                <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
+                    <a :href="href" v-bind="props.action" @click="navigate">
+                        <span :class="[item.icon, 'text-color']" />
+                        <span class="text-primary font-semibold">{{ item.label }}</span>
+                    </a>
+                </router-link>
+                <a v-else :href="item.url" :target="item.target" v-bind="props.action">
+                    <span class="text-surface-700 dark:text-surface-0">{{ item.label }}</span>
+                </a>
+            </template>
+      </Breadcrumb>
+    </div>
     <div class="card">
       <h2 class="text-3xl mb-4 items-end">ANUNCIOS</h2>
 
@@ -36,13 +51,13 @@
         <template #legend>
           <span class="text-2xl tracking-wide">Lista de Anuncios</span>
         </template>
-        <div class="overflow-x-auto">
+        <div class="!overflow-x-auto">
           <DataTable
             :value="filteredAnunciosConNumeracion"
             :rows="4"
             :paginator="true"
             :rowsPerPageOptions="[4, 8, 12]"
-            class="p-datatable-striped min-w-[600px]"
+            class="p-datatable-striped table-responsive min-w-[450px]"
           >
             <template #paginatorstart>
               <Button
@@ -171,12 +186,22 @@
                     icon="pi pi-eye"
                     class="p-button-rounded p-button-secondary"
                     @click="showDetails(rowData.data)"
+                    v-tooltip.left="{
+                      value: 'Ver',
+                      showDelay: 0,
+                      hideDelay: 100,
+                    }"
                     raised
                   />
                   <Button
                     icon="pi pi-pencil"
                     class="p-button-rounded p-button-info"
                     @click="openEditView(rowData.data)"
+                    v-tooltip.top="{
+                      value: 'Editar',
+                      showDelay: 0,
+                      hideDelay: 100,
+                    }"
                     raised
                   />
 
@@ -184,6 +209,11 @@
                     icon="pi pi-trash"
                     class="p-button-rounded p-button-danger"
                     @click="confirmarEliminacion(rowData.data.id)"
+                    v-tooltip.right="{
+                      value: 'Eliminar',
+                      showDelay: 0,
+                      hideDelay: 100,
+                    }"
                     severity="danger"
                     raised
                   />
@@ -227,10 +257,12 @@
     <Dialog
       header="Detalles del Anuncio"
       v-model:visible="showModal"
-      modal
-      :style="{ width: '50vw' }"
+      maximizable modal
+      :style="{ width: '60vw' }"
       @hide="closeModal"
     >
+    <Divider />
+
       <div v-if="selectedAnuncio">
         <form class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <!-- Parte izquierda: Campos del formulario -->
@@ -242,7 +274,7 @@
                 type="text"
                 id="titulo"
                 class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                disabled
+                readonly
               />
             </div>
             <div>
@@ -251,7 +283,7 @@
                 v-model="selectedAnuncio.tipo"
                 id="tipo"
                 class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                disabled
+                readonly
               />
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -262,7 +294,7 @@
                   type="date"
                   id="fecha_inicio"
                   class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  disabled
+                  readonly
                 />
               </div>
               <div>
@@ -272,7 +304,7 @@
                   type="date"
                   id="fecha_fin"
                   class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  disabled
+                  readonly
                 />
               </div>
             </div>
@@ -283,26 +315,23 @@
             <div class="w-full">
               <label for="miniatura">Miniatura</label>
               <div class="border rounded-xl flex justify-center">
-                <img
+                <Image
                   v-if="selectedAnuncio.miniatura"
                   :src="selectedAnuncio.miniatura"
                   alt="Miniatura"
-                  class="my-4 h-24 w-24 object-cover rounded"
+                  preview
+                  class="my-4 h-44 w-44  rounded"
                 />
               </div>
             </div>
-            <div class="w-full">
-              <label for="descripcion">Descripción</label>
-              <textarea
-                v-model="selectedAnuncio.descripcion"
-                id="descripcion"
-                class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                rows="4"
-                disabled
-              />
-            </div>
           </div>
         </form>
+        <div class="w-full">
+          <label for="descripcion">Descripción</label>
+          <div class="card">
+            <p class="" v-html="selectedAnuncio.descripcion"></p>
+          </div>
+        </div>
       </div>
     </Dialog>
   </div>
@@ -320,7 +349,15 @@ import api from "@/axiosConfig.js";
 
 const confirm = useConfirm();
 const toast = useToast();
-
+const home = ref({
+    icon: 'pi pi-home',
+    route: '/panelControl/main'
+});
+const items = ref([
+    { label: 'Anuncios', 
+      icon: "pi pi-megaphone",
+      route: '/panelControl/anuncios' }
+]);
 const authStore = useAuthStore();
 const idUsuario = authStore.usuario.id;
 
@@ -355,6 +392,7 @@ const expandedModulos = ref({}); // Para manejar la expansión de las descripcio
 const toggleExpand = (id) => {
   expandedModulos.value[id] = !expandedModulos.value[id];
 };
+
 // Cambia esta función
 const confirmarEliminacion = async (id) => {
   confirm.require({
@@ -452,6 +490,4 @@ const fetchAnuncios = async () => {
 onMounted(fetchAnuncios);
 </script>
 
-<style scoped>
-/* Agrega aquí tus estilos personalizados si es necesario */
-</style>
+<style scoped></style>

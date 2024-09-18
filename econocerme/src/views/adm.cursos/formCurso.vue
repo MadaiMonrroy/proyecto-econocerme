@@ -71,7 +71,7 @@
               <textarea
                 v-model="curso.descripcion"
                 id="descripcion"
-                class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                class="block w-full h-56 text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 rows="4"
                 placeholder="Ingrese descripción"
                 required
@@ -280,9 +280,9 @@ const actualizarCurso = async () => {
       detail: "El curso se ha editado correctamente.",
       life: 3000,
     });
-    setTimeout(() => {
+
       router.push('/panelControl/cursos');
-    }, 3000);
+
   } catch (error) {
     console.error(error);
     toast.add({
@@ -294,7 +294,7 @@ const actualizarCurso = async () => {
   }
 };
 const validarCampos = () => {
-  if (!curso.titulo || !curso.especialidad || !curso.descripcion || !curso.duracion || !curso.precio || !curso.estado || !selectedFile || !curso.miniatura) {
+  if (!curso.titulo || !curso.especialidad || !curso.descripcion || !curso.duracion || !curso.precio || !curso.estado || !selectedFile) {
     toast.add({
       severity: "error",
       summary: "Campos incompletos",
@@ -306,12 +306,21 @@ const validarCampos = () => {
   return true;
 };
 const validarCamposAct = () => {
-  if (!curso.titulo || !curso.especialidad || !curso.descripcion || !curso.duracion || !curso.precio || !curso.estado || !curso.miniatura) {
+  if (!curso.titulo || !curso.especialidad || !curso.descripcion || !curso.duracion || !curso.precio || !curso.estado) {
     toast.add({
       severity: "error",
       summary: "Campos incompletos",
       detail: "Por favor completa el formulario, todos los campos requeridos!.",
       life: 3000
+    });
+    return false;
+  }
+  if (!curso.miniatura && !selectedFile) {
+    toast.add({
+      severity: "error",
+      summary: "Falta la miniatura",
+      detail: "Debes subir una nueva miniatura o conservar la existente.",
+      life: 3000,
     });
     return false;
   }

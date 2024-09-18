@@ -14,11 +14,13 @@
       <!-- Botón personalizado para seleccionar archivos -->
       <button
         type="button"
-        class="flex items-center justify-center w-full py-2 px-4 bg-gray-200 text-gray-700 border border-gray-300 rounded-md shadow-sm text-sm font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        severity="help"
+         raised
+        class="bg-purple-500 flex items-center justify-center w-full py-2 px-4 text-violet-50 dark:text-purple-950 border border-purple-800 rounded-md shadow-sm text-sm font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500"
         @click="triggerFileInput"
       >
         <svg
-          class="w-5 h-5 mr-2 text-gray-500"
+          class="w-5 h-5 mr-2 text-violet-50 dark:text-purple-950"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -34,9 +36,10 @@
         Elegir Imagen
       </button>
       <!-- Ícono y texto de arrastrar archivo, oculto cuando hay imagen cargada -->
-      <div v-if="!imagePreview && !valueimg" class="flex items-center justify-center flex-col pt-4">
+      <div v-if="!imagePreview && !valueimg" class="flex items-center justify-center flex-col pt-4  dark:shadow-purple-950 shadow-lg rounded-2xl">
         <i class="pi pi-image !border-2 !rounded-full !p-8 !text-4xl !text-muted-color" />
-        <p class="mt-6 mb-0">Arrastre el archivo de imagen aquí para subir.</p>
+        <p class="mt-0 mb-0 "> Arrastre el archivo de imagen  </p>
+        <p class="mb-4">aquí para subir.</p>
       </div>
       <!-- Indicador de carga -->
       <div v-if="loading" class="absolute inset-0 flex items-center justify-center bg-gray-50 opacity-75 rounded-md">
@@ -57,7 +60,7 @@
       </div>
     </div>
     <!-- Nombre del archivo seleccionado -->
-    <div v-if="fileName" class="mt-2 text-sm text-gray-600">
+    <div v-if="fileName" class="mt-2 text-sm">
       Archivo seleccionado: <span class="font-medium">{{ fileName }}</span>
     </div>
     <!-- Vista previa de la imagen -->
@@ -65,14 +68,14 @@
       <img
         :src="imagePreview"
         alt="Vista previa de la imagen"
-        class="w-full h-auto max-h-48 border rounded-md shadow-md object-contain"
+        class="w-full h-auto max-h-48 border rounded-md object-contain dark:shadow-purple-950 shadow-lg"
       />
     </div>
     <div v-else-if="valueimg" class="mt-2">
       <img
         :src="valueimg"
         alt="Vista previa de la imagen"
-        class="w-full h-auto max-h-48 border rounded-md shadow-md object-contain"
+        class="w-full h-auto max-h-48 border rounded-md  object-contain dark:shadow-purple-950 shadow-lg"
       />
     </div>
     <!-- Mensaje de error -->

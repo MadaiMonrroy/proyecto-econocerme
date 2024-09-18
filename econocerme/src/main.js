@@ -123,6 +123,7 @@ import Tooltip from 'primevue/tooltip';
 import Drawer from 'primevue/drawer';
 import Carousel from 'primevue/carousel';
 import ConfirmDialog from 'primevue/confirmdialog';
+import AnimateOnScroll from 'primevue/animateonscroll';
 
 
 
@@ -187,6 +188,7 @@ app.component('OverlayBadge', OverlayBadge);
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Editor', Editor);
 app.directive('tooltip', Tooltip);
+app.directive('animateonscroll', AnimateOnScroll);
 
 app.use(pinia);
 const authStore = useAuthStore();

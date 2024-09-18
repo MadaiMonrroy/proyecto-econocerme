@@ -181,7 +181,7 @@ watch([() => anuncio.fecha_inicio, () => anuncio.fecha_fin], () => {
   if (anuncio.fecha_inicio && anuncio.fecha_fin) {
     // Convertir las fechas a milisegundos y compararlas
     if (
-      new Date(anuncio.fecha_fin).getTime() <=
+      new Date(anuncio.fecha_fin).getTime() <
       new Date(anuncio.fecha_inicio).getTime()
     ) {
       fechaFinInvalida.value = true;

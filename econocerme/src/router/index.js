@@ -30,6 +30,10 @@ import certificaciones from "@/views/est.cursos/certificaciones.vue";
 import panelCurso from "@/components/panelCurso.vue";
 import contenidoLeccion from "@/views/est.cursos/contenidoLeccion.vue";
 import contenidoModulo from "@/views/est.cursos/contenidoModulo.vue";
+import evaluacion from "@/views/adm.cursos/evaluacion.vue";
+import formEvaluacion from "@/views/adm.cursos/formEvaluacion.vue";
+import cuotas from "@/views/adm.inscripciones/cuotas.vue"
+
 const routes = [
   { path: "/", component: LoginForm },
   { path: "/Registro", component: RegistroForm },
@@ -43,7 +47,7 @@ const routes = [
       { path: "estudiantes", component: estudiantes },
       { path: "cursos", component: cursos },
       { path: "modulos", component: listaCursos },
-      { path: "lecciones/:idCurso", component: lecciones },
+      { path: "lecciones/:idModulo", component: lecciones },
       { path: "modulos/:idCurso", component: modulos },
       { path: "formCurso", component: formCurso }, // Ruta para agregar curso
       { path: "formCurso/:idCurso", component: formCurso },
@@ -55,6 +59,9 @@ const routes = [
       { path: "inscripciones", component: inscripciones },
       { path: "formInscripcion", component: formInscripcion },
       { path: "formInscripcion/:idInscripcion", component: formInscripcion },
+      { path: "evaluacion/:idCurso", component: evaluacion },
+      { path: "cuotas/:idInscripcion", component: cuotas},
+      
     ],
   },
   {

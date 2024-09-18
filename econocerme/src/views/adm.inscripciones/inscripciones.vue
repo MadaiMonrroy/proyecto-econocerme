@@ -10,8 +10,7 @@
         <Column field="nombreCompleto" header="Nombre Completo" class="px-6 py-4" />
         <Column field="fotoPerfil" header="Foto de Perfil" class="px-6 py-4">
           <template #body="slotProps">
-            <img :src="slotProps.data.fotoPerfil || defaultProfileImage" alt="Foto de Perfil"
-              class="w-10 h-10 rounded-full" @error="handleImageError($event, 'profile')" />
+            <img :src="slotProps.data.fotoPerfil" alt="Foto de Perfil" class="w-10 h-10 rounded-full" />
           </template>
         </Column>
         <Column field="observacion" header="Observación" class="px-6 py-4" />
@@ -25,85 +24,150 @@
             <span>{{ slotProps.data.montoTotal }} Bs.</span>
           </template>
         </Column>
-        <Column field="estado" header="Estado" class="px-6 py-4" />
+        <Column field="estado" header="Estado" class="px-6 py-4">
+          <template #body="rowData">
+            <Tag v-if="rowData.data.estado === 1" value="Habilitado" severity="success" class="px-2 py-1" />
+            <Tag v-else-if="rowData.data.estado === 2" value="Inhabilitado" severity="warn" class="px-2 py-1" />
+            <Tag v-else value="Desconocido" severity="warning" class="px-2 py-1" />
+          </template>
+        </Column>
+        <!-- Aquí se añade el botón de ojo para ver los cursos -->
         <Column header="Cursos Registrados" class="px-6 py-4">
           <template #body="slotProps">
-            <ul>
-              <li v-for="curso in slotProps.data.cursos" :key="curso.idCurso">
-                <span class="font-semibold">{{ curso.titulo }}</span>
-                <img :src="curso.miniatura || defaultCourseImage" alt="Miniatura del Curso" class="w-16 h-10 rounded"
-                  @error="handleImageError($event, 'course')" />
-              </li>
-            </ul>
+            <div class="flex">
+              <Button icon="pi pi-eye" class="p-button-rounded p-button-info mr-2" @click="showCourses(slotProps.data)" />
+              <span>Total de cursos: {{ slotProps.data.cursos.length }}</span>
+            </div>
+
           </template>
         </Column>
         <Column header="Acciones" class="px-6 py-4">
           <template #body="slotProps">
             <div class="flex items-center space-x-2">
-              <Button icon="pi pi-pencil" class="p-button-rounded p-button-info"
-                @click="openEditView(slotProps.data)" />
+              <!-- <Button icon="pi pi-pencil" class="p-button-rounded p-button-info"
+                @click="openEditView(slotProps.data)" /> -->
               <Button icon="pi pi-dollar" class="p-button-rounded p-button-success"
-                @click="openEditView(slotProps.data)" />
+                @click="openEditCuota(slotProps.data)" />
               <Button icon="pi pi-trash" class="p-button-rounded p-button-danger"
-                @click="eliminarInscripcion(slotProps.data.idInscripcion)" />
+                @click="eliminarInscripcionId(slotProps.data.idInscripcion)" />
             </div>
           </template>
         </Column>
       </DataTable>
+
+      <DynamicDialog /> <!-- Dialogo dinámico -->
+
+      <!-- Modal para Confirmar Eliminación -->
+      <Dialog v-model:visible="isConfirmModalOpen" header="Confirmar Eliminación" modal class="w-full max-w-sm">
+        <div class="p-4">
+          <p>¿Estás seguro de que deseas eliminar esta inscripción?</p>
+          <div class="mt-4 flex justify-end space-x-4">
+            <Button class="text-white px-4 py-2 rounded-md" severity="danger" @click="eliminarInscripcion">Eliminar</Button>
+            <Button class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md" @click="closeConfirmModal">Cancelar</Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   </div>
+
+
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from "@/stores/authStore";
+import { useDialog } from 'primevue/usedialog';
 import api from "@/axiosConfig.js";
+import cursosLista from './cursosLista.vue';  // Asegúrate de importar el componente correctamente
+import { useToast } from "primevue/usetoast";
+import ExcelJS from 'exceljs';
 
 const authStore = useAuthStore();
 const inscripciones = ref([]);
 const router = useRouter();
 const token = authStore.token;
-
-// Imágenes por defecto para errores
-const defaultProfileImage = '@/assets/avatar.png'; // Ruta de la imagen de perfil por defecto
-const defaultCourseImage = '@/assets/avatar.png';   // Ruta de la miniatura del curso por defecto
+const isConfirmModalOpen = ref(false);
+let inscripcionToDelete = ref(null);
 
 const openAddView = () => {
-  router.push('/panelControl/formInscripcion'); // Ruta para agregar inscripción
+  router.push('/panelControl/formInscripcion');
 };
 
 const openEditView = (inscripcion) => {
-  router.push(`/panelControl/formInscripcion/${inscripcion.idInscripcion}`); // Ruta para editar inscripción
+  router.push(`/panelControl/formInscripcion/${inscripcion.idInscripcion}`);
+};
+
+const openEditCuota = (inscripcion) => {
+  router.push(`/panelControl/cuotas/${inscripcion.idInscripcion}`);
+};
+
+const closeConfirmModal = () => {
+  isConfirmModalOpen.value = false;
+};
+
+
+const eliminarInscripcionId = (id) => {
+  inscripcionToDelete.value = id;
+  isConfirmModalOpen.value = true;
+};
+
+
+const exportToExcel = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Anuncios');
+
+  // Agrega encabezados
+  worksheet.columns = [
+    { header: '#', key: 'id', width: 10 },
+    { header: 'Foto de Perfil', key: 'fotoPerfil', width: 30 },
+    { header: 'Nombres', key: 'nombres', width: 20 },
+    { header: 'Primer Apellido', key: 'primerApellido', width: 15 },
+    { header: 'Segundo Apellido', key: 'segundoApellido', width: 15 },
+    { header: 'Estado', key: 'estado', width: 10 },
+    { header: 'Email', key: 'email', width: 20 },
+    { header: 'Fecha de Nacimiento', key: 'fechaNacimiento', width: 5 }
+  ];
+
+  // Agrega filas
+  usuarios.value.forEach((usuario) => {
+    worksheet.addRow(usuario);
+  });
+
+  // Generar y descargar el archivo Excel
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buffer]), 'usuarios.xlsx');
 };
 
 const eliminarInscripcion = async (idInscripcion) => {
   try {
-    await api.delete(`/inscripciones/eliminarInscripcion/${idInscripcion}`);
-    inscripciones.value = inscripciones.value.filter(inscripcion => inscripcion.idInscripcion !== idInscripcion);
+    await api.delete(`/inscripciones/eliminarInscripcion/${inscripcionToDelete.value}`);
+    fetchData();
+    closeConfirmModal();
+    toast.add({
+      severity: "success",
+      summary: "Inscripción Eliminada",
+      detail: "La inscripción ha sido eliminada con éxito.",
+      life: 3000,
+    });
   } catch (error) {
     console.error(error);
-    // Manejar el error de forma adecuada
-  }
-};
-
-// Manejo de error para cargar imágenes
-const handleImageError = (event, type) => {
-  if (type === 'profile') {
-    event.target.src = defaultProfileImage;
-  } else if (type === 'course') {
-    event.target.src = defaultCourseImage;
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Hubo un problema al eliminar la inscripción.",
+      life: 3000,
+    });
   }
 };
 
 const fetchData = async () => {
   try {
     const response = await api.get('/inscripciones/inscripcion');
-    inscripciones.value = response.data.data; // Asumiendo que data tiene la estructura correcta con cursos incluidos
-    console.log(response.data.data);
+    inscripciones.value = response.data.data;
+    // console.log(response.data.data);
   } catch (error) {
     console.error(error);
-    // Manejar el error de forma adecuada
   }
 };
 
@@ -117,54 +181,38 @@ const inscripcionesConNumeracion = computed(() => {
     index: index + 1
   }));
 });
+const dialog = useDialog();
+const dialogRef = ref(null);
+
+const showCourses = (inscripcion) => {
+  if (!inscripcion.cursos || inscripcion.cursos.length === 0) {
+    console.error('No se encontraron cursos para esta inscripción');
+    return;
+  }
+
+  // Cierra el diálogo actual si está abierto
+  if (dialogRef.value) {
+    dialogRef.value.close();
+  }
+
+  // Abre el nuevo diálogo
+  dialogRef.value = dialog.open(cursosLista, {
+    header: `Cursos Registrados de ${inscripcion.nombreCompleto}`, // Incluye el nombre completo en el encabezado
+    style: {
+      width: '50vw', // Ajusta el ancho del diálogo
+    },
+    breakpoints: {
+      '960px': '75vw',
+      '640px': '90vw'
+    },
+    modal: true,
+    data: {
+      cursos: inscripcion.cursos,
+      nombreCompleto: inscripcion.nombreCompleto
+    }
+  });
+};
+
+
 </script>
 
-
-
-
-
-
-<!-- EJEMPLO RESPUESTA -->
-
-<!-- 
-  { 
-    idInscripcion: 1, 
-    nombreUsuario: "Pablo Fernandez",
-fotoPerfil: "link", 
-    fecha: '2023-07-01', 
-    cursosalosqueestainscritoenestainscripcionelusuario: [ 
-      { idCurso: 1, titulo: 'Matemáticas', miniatura: '/placeholder.svg?height=100&width=100', descripcion: 'Curso básico de matemáticas', duracion: 2, precio: 300 },
-{ idCurso: 2, titulo: 'Lenguaje', miniatura: '/placeholder.svg?height=100&width=100', descripcion: 'Curso básico de lenguaje', duracion: 2, precio: 300 },
-    ],
-observacion: "Hola",
-cuotas: 5,
-    montoTotal: 700
-  },
-{ 
-    idInscripcion: 3,  
-    nombreUsuario: "Pablo Fernandez Gonzalez", 
-fotoPerfil: "link", 
-    fecha: '2023-07-03',  
-    cursosalosqueestainscritoenestainscripcionelusuario: [ 
-      { idCurso: 3, titulo: 'Base', miniatura: '/placeholder.svg?height=100&width=100', descripcion: 'Curso base', duracion: 2, precio: 200 }, 
-    ],
-observacion: "Hola",
-cuotas: 4, 
-    montoTotal: 700
-  },
-{ 
-    idInscripcion: 1, 
-    nombreUsuario: "Pablo Fernandez",
-fotoPerfil: "link", 
-    fecha: '2023-07-05',  
-    cursosalosqueestainscritoenestainscripcionelusuario: [ 
-      { idCurso: 3, titulo: 'Sopa', miniatura: '/placeholder.svg?height=100&width=100', descripcion: 'Curso sopa', duracion: 2, precio: 300 }, 
-{ idCurso: 4, titulo: 'Mani', miniatura: '/placeholder.svg?height=100&width=100', descripcion: 'Curso mani', duracion: 2, precio: 300 }, 
-    ],
-observacion: "Hola",
-cuotas: 2, 
-    montoTotal: 100 
-  }
-  
-  
-  -->
