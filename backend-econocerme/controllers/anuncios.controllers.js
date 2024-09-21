@@ -170,6 +170,7 @@ export const editarAnuncio = async (req, res) => {
 export const eliminarAnuncio = async (req, res) => {
   const { id } = req.params;
   const { idUsuario } = req.query;
+  
 
   try {
     const [result] = await connection.query(
