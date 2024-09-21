@@ -1,6 +1,10 @@
 <template>
   <div class="p-4">
-    <Breadcrumb :home="home" :model="items" class="card h-14">
+    <Breadcrumb
+      :home="home"
+      :model="items"
+      class="card h-14 shadow-2xl dark:shadow-violet-800"
+    >
       <template #item="{ item, props }">
         <router-link
           v-if="item.route"
@@ -10,28 +14,21 @@
         >
           <a :href="href" v-bind="props.action" @click="navigate">
             <span :class="[item.icon, 'text-color']" />
-            <span class="text-primary font-semibold">{{ item.label }}</span>
+            <span class="text-black dark:text-white font-semibold">{{
+              item.label
+            }}</span>
           </a>
         </router-link>
         <a v-else :href="item.url" :target="item.target" v-bind="props.action">
-          <span class="text-surface-700 dark:text-surface-0">{{
-            item.label
-          }}</span>
+          <span class="">{{ item.label }}</span>
         </a>
       </template>
     </Breadcrumb>
-    <div v-if="mostrarSpinner" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-    <ProgressSpinner
-      strokeWidth="3"
-      fill="transparent"
-      aria-label="Custom ProgressSpinner"
-      style="width: 200px; height: 200px;" 
-    />
-  </div>
-      
 
-    <div class="card overflow-x-auto">
-      <h2 class="text-3xl mb-4 items-end">ESTUDIANTES</h2>
+    <div class="card shadow-2xl dark:shadow-violet-600">
+      <h2 class="text-4xl mb-4 items-end text-shadow-3xl font-sans">
+        ESTUDIANTES
+      </h2>
       <Divider />
 
       <!-- Contenedor para alinear el botón y el buscador en la misma línea -->
@@ -54,10 +51,12 @@
         <div class="flex-none">
           <Button
             class="bg-green-500 text-white p-button-rounded p-button-success flex items-center"
+            raised
+            icon="pi pi-user-plus"
+            label="Agregar Estudiante"
+            severity="success"
             @click="openAddModal"
           >
-            <i class="pi pi-user-plus mr-2"></i>
-            Agregar Estudiante
           </Button>
         </div>
       </div>
@@ -71,7 +70,7 @@
         <template #legend>
           <span class="text-2xl tracking-wide">Lista de Usuarios</span>
         </template>
-        <div class="">
+        <div>
           <DataTable
             :value="usuariosConNumeracion"
             :rows="5"
@@ -85,6 +84,8 @@
               'email',
               'fechaNacimiento',
             ]"
+            :sortOrder="-1"
+            class="p-datatable-striped"
           >
             <template #paginatorstart>
               <Button
@@ -177,17 +178,35 @@
                   <Button
                     icon="pi pi-eye"
                     class="p-button-rounded p-button-secondary"
+                    raised
                     @click="showUserDetails(rowData.data)"
+                    v-tooltip.left="{
+                      value: 'Ver',
+                      showDelay: 0,
+                      hideDelay: 100,
+                    }"
                   />
                   <Button
                     icon="pi pi-user-edit"
                     class="p-button-rounded p-button-info"
+                    raised
                     @click="openEditModal(rowData.data)"
+                    v-tooltip.top="{
+                      value: 'Editar',
+                      showDelay: 0,
+                      hideDelay: 100,
+                    }"
                   />
                   <Button
                     icon="pi pi-user-minus"
                     class="p-button-rounded p-button-danger"
+                    raised
                     @click="eliminarUsuario(rowData.data.id)"
+                    v-tooltip.right="{
+                      value: 'Eliminar',
+                      showDelay: 0,
+                      hideDelay: 100,
+                    }"
                   />
                 </div>
               </template>
@@ -212,10 +231,11 @@
             >Eliminar</Button
           >
           <Button
-            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
+            class="px-4 py-2 rounded-md"
             @click="closeConfirmModal"
-            >Cancelar</Button
-          >
+            severity="secondary"
+            label="Cancelar"
+          ></Button>
         </div>
       </div>
     </Dialog>
@@ -306,7 +326,6 @@
           </div>
         </form>
       </div>
-
     </Dialog>
 
     <Dialog
@@ -314,8 +333,7 @@
       :header="isEditMode ? 'Editar Usuario' : 'Agregar Usuario'"
       :visible="isModalOpen"
       modal
-      class=" "
-      :style="{ zIndex: 10 }"
+      :style="{ zIndex: 1000 }"
     >
       <form @submit.prevent="isEditMode ? updateUsuario() : addUsuario()">
         <div
@@ -336,7 +354,7 @@
             <!-- Botón para generar nueva contraseña -->
             <div v-if="isEditMode" class="flex items-center space-x-2">
               <Button
-                @click="handlePasswordChange"
+                @click="updatePasswordUsuario"
                 severity="primary"
                 class="text-white px-4 w-full py-2 rounded-md"
                 >Generar Nueva Contraseña</Button
@@ -354,7 +372,7 @@
                 id="nombres"
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
                 placeholder="Ingrese nombres"
-                required
+                @input="validarInput"
               />
             </div>
             <div>
@@ -365,7 +383,7 @@
                 id="primerApellido"
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
                 placeholder="Ingrese primer apellido"
-                required
+                @input="validarInput"
               />
             </div>
             <div>
@@ -376,6 +394,7 @@
                 id="segundoApellido"
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
                 placeholder="Ingrese segundo apellido"
+                @input="validarInput"
               />
             </div>
             <div>
@@ -396,7 +415,7 @@
             </div>
           </div>
         </div>
-        <div class="pl-5 pr-5 pb-4">
+        <div v-if="!isEditMode" class="pl-5 pr-5 pb-4">
           <h1 for="email"><strong>Email</strong></h1>
           <InputText
             v-model="selectedUsuario.email"
@@ -404,23 +423,51 @@
             id="email"
             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
             placeholder="Ingrese el correo electronico"
-            required
+          />
+        </div>
+        <div v-if="isEditMode" class="pl-5 pr-5 pb-4">
+          <h1 for="email"><strong>Email</strong></h1>
+          <InputText
+            v-model="selectedUsuario.email"
+            type="email"
+            id="email"
+            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
+            placeholder="Ingrese el correo electronico"
+            readonly
           />
         </div>
         <div class="p-4 flex justify-end space-x-4">
-          <Button type="submit" severity="help" class="px-4 py-2 rounded-md"
-            >Guardar</Button
-          >
+          <Button
+            type="submit"
+            severity="help"
+            class="px-4 py-2 rounded-md w-36"
+            label="Guardar"
+            raised
+            rounded
+          ></Button>
           <Button
             type="button"
             severity="secondary"
-            class="px-4 py-2 rounded-md"
+            class="px-4 py-2 rounded-md w-36"
+            label="Cancelar"
+            rounded
+            raised
             @click="closeModal"
-            >Cancelar</Button
-          >
+          ></Button>
         </div>
       </form>
     </Dialog>
+    <div
+      v-if="mostrarSpinner"
+      class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-1000"
+    >
+      <ProgressSpinner
+        strokeWidth="3"
+        fill="transparent"
+        aria-label="Custom ProgressSpinner"
+        style="width: 200px; height: 200px"
+      />
+    </div>
   </div>
 </template>
 
@@ -443,7 +490,7 @@ const showUserDetailsModal = ref(false);
 const selectedUser = ref(null);
 const globalFilter = ref(""); // Variable para almacenar el valor del buscador global
 
-const mostrarSpinner = ref(false); 
+const mostrarSpinner = ref(false);
 const home = ref({
   icon: "pi pi-home",
   route: "/panelControl/main",
@@ -451,7 +498,7 @@ const home = ref({
 const items = ref([
   {
     label: "Estudiantes",
-    icon: "pi pi-book",
+    icon: "pi pi-user",
     route: "/panelControl/estudiantes",
   },
 ]);
@@ -493,13 +540,14 @@ const closeUserDetailsModal = () => {
   showUserDetailsModal.value = false;
   selectedUser.value = null;
 };
+
 const fetchData = async () => {
   try {
-    const response = await api.get("/usuarios/usuario");
+    const response = await api.get(`/usuarios/usuario/${idUsuario}`);
     console.log(response);
-    usuarios.value = response.data.filter(
-      (usuario) => usuario.tipoUsuario === "usuario"
-    );
+    usuarios.value = response.data
+      .filter((usuario) => usuario.tipoUsuario === "usuario")
+      .reverse(); // Invertir el arreglo
   } catch (error) {
     console.error(error);
   }
@@ -532,14 +580,11 @@ const handleFileUpload = (event) => {
 };
 
 const openEditModal = (usuario) => {
-  console.log(usuario);
-  
-  console.log(selectedUsuario.value.fotoPerfil);
-
   isEditMode.value = true;
   selectedUsuario.value = { ...usuario };
   selectedUsuario.value.fechaNacimiento = formatDate(usuario.fechaNacimiento);
   selectedUsuario.value.idUsuario = idUsuario;
+  console.log(selectedUsuario.value.id);
   isModalOpen.value = true;
 };
 const formatToDateInput = (dateString) => {
@@ -551,12 +596,8 @@ const formatToDateInput = (dateString) => {
   return `${year}-${month}-${day}`;
 };
 function convertirFechaAMysql(fecha) {
-  const fechaObj = new Date(fecha);
-  const year = fechaObj.getFullYear();
-  const month = String(fechaObj.getMonth() + 1).padStart(2, "0"); // Los meses comienzan en 0
-  const day = String(fechaObj.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+  const d = new Date(fecha);
+  return d.toISOString().split("T")[0]; // Formato YYYY-MM-DD
 }
 const closeModal = () => {
   isModalOpen.value = false;
@@ -608,6 +649,8 @@ const usuariosConNumeracion = computed(() => {
 });
 
 const addUsuario = async () => {
+  if (!validarCampos()) return;
+
   closeModal();
 
   mostrarSpinner.value = true;
@@ -624,7 +667,8 @@ const addUsuario = async () => {
   formData.append("contrasenia", selectedUsuario.value.contrasenia); // Se envía al backend
   formData.append("estado", selectedUsuario.value.estado);
   formData.append("idUsuario", selectedUsuario.value.idUsuario);
-
+  const nombre = nombreCompleto();
+  formData.append("nombreCompleto", nombre);
   if (selectedFile) {
     formData.append("fotoPerfil", selectedFile);
   }
@@ -636,7 +680,7 @@ const addUsuario = async () => {
       },
     });
     fetchData();
-    
+
     mostrarSpinner.value = false;
 
     toast.add({
@@ -648,12 +692,19 @@ const addUsuario = async () => {
     });
   } catch (error) {
     console.error(error);
+    mostrarSpinner.value = false; // Ocultar el spinner
+
+    // Captura el mensaje del error del backend
+    const errorMessage =
+      error.response?.data?.mensaje ||
+      "No se pudo añadir el usuario. Por favor, intente de nuevo más tarde.";
+
+    // Mostrar el toast con el mensaje de error
     toast.add({
       severity: "error",
       summary: "Error",
-      detail:
-        "No se pudo añadir el usuario. Por favor, intente de nuevo más tarde.",
-      life: 3000,
+      detail: errorMessage,
+      life: 5000, // Duración del toast
     });
   }
 };
@@ -671,10 +722,115 @@ const filteredUsuarios = computed(() => {
     );
   });
 });
+const nombreCompleto = () => {
+  const nombress = selectedUsuario.value.nombres;
+  const primerApellidos = selectedUsuario.value.primerApellido;
+  const nombres = nombress || ""; // Asegurarse de que `nombres` no sea undefined
+  const nombreCompleto = nombres.split(" ")[0] + " " + primerApellidos;
 
+  return nombreCompleto; // Dividir por espacios y retornar el primer elemento
+};
+
+const updatePasswordUsuario = async () => {
+  const formData = new FormData();
+  formData.append("idUsuario", selectedUsuario.value.idUsuario);
+  selectedUsuario.value.contrasenia = generatePassword();
+  formData.append("contrasenia", selectedUsuario.value.contrasenia); // Solo enviar si se cambia
+  formData.append("email", selectedUsuario.value.email);
+
+  try {
+    // Esperar el valor de `nombreCompleto()` si es una función asíncrona.
+    const nombre = nombreCompleto();
+    formData.append("nombreCompleto", nombre);
+
+    // Agregar el toast de éxito antes de enviar la solicitud.
+    toast.add({
+      severity: "success",
+      summary: "Contraseña actualizada correctamente",
+      detail: "La nueva contraseña se envió al correo electronico.",
+      life: 3000,
+    });
+
+    await api.put(
+      `/usuarios/cambiarContrasenia/${selectedUsuario.value.id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  } catch (error) {
+    console.error("Error al actualizar usuario:", error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Hubo un problema al actualizar el usuario. Intente nuevamente.",
+      life: 3000,
+    });
+  }
+};
+const validarInput = (event) => {
+  // Expresión regular para permitir solo letras y espacios
+  const regex = /^[A-Za-z\s]*$/;
+
+  // Si el valor ingresado no coincide con la expresión regular
+  if (!regex.test(event.target.value)) {
+    // Eliminar el último carácter ingresado
+    event.target.value = event.target.value.slice(0, -1);
+    selectedUsuario.value.nombres = event.target.value; // Actualizar el modelo de Vue
+    selectedUsuario.value.primerApellido = event.target.value; // Actualizar el modelo de Vue
+    selectedUsuario.value.segundoApellido = event.target.value; // Actualizar el modelo de Vue
+  }
+};
+const generatePassword = () => {
+  const length = 8;
+  const lowercase = "abcdefghijklmnopqrstuvwxyz";
+  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const numbers = "0123456789";
+  const special = "!@#$%^&*()_+~`|}{[]:;?><,./-=";
+  const allChars = lowercase + uppercase + numbers + special;
+
+  let password = [];
+
+  // Garantizamos que al menos un carácter de cada tipo esté presente
+  password.push(lowercase[Math.floor(Math.random() * lowercase.length)]);
+  password.push(uppercase[Math.floor(Math.random() * uppercase.length)]);
+  password.push(numbers[Math.floor(Math.random() * numbers.length)]);
+  password.push(special[Math.floor(Math.random() * special.length)]);
+
+  // Rellenamos la contraseña con caracteres aleatorios hasta llegar a 8 caracteres
+  while (password.length < length) {
+    password.push(allChars[Math.floor(Math.random() * allChars.length)]);
+  }
+
+  // Mezclamos la contraseña para evitar patrones predecibles
+  password = password.sort(() => Math.random() - 0.5).join("");
+
+  return password;
+};
+const validarCampos = () => {
+  if (
+    !selectedUsuario.value.nombres ||
+    !selectedUsuario.value.primerApellido ||
+    !selectedUsuario.value.segundoApellido ||
+    !selectedUsuario.value.fechaNacimiento ||
+    !selectedFile
+  ) {
+    toast.add({
+      severity: "error",
+      summary: "Campos incompletos",
+      detail:
+        "Por favor completa el formulario, todos los campos son requeridos!.",
+      life: 3000,
+    });
+    return false;
+  }
+  return true;
+};
 const updateUsuario = async () => {
+  if (!validarCamposAct()) return;
   closeModal();
-
   const formData = new FormData();
   formData.append("nombres", selectedUsuario.value.nombres);
   formData.append("primerApellido", selectedUsuario.value.primerApellido);
@@ -684,24 +840,25 @@ const updateUsuario = async () => {
     "fechaNacimiento",
     convertirFechaAMysql(selectedUsuario.value.fechaNacimiento)
   );
-  console.log(convertirFechaAMysql(selectedUsuario.value.fechaNacimiento))
+  console.log(convertirFechaAMysql(selectedUsuario.value.fechaNacimiento));
   formData.append("estado", selectedUsuario.value.estado);
   formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
   formData.append("id", selectedUsuario.value.id); // Agregar el ID del usuario
   //console.log(date);
   formData.append("idUsuario", selectedUsuario.value.idUsuario);
-  if(selectedUsuario.value.fotoPerfil === "http://localhost:3000/uploads/usuarios/avatar3.png" || selectedUsuario.value.fotoPerfil === null){
-    selectedUsuario.value.fotoPerfil = null
+  if (
+    selectedUsuario.value.fotoPerfil ===
+      "http://localhost:3000/uploads/usuarios/avatar3.png" ||
+    selectedUsuario.value.fotoPerfil === null
+  ) {
+    selectedUsuario.value.fotoPerfil = null;
   }
   console.log(selectedUsuario.value.fotoPerfil);
 
   if (selectedFile) {
     formData.append("fotoPerfil", selectedFile);
-  }else{
-    selectedUsuario.value.fotoPerfil }
-
-  if (selectedUsuario.value.contrasenia) {
-    formData.append("contrasenia", selectedUsuario.value.contrasenia); // Solo enviar si se cambia
+  } else {
+    selectedUsuario.value.fotoPerfil;
   }
 
   try {
@@ -714,14 +871,6 @@ const updateUsuario = async () => {
         },
       }
     );
-
-    // Actualizar el usuario en la lista local
-    const index = usuarios.value.findIndex(
-      (usuario) => usuario.id === selectedUsuario.value.id
-    );
-    if (index !== -1) {
-      usuarios.value[index] = { ...selectedUsuario.value }; // Actualizar el usuario en la lista
-    }
     fetchData();
     toast.add({
       severity: "success",
@@ -729,6 +878,13 @@ const updateUsuario = async () => {
       detail: "Los datos del usuario se han actualizado correctamente.",
       life: 3000,
     });
+    // Actualizar el usuario en la lista local
+    const index = usuarios.value.findIndex(
+      (usuario) => usuario.id === selectedUsuario.value.id
+    );
+    if (index !== -1) {
+      usuarios.value[index] = { ...selectedUsuario.value }; // Actualizar el usuario en la lista
+    }
   } catch (error) {
     console.error("Error al actualizar usuario:", error);
     toast.add({
@@ -739,7 +895,37 @@ const updateUsuario = async () => {
     });
   }
 };
+const validarCamposAct = () => {
+  // Verificar si los campos requeridos están completos
+  if (
+    !selectedUsuario.value.nombres ||
+    !selectedUsuario.value.primerApellido ||
+    !selectedUsuario.value.segundoApellido ||
+    !selectedUsuario.value.fechaNacimiento
+  ) {
+    toast.add({
+      severity: "error",
+      summary: "Campos incompletos",
+      detail:
+        "Por favor completa el formulario, todos los campos son requeridos.",
+      life: 3000,
+    });
+    return false;
+  }
 
+  // Verificar que al menos uno de los campos `miniatura` o `selectedFile` esté presente
+  if (!selectedUsuario.value.fotoPerfil && !selectedFile) {
+    toast.add({
+      severity: "error",
+      summary: "Falta la Foto de Perfil",
+      detail: "Debes subir una nueva Foto de Perfil o conservar la existente.",
+      life: 3000,
+    });
+    return false;
+  }
+
+  return true;
+};
 const eliminarUsuario = (id) => {
   usuarioToDelete.value = id;
   isConfirmModalOpen.value = true;
@@ -767,42 +953,16 @@ const deleteUsuario = async () => {
   }
 };
 // Función para generar contraseña aleatoria
-const generatePassword = () => {
-  const length = 8;
-  const lowercase = "abcdefghijklmnopqrstuvwxyz";
-  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const numbers = "0123456789";
-  const special = "!@#$%^&*()_+~`|}{[]:;?><,./-=";
-  const allChars = lowercase + uppercase + numbers + special;
 
-  let password = [];
-
-  // Garantizamos que al menos un carácter de cada tipo esté presente
-  password.push(lowercase[Math.floor(Math.random() * lowercase.length)]);
-  password.push(uppercase[Math.floor(Math.random() * uppercase.length)]);
-  password.push(numbers[Math.floor(Math.random() * numbers.length)]);
-  password.push(special[Math.floor(Math.random() * special.length)]);
-
-  // Rellenamos la contraseña con caracteres aleatorios hasta llegar a 8 caracteres
-  while (password.length < length) {
-    password.push(allChars[Math.floor(Math.random() * allChars.length)]);
-  }
-
-  // Mezclamos la contraseña para evitar patrones predecibles
-  password = password.sort(() => Math.random() - 0.5).join("");
-
-  return password;
-};
 const getRowIndex = (rowData) => {
   return usuarios.value.findIndex((user) => user.id === rowData.data.id) + 1;
 };
 const exportToExcel = async () => {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Anuncios");
+  const worksheet = workbook.addWorksheet("Usuarios");
 
   // Agrega encabezados
   worksheet.columns = [
-    { header: "#", key: "id", width: 10 },
     { header: "Foto de Perfil", key: "fotoPerfil", width: 30 },
     { header: "Nombres", key: "nombres", width: 20 },
     { header: "Primer Apellido", key: "primerApellido", width: 15 },
@@ -820,14 +980,5 @@ const exportToExcel = async () => {
   // Generar y descargar el archivo Excel
   const buffer = await workbook.xlsx.writeBuffer();
   saveAs(new Blob([buffer]), "usuarios.xlsx");
-};
-const handlePasswordChange = () => {
-  selectedUsuario.value.contrasenia = generatePassword();
-  toast.add({
-    severity: "info",
-    summary: "Contraseña Generada",
-    detail: "Se ha generado una nueva contraseña para el usuario.",
-    life: 3000,
-  });
 };
 </script>

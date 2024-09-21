@@ -2,7 +2,18 @@
 <template>
     
 <div class="grid grid-cols-4 grid-rows-5 gap-4">
-    <div >1</div>
+    <div >1 
+        <Button
+        @click="addOption(index)"
+        severity="info"
+        text
+        raised
+        icon="pi pi-plus-circle"
+        label="Añadir Opción"
+        class="dark:text-sky-500"
+      >
+      </Button>
+    </div>
     <div >2</div>
     <div >3</div>
     <div >4</div>

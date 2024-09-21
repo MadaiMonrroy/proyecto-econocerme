@@ -26,8 +26,8 @@
               }"
             >
               <div class="md:w-40 relative">
-                <img
-                  class="block xl:block mx-auto rounded w-full"
+                <Image
+                  class="block xl:block mx-auto rounded w-full "
                   :src="curso.miniatura"
                   alt="Imagen del curso"
                 />

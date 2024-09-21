@@ -112,8 +112,11 @@ const handleSubmit = async () => {
       setTimeout(() => {
         if (tipoUsuario === "admin") {
           router.push("/panelControl/main");
-        } else {
+        } else if (tipoUsuario === "usuario"){
           router.push("/panelEstudiante");
+        } else if (tipoUsuario === "coach"){
+          router.push("/panelCoaches");
+
         }
       }, 1000);
       if (remember.value) {
@@ -142,8 +145,10 @@ onMounted(() => {
     const userTipo = authStore.usuario.tipoUsuario
     if (userTipo === "admin") {
           router.push("/panelControl/main");
-        } else {
+        } else if(userTipo === "usuario") {
           router.push("/panelEstudiante/dashboard");
+        } else if(userTipo === "coach"){
+          router.push("/panelCoaches");
         }
   }
 });

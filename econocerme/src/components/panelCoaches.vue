@@ -1,27 +1,25 @@
 <template>
   <div
-    style="background-color: rgba(77, 41, 165, 0.5)"
+    style="background-color: rgba(99, 63, 191, 0.39)"
     :class="[
       'flex flex-col min-h-screen  bg-opacity-0',
       { 'collapsed-sidebar': isSidebarCollapsed },
     ]"
   >
     <header
-      class="bg-gradient-to-t from-custom-purple to-custom-pink dark:bg-gradient-to-t dark:from-dark-purple dark:to-dark-pink text-black p-5 flex justify-between items-center fixed top-0 left-0 w-full z-20 shadow-lg shadow-purple-800/50"
+      class="custom-gradient text-black p-5 flex justify-between items-center fixed top-0 left-0 w-full z-20 shadow-lg shadow-purple-800/50"
     >
       <div class="flex items-center">
-        <img src="@/assets/logoec.png" alt="Logo" class="h-10 mx-6 dark:brightness-0 dark:invert" />
+        <img src="@/assets/logoec.png" alt="Logo" class="h-10 mx-6" />
         <button
           @click="toggleSidebar"
           class="mr-4 text-black hover:text-purple-950"
         >
-          <i
-            class="pi pi-bars text-[32px] dark:text-white"
-            style="font-size: 21px"
-          ></i>
+          <i class="pi pi-bars text-[32px]" style="font-size: 21px"></i>
         </button>
       </div>
       <div class="flex items-center space-x-4">
+        
         <theme-switcher class="w-14 h-14"></theme-switcher>
         <div
           class="flex justify-center items-center space-x-2 cursor-pointer group"
@@ -35,11 +33,11 @@
             class="w-12 h-11 rounded-full group-hover:shadow-2xl transition duration-300"
           />
           <span
-            class="text-base font-medium group-hover:shadow-xl dark:text-white transition duration-300"
+            class="text-base font-medium group-hover:shadow-xl transition duration-300"
             >{{ primerNombre }}</span
           >
           <i
-            class="pi pi-chevron-down group-hover:shadow-lg dark:text-white transition duration-300"
+            class="pi pi-chevron-down group-hover:shadow-lg transition duration-300"
           ></i>
           <Menu
             ref="menu"
@@ -54,7 +52,7 @@
     <div class="flex flex-1 pt-16 shadow-lg shadow-purple-800/50">
       <nav
         :class="[
-          'bg-gradient-to-t from-custom-pink to-custom-purple dark:bg-gradient-to-t dark:from-dark-pink dark:to-dark-purple text-black font-semibold p-4 fixed top-[69px] bottom-0 overflow-y-auto z-30 transition-all duration-300 shadow-lg shadow-purple-600/100',
+          'custom-gradient2 text-black font-semibold p-4 fixed top-[69px] bottom-0 overflow-y-auto z-30 transition-all duration-300 shadow-lg shadow-purple-600/100',
           { 'w-[360px]': isSidebarCollapsed, 'w-[230px]': !isSidebarCollapsed },
         ]"
         @mouseenter="handleSidebarMouseEnter"
@@ -71,17 +69,16 @@
             {{ primerNombre }} {{ authStore.usuario.primerApellido }}
           </h2>
         </div>
-        <ul class="space-y-2 ">
-          <li v-for="(item, index) in menuItems" :key="index" class="w-full justify-start">
-            
+        <ul class="space-y-2">
+          <li v-for="(item, index) in menuItems" :key="index" class="w-full">
             <div
               @click="handleMenuClick(item)"
-              class="flex items-start cursor-pointer rounded-3xl transition-colors duration-300 hover:bg-gradient-to-r from-custom-pink to-custom-purple dark:hover:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink  p-3"
+              class="flex items-center cursor-pointer rounded transition-colors duration-300 hover:bg-gradient-to-r from-purple-500 to-purple-900 p-3"
             >
               <i :class="item.icon" class="mr-3" style="font-size: 1.4rem"></i>
               <span
                 v-if="!isSidebarCollapsed"
-                class="ml-0 "
+                class="ml-0"
                 style="font-size: 1.1rem"
                 >{{ item.label }}</span
               >
@@ -98,12 +95,12 @@
             </div>
             <ul
               v-if="item.items && sublistOpen[item.key]"
-              class="ml-6 mt-2 space-y-1"
+              class="ml-4 mt-2 space-y-1"
             >
               <li v-for="(subItem, subIndex) in item.items" :key="subIndex">
                 <router-link
                   :to="subItem.route"
-                  class="block p-2 transition-colors rounded-3xl duration-300 hover:bg-gradient-to-r from-custom-pink to-custom-purple dark:hover:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink"
+                  class="block p-2 rounded transition-colors duration-300 hover:bg-gradient-to-r from-purple-500 to-purple-900"
                 >
                   {{ subItem.label }}
                 </router-link>
@@ -120,7 +117,7 @@
         }"
         class=""
       >
-        <p>Usuario: {{ authStore.usuario.email }}</p>
+        <p>Usuario: aqui estas coach{{ authStore.usuario.email }}</p>
         <router-view></router-view>
       </main>
     </div>
@@ -147,6 +144,8 @@ export default {
 
       authStore.loadUser(); // Asegúrate de que el usuario se carga antes de verificar la autenticación
       if (!authStore.isAuthenticated) {
+        router.push("/"); // Redirigir a la página de inicio o login
+      } else if (authStore.usuario.tipoUsuario !== "coach") {
         router.push("/"); // Redirigir a la página de inicio o login
       }
     });
@@ -192,20 +191,10 @@ export default {
     );
     const menuItems = ref([
       {
-        key: "main",
-        label: "Principal",
-        icon: "pi pi-home",
-        route: "/panelControl/main",
-      },
-      {
-        key: "usuarios",
-        label: "Usuarios",
-        icon: "pi pi-users",
-        items: [
-          { label: "Administradores", route: "/panelControl/administradores" },
-          { label: "Coaches", route: "/panelControl/coaches" },
-          { label: "Estudiantes", route: "/panelControl/estudiantes" },
-        ],
+        key: "inscritos",
+        label: "Lista de Inscritos",
+        icon: "pi pi-address-book",
+        route: "/panelControl/inscripciones",
       },
       {
         key: "cursos",
@@ -213,12 +202,7 @@ export default {
         icon: "pi pi-book",
         route: "/panelControl/cursos",
       },
-      {
-        key: "inscripciones",
-        label: "Inscripciones",
-        icon: "pi pi-address-book",
-        route: "/panelControl/inscripciones",
-      },
+
       {
         key: "anuncios",
         label: "Anuncios",
@@ -232,7 +216,7 @@ export default {
         label: "Perfil",
         icon: "pi pi-user",
         command: () => {
-          router.push("/panelControl/formEdit");
+          router.push("/panelCoaches/formEdit");
         },
       },
       {
@@ -366,11 +350,15 @@ nav:hover ul li span {
     /*
     rgba(99, 64, 204, 0.682),
     rgba(214, 138, 255, 0.538)*/
-      rgba(77, 41, 165),
-    rgba(210, 88, 255)
+      rgba(77, 41, 165, 0.682),
+    rgba(210, 88, 255, 0.538)
   );
 }
 .custom-gradient2 {
-  background: linear-gradient(to bottom, rgba(77, 41, 165), rgba(210, 88, 255));
+  background: linear-gradient(
+    to bottom,
+    rgba(77, 41, 165, 0.682),
+    rgba(210, 88, 255, 0.538)
+  );
 }
 </style>

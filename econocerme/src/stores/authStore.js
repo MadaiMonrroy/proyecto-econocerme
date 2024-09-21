@@ -35,8 +35,8 @@ export const useAuthStore = defineStore("auth", {
           token: this.token,
         });
         document.cookie = `auth=${encryptedData}; path=/;`;
-        console.log("Usuario:", this.usuario);
-        console.log("Token:", this.token);
+        // console.log("Usuario:", this.usuario);
+        // console.log("Token:", this.token);
         return response.data;
       } catch (error) {
         console.error("Error en login:", error);
@@ -54,14 +54,21 @@ export const useAuthStore = defineStore("auth", {
           const decryptedValue = desencriptar(encryptedValue);
           this.usuario = decryptedValue.usuario;
           this.token = decryptedValue.token;
-          console.log("Usuario cargado:", this.usuario);
-          console.log("Token cargado:", this.token);
+          // console.log("Usuario cargado:", this.usuario);
+          // console.log("Token cargado:", this.token);
         } catch (error) {
           console.error("Error al desencriptar la cookie:", error);
         }
       }
     },
-
+    actualizarUsuario(usuarioActualizado) {
+      this.usuario = { ...this.usuario, ...usuarioActualizado }; // Sobrescribe los campos del usuario con los nuevos datos
+      const encryptedData = encriptar({
+        usuario: this.usuario,
+        token: this.token,
+      });
+      document.cookie = `auth=${encryptedData}; path=/;`; // Actualiza la cookie con los datos encriptados
+    }, 
     logout() {
       this.usuario = null;
       this.token = null;

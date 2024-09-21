@@ -1,7 +1,7 @@
 <template>
   <div
     style="background-color: rgba(99, 63, 191, 0.39)"
-    class="flex flex-col min-h-screen bg-opacity-0"
+    class="flex flex-col min-h-screen  bg-opacity-0"
   >
     <header
       class="custom-gradient text-black p-5 flex justify-between items-center fixed top-0 left-0 w-full z-20 shadow-lg shadow-purple-800/50"
@@ -57,7 +57,7 @@
     </header>
 
     <div class="flex flex-1 pt-16">
-      <main class="flex-1 p-5">
+      <main class="flex-1 p-5 ">
         <router-view></router-view>
       </main>
     </div>
@@ -81,7 +81,7 @@ export default {
       authStore.loadUser();
       if (!authStore.isAuthenticated) {
         router.push("/");
-        console.log(authStore.usuario);
+        //console.log(authStore.usuario);
       }
     });
 
@@ -95,7 +95,9 @@ export default {
       {
         label: "Perfil",
         icon: "pi pi-user",
-        command: () => {},
+        command: () => {
+          router.push("/panelEstudiante/formEdit");
+        },
       },
       {
         label: "Cerrar sesión",

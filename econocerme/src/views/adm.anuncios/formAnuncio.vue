@@ -96,19 +96,23 @@
         </div>
         <!-- Botones de acción -->
         <div class="flex justify-end space-x-4 mt-6">
-          <button
+          <Button
             type="submit"
-            class="inline-block px-6 py-3 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            severity="help"
+            raised
+            class="inline-block px-6 py-3 w-36 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 "
           >
             {{ anuncio.id ? "Guardar" : "Agregar" }}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             @click="cancelarEdicion"
-            class="inline-block px-6 py-3 bg-gray-300 text-gray-700 rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            severity="secondary"
+            raised
+            class="inline-block px-6 py-3 w-36 bg-gray-300 text-gray-700 rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             Cancelar
-          </button>
+          </Button>
         </div>
       </form>
     </div>
@@ -320,7 +324,7 @@ const validarCampos = () => {
     toast.add({
       severity: "error",
       summary: "Campos incompletos",
-      detail: "Por favor completa el formulario, todos los campos requeridos!.",
+      detail: "Por favor completa el formulario, todos los campos son requeridos!.",
       life: 3000,
     });
     return false;
@@ -340,7 +344,7 @@ const validarCamposAct = () => {
     toast.add({
       severity: "error",
       summary: "Campos incompletos",
-      detail: "Por favor completa el formulario, todos los campos requeridos.",
+      detail: "Por favor completa el formulario, todos los campos son requeridos.",
       life: 3000,
     });
     return false;

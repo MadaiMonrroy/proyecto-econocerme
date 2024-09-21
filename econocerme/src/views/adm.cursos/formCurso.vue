@@ -103,19 +103,23 @@
         </div>
 
         <div class="mt-6 flex justify-end space-x-4">
-          <button
+          <Button
             type="submit"
-            class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            severity="help"
+            raised
+            class="inline-block px-4 py-2 w-36 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {{ curso.idCurso ? 'Guardar' : 'Agregar' }}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             @click="cancelarEdicion"
-            class="inline-block px-4 py-2 bg-gray-300  rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            severity="secondary"
+            raised
+            class="inline-block px-4 py-2 w-36 bg-gray-300  rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             Cancelar
-          </button>
+          </Button>
         </div>
       </form>
       

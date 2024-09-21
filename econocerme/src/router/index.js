@@ -5,7 +5,7 @@ import { useAuthStore } from "@/stores/authStore";
 import LoginForm from "@/views/auth/loginForm.vue";
 import RegistroForm from "@/views/auth/formularioRegistro.vue";
 import panelControl from "@/components/panelControl.vue";
-import usuarios from "@/views/adm.usuarios/usuarios.vue";
+import administradores from "@/views/adm.usuarios/admins.vue";
 import coaches from "@/views/adm.usuarios/coaches.vue";
 import estudiantes from "@/views/adm.usuarios/estudiantes.vue";
 import cursos from "@/views/adm.cursos/cursos.vue";
@@ -16,7 +16,7 @@ import anuncios from "@/views/adm.anuncios/anuncios.vue";
 import formAnuncio from "@/views/adm.anuncios/formAnuncio.vue";
 import inscripciones from "@/views/adm.inscripciones/inscripciones.vue";
 import formInscripcion from "@/views/adm.inscripciones/formInscripcion.vue";
-import panelUsuario from "@/components/panelUsuario.vue";
+import panelCoaches from "@/components/panelCoaches.vue";
 import menuUser from "@/components/menuUser.vue";
 import prueba from "@/components/pruebas.vue";
 import curso from "@/views/user.curso/curso.vue";
@@ -33,6 +33,7 @@ import contenidoModulo from "@/views/est.cursos/contenidoModulo.vue";
 import evaluacion from "@/views/adm.cursos/evaluacion.vue";
 import formEvaluacion from "@/views/adm.cursos/formEvaluacion.vue";
 import cuotas from "@/views/adm.inscripciones/cuotas.vue"
+import formEdit from "@/views/adm.usuarios/formEdit.vue";
 
 const routes = [
   { path: "/", component: LoginForm },
@@ -42,7 +43,7 @@ const routes = [
     component: panelControl,
     meta: { requiresAuth: true },
     children: [
-      { path: "usuarios", component: usuarios },
+      { path: "administradores", component: administradores },
       { path: "coaches", component: coaches },
       { path: "estudiantes", component: estudiantes },
       { path: "cursos", component: cursos },
@@ -56,6 +57,7 @@ const routes = [
       { path: "formAnuncio/:id", component: formAnuncio },
       { path: "prueba", component: prueba },
       { path: "main", component: main },
+      { path: "formEdit", component: formEdit},
       { path: "inscripciones", component: inscripciones },
       { path: "formInscripcion", component: formInscripcion },
       { path: "formInscripcion/:idInscripcion", component: formInscripcion },
@@ -71,6 +73,7 @@ const routes = [
     children: [
       { path: "dashboard", component: dashboard },
       { path: "misCursos", component: misCursos },
+      { path: "formEdit", component: formEdit},
       { path: "certificaciones", component: certificaciones },
       {
         path: "panelCurso/:id",
@@ -80,6 +83,17 @@ const routes = [
           { path: "leccion/:idLeccion", component: contenidoLeccion },
         ],
       },
+    ],
+  },
+  {
+    path: "/panelCoaches",
+    component: panelCoaches,
+    meta: { requiresAuth: true },
+    children: [
+      { path: "dashboard", component: dashboard },
+      { path: "misCursos", component: misCursos },
+      { path: "formEdit", component: formEdit},
+      { path: "certificaciones", component: certificaciones },
     ],
   },
   { path: "/menuUser", component: menuUser },
@@ -95,11 +109,11 @@ const router = createRouter({
 // Middleware para verificar la autenticación
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  console.log(`Navegando a: ${to.path}`); // Verificar a dónde intentas navegar
-  console.log(
-    `Requiere autenticación: ${to.matched.some((record) => record.meta.requiresAuth)}`
-  );
-  console.log(`Autenticado: ${authStore.isAuthenticated}`);
+  //console.log(`Navegando a: ${to.path}`); // Verificar a dónde intentas navegar
+  // console.log(
+  //   `Requiere autenticación: ${to.matched.some((record) => record.meta.requiresAuth)}`
+  // );
+  // console.log(`Autenticado: ${authStore.isAuthenticated}`);
   if (
     to.matched.some((record) => record.meta.requiresAuth) &&
     !authStore.isAuthenticated

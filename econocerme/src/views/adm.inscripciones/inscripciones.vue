@@ -36,7 +36,7 @@
           <template #body="slotProps">
             <div class="flex">
               <Button icon="pi pi-eye" class="p-button-rounded p-button-info mr-2" @click="showCourses(slotProps.data)" />
-              <span>Total de cursos: {{ slotProps.data.cursos.length }}</span>
+              <span class="text-center pt-4 border "> {{ slotProps.data.cursos.length }}</span>
             </div>
 
           </template>
@@ -164,7 +164,7 @@ const eliminarInscripcion = async (idInscripcion) => {
 const fetchData = async () => {
   try {
     const response = await api.get('/inscripciones/inscripcion');
-    inscripciones.value = response.data.data;
+    inscripciones.value = response.data.data.reverse();
     // console.log(response.data.data);
   } catch (error) {
     console.error(error);

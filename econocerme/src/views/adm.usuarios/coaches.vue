@@ -1,7 +1,29 @@
 <template>
-  <div class="p-4">
-    <div class="card">
-      <h2 class="text-2xl mb-4">Coaches</h2>
+  <div class="p-4 ">
+    <Breadcrumb :home="home" :model="items" class="card h-14 shadow-2xl dark:shadow-violet-800">
+      <template #item="{ item, props }">
+        <router-link
+          v-if="item.route"
+          v-slot="{ href, navigate }"
+          :to="item.route"
+          custom
+        >
+          <a :href="href" v-bind="props.action" @click="navigate">
+            <span :class="[item.icon, 'text-color']" />
+            <span class="!text-black font-semibold">{{ item.label }}</span>
+          </a>
+        </router-link>
+        <a v-else :href="item.url" :target="item.target" v-bind="props.action">
+          <span class="">{{
+            item.label
+          }}</span>
+        </a>
+      </template>
+    </Breadcrumb>
+    
+
+    <div  class="card shadow-2xl dark:shadow-violet-600 ">
+      <h2 class="text-4xl mb-4 items-end text-shadow-3xl  font-sans  ">ESTUDIANTES</h2>
       <Divider />
 
       <!-- Contenedor para alinear el botón y el buscador en la misma línea -->
@@ -13,7 +35,7 @@
               <i class="pi pi-search" />
             </InputIcon>
             <inputText
-              v-model="searchTerm"
+              v-model="globalFilter"
               placeholder="Buscar..."
               class="w-full"
             />
@@ -24,116 +46,156 @@
         <div class="flex-none">
           <Button
             class="bg-green-500 text-white p-button-rounded p-button-success flex items-center"
+            raised
+            severity="success"
             @click="openAddModal"
           >
             <i class="pi pi-user-plus mr-2"></i>
-            Agregar Estudiante
+            Agregar Coach
           </Button>
         </div>
       </div>
 
+      <!-- v-model:selection="selectedRow"
+        selection-mode="multiple" -->
+      <!-- <Column header="#" sortable class="px-6 py-4"> </Column>-->
+
       <Divider />
-      <DataTable
-        :value="filteredUsuarios"
-        tableStyle="min-width: 50rem"
-        :rows="4"
-        :paginator="true"
-        :rowsPerPageOptions="[4, 8, 12]"
-        class="p-datatable-striped"
-      >
-      <template #paginatorstart>
-                <Button type="button" icon="pi pi-refresh" text @click="reloadPage" />
+      <Fieldset >
+        <template #legend>
+          <span class="text-2xl tracking-wide">Lista de Usuarios</span>
+        </template>
+        <div>
+          <DataTable
+            :value="usuariosConNumeracion"
+            :rows="5"
+            paginator
+            :rowsPerPageOptions="[5, 10, 25]"
+            :globalFilter="globalFilter"
+            :globalFilterFields="[
+              'nombres',
+              'primerApellido',
+              'segundoApellido',
+              'email',
+              'fechaNacimiento',
+            ]"
+            :sortOrder="-1"
+            class="p-datatable-striped"
+
+          >
+            <template #paginatorstart>
+              <Button
+                type="button"
+                icon="pi pi-refresh"
+                text
+                @click="reloadPage"
+              />
             </template>
             <template #paginatorend>
-                <Button type="button" icon="pi pi-download" text @click="exportToExcel" />
+              <Button
+                type="button"
+                icon="pi pi-download"
+                text
+                @click="exportToExcel"
+              />
             </template>
-        <Column header="#" sortable class="px-6 py-4">
-          <template #body="rowData">
-            {{ getRowIndex(rowData) }}
-          </template>
-        </Column>
-        <Column header="Foto de Perfil" class="px-6 py-4">
-          <template #body="rowData">
-            <Image
-              v-if="rowData.data.fotoPerfil"
-              :src="rowData.data.fotoPerfil"
-              alt="Foto de Perfil"
-              class="h-16 w-20 object-cover rounded"
-              preview
-            />
-          </template>
-        </Column>
-        <Column field="nombres" header="Nombres" sortable class="px-6 py-4" />
-        <Column
-          field="primerApellido"
-          header="Primer Apellido"
-          sortable
-          class="px-6 py-4"
-        />
-        <Column
-          field="segundoApellido"
-          header="Segundo Apellido"
-          sortable
-          class="px-6 py-4"
-        />
-        <Column field="estado" header="Estado" class="px-6 py-4">
-          <template #body="rowData">
-            <Tag
-              v-if="rowData.data.estado === 1"
-              value="Activo"
-              severity="success"
-              class="px-2 py-1"
-            />
-            <Tag
-              v-else-if="rowData.data.estado === 2"
-              value="Inactivo"
-              severity="warn"
-              class="px-2 py-1"
-            />
-            <Tag
-              v-else
-              value="Desconocido"
-              severity="warning"
-              class="px-2 py-1"
-            />
-          </template>
-        </Column>
-        <Column field="email" header="Email" class="px-6 py-4" />
+            <template #body="rowData">
+              {{ getRowIndex(rowData) }}
+            </template>
+            <Column field="index" header="#" sortable class="px-6 py-4" />
 
-        <Column
-          field="fechaNacimiento"
-          header="Fecha de Nacimiento"
-          sortable
-          class="px-6 py-4"
-        >
-          <template #body="rowData">
-            {{ formatDate(rowData.data.fechaNacimiento) }}
-          </template>
-        </Column>
+            <Column header="Foto de Perfil" class="px-6 py-4">
+              <template #body="rowData">
+                <Image
+                  v-if="rowData.data.fotoPerfil"
+                  :src="rowData.data.fotoPerfil"
+                  alt="Foto de Perfil"
+                  class="h-16 w-20 object-cover rounded-full"
+                  preview
+                />
+              </template>
+            </Column>
+            <Column
+              field="nombres"
+              header="Nombres"
+              sortable
+              class="px-6 py-4"
+            />
+            <Column
+              field="primerApellido"
+              header="Primer Apellido"
+              sortable
+              class="px-6 py-4"
+            />
+            <Column
+              field="segundoApellido"
+              header="Segundo Apellido"
+              sortable
+              class="px-6 py-4"
+            />
+            <Column field="estado" header="Estado" class="px-6 py-4">
+              <template #body="rowData">
+                <Tag
+                  v-if="rowData.data.estado === 1"
+                  value="Activo"
+                  severity="success"
+                  class="px-2 py-1"
+                />
+                <Tag
+                  v-else-if="rowData.data.estado === 2"
+                  value="Inactivo"
+                  severity="warn"
+                  class="px-2 py-1"
+                />
+                <Tag
+                  v-else
+                  value="Desconocido"
+                  severity="warning"
+                  class="px-2 py-1"
+                />
+              </template>
+            </Column>
+            <Column field="email" header="Email" class="px-6 py-4" />
 
-        <Column header="Acciones" class="px-6 py-4">
-          <template #body="rowData">
-            <div class="flex items-center space-x-2">
-              <Button
-                icon="pi pi-eye"
-                class="p-button-rounded p-button-secondary"
-                @click="showUserDetails(rowData.data)"
-              />
-              <Button
-                icon="pi pi-user-edit"
-                class="p-button-rounded p-button-info"
-                @click="openEditModal(rowData.data)"
-              />
-              <Button
-                icon="pi pi-user-minus"
-                class="p-button-rounded p-button-danger"
-                @click="eliminarUsuario(rowData.data.id)"
-              />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
-    </div>
+            <Column
+              field="fechaNacimiento"
+              header="Fecha de Nacimiento"
+              sortable
+              class="px-6 py-4"
+            >
+              <template #body="rowData">
+                {{ formatDate(rowData.data.fechaNacimiento) }}
+              </template>
+            </Column>
+
+            <Column header="Acciones" class="px-6 py-4">
+              <template #body="rowData">
+                <div class="flex items-center space-x-2">
+                  <Button
+                    icon="pi pi-eye"
+                    class="p-button-rounded p-button-secondary"
+                    raised
+                    @click="showUserDetails(rowData.data)"
+                  />
+                  <Button
+                    icon="pi pi-user-edit"
+                    class="p-button-rounded p-button-info"
+                    raised
+                    @click="openEditModal(rowData.data)"
+                  />
+                  <Button
+                    icon="pi pi-user-minus"
+                    class="p-button-rounded p-button-danger"
+                    raised
+                    @click="eliminarUsuario(rowData.data.id)"
+                  />
+                </div>
+              </template>
+            </Column>
+          </DataTable>
+        </div>
+      </Fieldset>
+        </div>
     <!-- Modal para Confirmar Eliminación -->
     <Dialog
       v-model:visible="isConfirmModalOpen"
@@ -159,101 +221,87 @@
     </Dialog>
     <!-- Modal para mostrar detalles del usuario -->
     <Dialog
-      header="Detalles del Usuario"
+      header="DATOS DEL USUARIO"
       v-model:visible="showUserDetailsModal"
       modal
-      :style="{ width: '50vw' }"
+      :style="{ width: '90vw', maxWidth: '750px' }"
       @hide="closeUserDetailsModal"
     >
       <div v-if="selectedUser">
-        <form class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <!-- Parte izquierda: Campos del formulario -->
-          <div class="space-y-6">
+        <form class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 p-4">
+          <!-- Parte izquierda: Foto de perfil -->
+          <div class="flex flex-col items-center pt-4">
+            <div
+              class="relative h-48 w-48 md:h-96 md:w-96 rounded-full overflow-hidden shadow-2xl my-4"
+            >
+              <Image
+                v-if="selectedUser.fotoPerfil"
+                :src="selectedUser.fotoPerfil"
+                alt="Foto de Perfil"
+                preview
+                class="object-cover object-center h-full w-full"
+              />
+            </div>
+          </div>
+
+          <!-- Parte derecha: Datos personales -->
+          <div class="flex flex-col w-full space-y-4">
             <div>
-              <label
-                for="nombres"
-                class="block text-sm font-medium text-gray-700 mb-2"
-                >Nombres</label
-              >
+              <h1 class="text-lg font-semibold mb-2" for="nombres">Nombres</h1>
               <InputText
                 v-model="selectedUser.nombres"
                 type="text"
                 id="nombres"
                 class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                disabled
+                readonly
               />
             </div>
             <div>
-              <label
-                for="primerApellido"
-                class="block text-sm font-medium text-gray-700 mb-2"
-                >Primer Apellido</label
-              >
+              <h1 class="text-lg font-semibold mb-2" for="primerApellido">
+                Primer Apellido
+              </h1>
               <InputText
                 v-model="selectedUser.primerApellido"
                 id="primerApellido"
                 class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                disabled
+                readonly
               />
             </div>
             <div>
-              <label
-                for="segundoApellido"
-                class="block text-sm font-medium text-gray-700 mb-2"
-                >Segundo Apellido</label
-              >
+              <h1 class="text-lg font-semibold mb-2" for="segundoApellido">
+                Segundo Apellido
+              </h1>
               <InputText
                 v-model="selectedUser.segundoApellido"
                 id="segundoApellido"
                 class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                disabled
+                readonly
               />
             </div>
             <div>
-              <label
-                for="email"
-                class="block text-sm font-medium text-gray-700 mb-2"
-                >Email</label
-              >
+              <h1 class="text-lg font-semibold mb-2" for="email">Email</h1>
               <InputText
                 v-model="selectedUser.email"
                 id="email"
                 class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                disabled
+                readonly
               />
             </div>
             <div>
-              <label
-                for="fechaNacimiento"
-                class="block text-sm font-medium text-gray-700 mb-2"
-                >Fecha de Nacimiento</label
-              >
-              <InputText
-                v-model="selectedUser.fechaNacimiento"
-                type="date"
-                id="fechaNacimiento"
-                class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                disabled
-              />
-            </div>
-          </div>
+              <h1 class="text-lg font-semibold mb-2" for="fechaNacimiento">
+                Fecha de Nacimiento
+              </h1>
 
-          <!-- Parte derecha: Foto de perfil -->
-          <div class="flex flex-col items-start space-y-2">
-            <div class="w-full">
-              <label
-                for="fotoPerfil"
-                class="block text-sm font-medium text-gray-700 mb-2"
-                >Foto de Perfil</label
-              >
-              <div class="border rounded-xl flex justify-center">
-                <img
-                  v-if="selectedUser.fotoPerfil"
-                  :src="selectedUser.fotoPerfil"
-                  alt="Foto de Perfil"
-                  class="my-4 h-24 w-24 object-cover rounded"
-                />
-              </div>
+              <DatePicker
+                v-model="selectedUser.fechaNacimiento"
+                dateFormat="dd-mm-yy"
+                showIcon
+                fluid
+                inputId="icondisplay"
+                id="fechaNacimiento"
+                class="-mt-0"
+                readonly
+              />
             </div>
           </div>
         </form>
@@ -265,148 +313,140 @@
       :header="isEditMode ? 'Editar Usuario' : 'Agregar Usuario'"
       :visible="isModalOpen"
       modal
-      class="w-full max-w-lg"
+      :style="{ zIndex: 1000 }"
     >
       <form @submit.prevent="isEditMode ? updateUsuario() : addUsuario()">
-        <div class="grid grid-cols-2 gap-4 p-4">
-          <div>
-            <label
-              for="nombres"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Nombres</label
-            >
-            <input
-              v-model="selectedUsuario.nombres"
-              type="text"
-              id="nombres"
-              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
-              placeholder="Ingrese nombres"
-              required
-            />
-          </div>
-          <div>
-            <label
-              for="primerApellido"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Primer Apellido</label
-            >
-            <input
-              v-model="selectedUsuario.primerApellido"
-              type="text"
-              id="primerApellido"
-              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
-              placeholder="Ingrese primer apellido"
-              required
-            />
-          </div>
-          <div>
-            <label
-              for="segundoApellido"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Segundo Apellido</label
-            >
-            <input
-              v-model="selectedUsuario.segundoApellido"
-              type="text"
-              id="segundoApellido"
-              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
-              placeholder="Ingrese segundo apellido"
-            />
-          </div>
-          <div>
-            <label
-              for="email"
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Email</label
-            >
-            <input
-              v-model="selectedUsuario.email"
-              type="email"
-              id="email"
-              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
-              placeholder="Ingrese email"
-              required
-            />
-          </div>
-          <!-- Foto de Perfil -->
-          <div class="col-span-2 flex items-start">
-            <div class="w-1/2">
-              <label
-                for="fotoPerfil"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Foto de Perfil</label
-              >
+        <div
+          class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-9 p-5"
+        >
+          <!-- Columna izquierda -->
+          <div class="flex flex-col space-y-8">
+            <div>
+              <h1 for="fotoPerfil"><strong>Foto de Perfil</strong></h1>
               <CustomFileInput
                 @change="handleFileUpload"
                 type="file"
                 id="fotoPerfil"
-                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
+                :valueimg="selectedUsuario.fotoPerfil"
+                class="h-auto w-full rounded-lg"
               />
-              <!-- Vista previa de la foto -->
-              <div
-                v-if="isEditMode && !selectedFile"
-                class="mt-2 flex justify-center items-center"
-              >
-                <div class="relative border border-gray-300 rounded-lg p-1">
-                  <Image
-                    :src="previewFotoPerfil"
-                    alt="Vista previa de la foto de perfil"
-                    class="h-24 w-30 object-cover rounded-md"
-                    preview
-                  />
-                </div>
-              </div>
             </div>
-            <div class="w-1/2 flex flex-col justify-between ml-4">
-              <label
-                for="fechaNacimiento"
-                class="block text-sm font-medium text-gray-700 mb-1"
-                >Fecha de Nacimiento</label
+            <!-- Botón para generar nueva contraseña -->
+            <div v-if="isEditMode" class="flex items-center space-x-2">
+              <Button
+                @click="updatePasswordUsuario"
+                severity="primary"
+                class="text-white px-4 w-full py-2 rounded-md"
+                >Generar Nueva Contraseña</Button
               >
+            </div>
+          </div>
+
+          <!-- Columna derecha -->
+          <div class="flex flex-col space-y-4">
+            <div>
+              <h1 for="nombres"><strong>Nombres</strong></h1>
+              <InputText
+                v-model="selectedUsuario.nombres"
+                type="text"
+                id="nombres"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
+                placeholder="Ingrese nombres"
+                @input="validarInput"
+                
+              />
+            </div>
+            <div>
+              <h1 for="primerApellido"><strong>Primer Apellido</strong></h1>
+              <InputText
+                v-model="selectedUsuario.primerApellido"
+                type="text"
+                id="primerApellido"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
+                placeholder="Ingrese primer apellido"
+                @input="validarInput"
+                
+              />
+            </div>
+            <div>
+              <h1 for="segundoApellido"><strong>Segundo Apellido</strong></h1>
+              <InputText
+                v-model="selectedUsuario.segundoApellido"
+                type="text"
+                id="segundoApellido"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
+                placeholder="Ingrese segundo apellido"
+                @input="validarInput"
+
+              />
+            </div>
+            <div>
+              <h1 for="fechaNacimiento">
+                <strong>Fecha de Nacimiento</strong>
+              </h1>
               <DatePicker
                 v-model="selectedUsuario.fechaNacimiento"
-                dateFormat="dd/mm/yy"
+                dateFormat="dd-mm-yy"
+                :maxDate="new Date(2005, 11, 31)"
                 showIcon
                 fluid
                 inputId="icondisplay"
                 id="fechaNacimiento"
-                class="-mt-0"
+                placeholder="Fecha de Nacimiento"
+                class="mt-1 w-auto rounded-md py-1"
               />
-
-              <div v-if="isEditMode" class="mt-5 flex items-center space-x-2">
-                <Button
-                  @click="handlePasswordChange"
-                  class="bg-blue-500 text-white px-4 py-2 rounded-md"
-                  >Generar Nueva Contraseña</Button
-                >
-              </div>
             </div>
           </div>
-          <input
-            type="hidden"
-            v-model="selectedUsuario.tipoUsuario"
-            value="coach"
+        </div>
+        <div v-if="!isEditMode" class="pl-5 pr-5 pb-4">
+          <h1 for="email"><strong>Email</strong></h1>
+          <InputText
+            v-model="selectedUsuario.email"
+            type="email"
+            id="email"
+            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
+            placeholder="Ingrese el correo electronico"
+            
           />
-          <input
-            type="hidden"
-            :value="isEditMode ? selectedUsuario.estado : 2"
+          
+        </div>
+        <div v-if="isEditMode" class="pl-5 pr-5 pb-4">
+          <h1 for="email"><strong>Email</strong></h1>
+          <InputText
+            v-model="selectedUsuario.email"
+            type="email"
+            id="email"
+            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
+            placeholder="Ingrese el correo electronico"
+            readonly
           />
+          
         </div>
         <div class="p-4 flex justify-end space-x-4">
-          <Button
-            type="submit"
-            class="bg-blue-600 text-white px-4 py-2 rounded-md"
+          <Button type="submit" severity="help" class="px-4 py-2 rounded-md"
             >Guardar</Button
           >
           <Button
             type="button"
-            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
+            severity="secondary"
+            class="px-4 py-2 rounded-md"
             @click="closeModal"
             >Cancelar</Button
           >
         </div>
       </form>
     </Dialog>
+    <div
+      v-if="mostrarSpinner"
+      class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-1000"
+    >
+      <ProgressSpinner
+        strokeWidth="3"
+        fill="transparent"
+        aria-label="Custom ProgressSpinner"
+        style="width: 200px; height: 200px"
+      />
+    </div>
   </div>
 </template>
 
@@ -414,9 +454,10 @@
 import { ref, computed, onMounted } from "vue";
 import CustomFileInput from "@/components/CustomFileInput.vue";
 import { useToast } from "primevue/usetoast";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 import { useAuthStore } from "@/stores/authStore";
-import api from '@/axiosConfig.js'
-
+import api from "@/axiosConfig.js";
 const authStore = useAuthStore();
 
 const usuarios = ref([]);
@@ -424,9 +465,27 @@ const isModalOpen = ref(false);
 const isEditMode = ref(false);
 const isConfirmModalOpen = ref(false);
 const toast = useToast();
-const token = authStore.token;
 const showUserDetailsModal = ref(false);
 const selectedUser = ref(null);
+const globalFilter = ref(""); // Variable para almacenar el valor del buscador global
+
+const mostrarSpinner = ref(false);
+const home = ref({
+  icon: "pi pi-home",
+  route: "/panelControl/main",
+});
+const items = ref([
+  {
+    label: "Coaches",
+    icon: "pi pi-user",
+    route: "/panelControl/coaches",
+  },
+]);
+
+const token = authStore.token;
+const idUsuario = authStore.usuario.id;
+/* esto es para seleccionar varios datos de una tabla
+const selectedRow = ref();*/
 const selectedUsuario = ref({
   nombres: "",
   primerApellido: "",
@@ -437,21 +496,22 @@ const selectedUsuario = ref({
   fechaNacimiento: "",
   tipoUsuario: "coach",
   estado: 2, // Por defecto inactivo
+  idUsuario: idUsuario,
 });
 const previewFotoPerfil = ref("");
 let usuarioToDelete = ref(null); // Usuario a eliminar
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
-  // Suponiendo que la fecha viene en formato ISO (YYYY-MM-DDTHH:mm:ss.sssZ)
   const date = new Date(dateString);
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Meses desde 0
-  const year = date.getUTCFullYear();
-  return `${day}/${month}/${year}`;
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
 };
 const showUserDetails = (user) => {
   selectedUser.value = user;
+  user.fechaNacimiento = formatDate(selectedUser.value.fechaNacimiento);
   showUserDetailsModal.value = true;
 };
 
@@ -459,22 +519,20 @@ const closeUserDetailsModal = () => {
   showUserDetailsModal.value = false;
   selectedUser.value = null;
 };
+
 const fetchData = async () => {
   try {
-    const response = await api.get(
-      "/usuarios/usuario"
-    );
+    const response = await api.get(`/usuarios/usuario/${idUsuario}`);
+    console.log(response);
     usuarios.value = response.data.filter(
       (usuario) => usuario.tipoUsuario === "coach"
-    );
+    ).reverse(); // Invertir el arreglo
+
   } catch (error) {
     console.error(error);
   }
 };
-// Función para recargar la página
-const reloadPage = () => {
-  fetchData();
-};
+
 onMounted(fetchData);
 
 const openAddModal = () => {
@@ -489,6 +547,7 @@ const openAddModal = () => {
     fechaNacimiento: "",
     tipoUsuario: "coach",
     estado: 1,
+    idUsuario: idUsuario,
   };
   previewFotoPerfil.value = "";
   isModalOpen.value = true;
@@ -498,21 +557,14 @@ let selectedFile = null;
 
 const handleFileUpload = (event) => {
   selectedFile = event.target.files[0];
-  if (selectedFile) {
-    previewFotoPerfil.value = URL.createObjectURL(selectedFile);
-  } else {
-    previewFotoPerfil.value = "";
-    selectedFile = null; // Restablece el archivo seleccionado
-  }
 };
 
 const openEditModal = (usuario) => {
   isEditMode.value = true;
   selectedUsuario.value = { ...usuario };
-  selectedUsuario.value.fechaNacimiento = formatToDateInput(
-    usuario.fechaNacimiento
-  );
-  previewFotoPerfil.value = usuario.fotoPerfil ? usuario.fotoPerfil : "";
+  selectedUsuario.value.fechaNacimiento = formatDate(usuario.fechaNacimiento);
+  selectedUsuario.value.idUsuario = idUsuario;
+  console.log(selectedUsuario.value.id);
   isModalOpen.value = true;
 };
 const formatToDateInput = (dateString) => {
@@ -524,12 +576,8 @@ const formatToDateInput = (dateString) => {
   return `${year}-${month}-${day}`;
 };
 function convertirFechaAMysql(fecha) {
-  const fechaObj = new Date(fecha);
-  const year = fechaObj.getFullYear();
-  const month = String(fechaObj.getMonth() + 1).padStart(2, "0"); // Los meses comienzan en 0
-  const day = String(fechaObj.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+  const d = new Date(fecha);
+  return d.toISOString().split("T")[0]; // Formato YYYY-MM-DD
 }
 const closeModal = () => {
   isModalOpen.value = false;
@@ -537,31 +585,55 @@ const closeModal = () => {
 const closeConfirmModal = () => {
   isConfirmModalOpen.value = false;
 };
-const exportToExcel = async () => {
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Anuncios');
-
-  // Agrega encabezados
-  worksheet.columns = [
-    { header: 'ID', key: 'id', width: 10 },
-    { header: 'Título', key: 'titulo', width: 30 },
-    { header: 'Miniatura', key: 'miniatura', width: 30 },
-    { header: 'Descripción', key: 'descripcion', width: 50 },
-    { header: 'Fecha Inicio', key: 'fecha_inicio', width: 15 },
-    { header: 'Fecha Fin', key: 'fecha_fin', width: 15 },
-    { header: 'Tipo', key: 'tipo', width: 10 }
-  ];
-
-  // Agrega filas
-  anuncios.value.forEach((anuncio) => {
-    worksheet.addRow(anuncio);
-  });
-
-  // Generar y descargar el archivo Excel
-  const buffer = await workbook.xlsx.writeBuffer();
-  saveAs(new Blob([buffer]), 'anuncios.xlsx');
+// Función para recargar la página
+const reloadPage = () => {
+  fetchData();
 };
+
+const usuariosConNumeracion = computed(() => {
+  // Limpiamos el filtro de espacios en blanco innecesarios
+  const filter = globalFilter.value.trim().toLowerCase();
+
+  // Si el filtro está vacío (solo espacios o nada), mostramos todos los usuarios
+  if (!filter) {
+    return usuarios.value.map((usuario, index) => ({
+      ...usuario,
+      index: index + 1,
+      expanded: false,
+    }));
+  }
+
+  // Filtramos los usuarios cuando hay texto en el filtro
+  return usuarios.value
+    .filter((usuario) => {
+      const nombres = usuario.nombres?.toLowerCase() || "";
+      const primerApellido = usuario.primerApellido?.toLowerCase() || "";
+      const segundoApellido = usuario.segundoApellido?.toLowerCase() || "";
+      const email = usuario.email?.toLowerCase() || "";
+      const fechaNacimiento = formatDate(usuario.fechaNacimiento || "");
+
+      // Verificamos si alguno de los campos contiene el filtro
+      return (
+        nombres.includes(filter) ||
+        primerApellido.includes(filter) ||
+        segundoApellido.includes(filter) ||
+        email.includes(filter) ||
+        fechaNacimiento.includes(filter)
+      );
+    })
+    .map((usuario, index) => ({
+      ...usuario,
+      index: index + 1,
+      expanded: false,
+    }));
+});
+
 const addUsuario = async () => {
+  if (!validarCampos()) return;
+
+  closeModal(); 
+
+  mostrarSpinner.value = true;
   const formData = new FormData();
   formData.append("nombres", selectedUsuario.value.nombres);
   formData.append("primerApellido", selectedUsuario.value.primerApellido);
@@ -574,24 +646,23 @@ const addUsuario = async () => {
   formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
   formData.append("contrasenia", selectedUsuario.value.contrasenia); // Se envía al backend
   formData.append("estado", selectedUsuario.value.estado);
-  formData.append("id", selectedUsuario.value.id); // Agregar el ID del usuario
-
+  formData.append("idUsuario", selectedUsuario.value.idUsuario);
+  const nombre = nombreCompleto(); 
+  formData.append("nombreCompleto", nombre); 
   if (selectedFile) {
     formData.append("fotoPerfil", selectedFile);
   }
 
   try {
-    await api.post(
-      "/usuarios/agregarUsuariocoach",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+    await api.post("/usuarios/agregarUsuario", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     fetchData();
-    closeModal();
+
+    mostrarSpinner.value = false;
+
     toast.add({
       severity: "info",
       summary: "Usuario Añadido",
@@ -601,13 +672,19 @@ const addUsuario = async () => {
     });
   } catch (error) {
     console.error(error);
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail:
-        "No se pudo añadir el usuario. Por favor, intente de nuevo más tarde.",
-      life: 3000,
-    });
+    mostrarSpinner.value = false; // Ocultar el spinner
+
+// Captura el mensaje del error del backend
+const errorMessage = error.response?.data?.mensaje || "No se pudo añadir el usuario. Por favor, intente de nuevo más tarde.";
+
+// Mostrar el toast con el mensaje de error
+toast.add({
+  severity: "error",
+  summary: "Error",
+  detail: errorMessage,
+  life: 5000, // Duración del toast
+});
+
   }
 };
 const searchTerm = ref("");
@@ -624,32 +701,39 @@ const filteredUsuarios = computed(() => {
     );
   });
 });
+const nombreCompleto = () => {
+ const nombress = selectedUsuario.value.nombres
+  const primerApellidos = selectedUsuario.value.primerApellido 
+      const nombres = nombress || ""; // Asegurarse de que `nombres` no sea undefined
+      const nombreCompleto = nombres.split(" ")[0] + " "+ primerApellidos;
+      
 
-const updateUsuario = async () => {
+      return  nombreCompleto;// Dividir por espacios y retornar el primer elemento
+};
+
+
+const updatePasswordUsuario = async () => {
   const formData = new FormData();
-  formData.append("nombres", selectedUsuario.value.nombres);
-  formData.append("primerApellido", selectedUsuario.value.primerApellido);
-  formData.append("segundoApellido", selectedUsuario.value.segundoApellido);
+  formData.append("idUsuario", selectedUsuario.value.idUsuario);
+  selectedUsuario.value.contrasenia =  generatePassword();
+  formData.append("contrasenia", selectedUsuario.value.contrasenia); // Solo enviar si se cambia
   formData.append("email", selectedUsuario.value.email);
-  formData.append(
-    "fechaNacimiento",
-    convertirFechaAMysql(selectedUsuario.value.fechaNacimiento)
-  );
-  formData.append("estado", selectedUsuario.value.estado);
-  formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
-  formData.append("id", selectedUsuario.value.id); // Agregar el ID del usuario
-  //console.log(date);
-  if (selectedFile) {
-    formData.append("fotoPerfil", selectedFile);
-  }
-
-  if (selectedUsuario.value.contrasenia) {
-    formData.append("contrasenia", selectedUsuario.value.contrasenia); // Solo enviar si se cambia
-  }
 
   try {
+    // Esperar el valor de `nombreCompleto()` si es una función asíncrona.
+    const nombre = nombreCompleto(); 
+    formData.append("nombreCompleto", nombre);
+
+    // Agregar el toast de éxito antes de enviar la solicitud.
+    toast.add({
+      severity: "success",
+      summary: "Contraseña actualizada correctamente",
+      detail: "La nueva contraseña se envió al correo electronico.",
+      life: 3000,
+    });
+
     await api.put(
-      `/usuarios/editarUsuariocoach/${selectedUsuario.value.id}`,
+      `/usuarios/cambiarContrasenia/${selectedUsuario.value.id}`,
       formData,
       {
         headers: {
@@ -657,22 +741,6 @@ const updateUsuario = async () => {
         },
       }
     );
-
-    // Actualizar el usuario en la lista local
-    const index = usuarios.value.findIndex(
-      (usuario) => usuario.id === selectedUsuario.value.id
-    );
-    if (index !== -1) {
-      usuarios.value[index] = { ...selectedUsuario.value }; // Actualizar el usuario en la lista
-    }
-    fetchData();
-    closeModal();
-    toast.add({
-      severity: "success",
-      summary: "Datos Actuaizados del Usuario",
-      detail: "Los datos del usuario se han actualizado correctamente.",
-      life: 3000,
-    });
   } catch (error) {
     console.error("Error al actualizar usuario:", error);
     toast.add({
@@ -683,36 +751,20 @@ const updateUsuario = async () => {
     });
   }
 };
+const validarInput = (event) => {
+  // Expresión regular para permitir solo letras y espacios
+  const regex = /^[A-Za-z\s]*$/;
 
-const eliminarUsuario = (id) => {
-  usuarioToDelete.value = id;
-  isConfirmModalOpen.value = true;
-};
+  // Si el valor ingresado no coincide con la expresión regular
+  if (!regex.test(event.target.value)) {
+    // Eliminar el último carácter ingresado
+    event.target.value = event.target.value.slice(0, -1);
+    selectedUsuario.value.nombres = event.target.value; // Actualizar el modelo de Vue
+    selectedUsuario.value.primerApellido = event.target.value; // Actualizar el modelo de Vue
+    selectedUsuario.value.segundoApellido = event.target.value; // Actualizar el modelo de Vue
 
-const deleteUsuario = async () => {
-  try {
-    await api.delete(
-      `/usuarios/eliminarUsuario/${usuarioToDelete.value}`
-    );
-    fetchData();
-    closeConfirmModal();
-    toast.add({
-      severity: "success",
-      summary: "Usuario Eliminado",
-      detail: "El usuario ha sido eliminado con éxito.",
-      life: 3000,
-    });
-  } catch (error) {
-    console.error(error);
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: "Hubo un problema al eliminar el usuario.",
-      life: 3000,
-    });
   }
 };
-// Función para generar contraseña aleatoria
 const generatePassword = () => {
   const length = 8;
   const lowercase = "abcdefghijklmnopqrstuvwxyz";
@@ -739,17 +791,176 @@ const generatePassword = () => {
 
   return password;
 };
+const validarCampos = () => {
+  if (
+    !selectedUsuario.value.nombres ||
+    !selectedUsuario.value.primerApellido ||
+    !selectedUsuario.value.segundoApellido ||
+    !selectedUsuario.value.fechaNacimiento ||
+    !selectedFile
+  ) {
+    toast.add({
+      severity: "error",
+      summary: "Campos incompletos",
+      detail: "Por favor completa el formulario, todos los campos son requeridos!.",
+      life: 3000,
+    });
+    return false;
+  }
+  return true;
+};
+const updateUsuario = async () => {
+
+  
+  if (!validarCamposAct())return;
+  closeModal();
+  const formData = new FormData();
+  formData.append("nombres", selectedUsuario.value.nombres);
+  formData.append("primerApellido", selectedUsuario.value.primerApellido);
+  formData.append("segundoApellido", selectedUsuario.value.segundoApellido);
+  formData.append("email", selectedUsuario.value.email);
+  formData.append(
+    "fechaNacimiento",
+    convertirFechaAMysql(selectedUsuario.value.fechaNacimiento)
+  );
+  console.log(convertirFechaAMysql(selectedUsuario.value.fechaNacimiento));
+  formData.append("estado", selectedUsuario.value.estado);
+  formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
+  formData.append("id", selectedUsuario.value.id); // Agregar el ID del usuario
+  //console.log(date);
+  formData.append("idUsuario", selectedUsuario.value.idUsuario);
+  if (
+    selectedUsuario.value.fotoPerfil ===
+      "http://localhost:3000/uploads/usuarios/avatar3.png" ||
+    selectedUsuario.value.fotoPerfil === null
+  ) {
+    selectedUsuario.value.fotoPerfil = null;
+  }
+  console.log(selectedUsuario.value.fotoPerfil);
+
+  if (selectedFile) {
+    formData.append("fotoPerfil", selectedFile);
+  } else {
+    selectedUsuario.value.fotoPerfil;
+  }
+
+  try {
+    await api.put(
+      `/usuarios/editarUsuario/${selectedUsuario.value.id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    fetchData();
+    toast.add({
+      severity: "success",
+      summary: "Datos Actuaizados del Usuario",
+      detail: "Los datos del usuario se han actualizado correctamente.",
+      life: 3000,
+    });
+    // Actualizar el usuario en la lista local
+    const index = usuarios.value.findIndex(
+      (usuario) => usuario.id === selectedUsuario.value.id
+    );
+    if (index !== -1) {
+      usuarios.value[index] = { ...selectedUsuario.value }; // Actualizar el usuario en la lista
+    }
+  } catch (error) {
+    console.error("Error al actualizar usuario:", error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Hubo un problema al actualizar el usuario. Intente nuevamente.",
+      life: 3000,
+    });
+  }
+};
+const validarCamposAct = () => {
+  // Verificar si los campos requeridos están completos
+  if (
+    !selectedUsuario.value.nombres ||
+    !selectedUsuario.value.primerApellido ||
+    !selectedUsuario.value.segundoApellido ||
+    !selectedUsuario.value.fechaNacimiento
+  ) {
+    toast.add({
+      severity: "error",
+      summary: "Campos incompletos",
+      detail: "Por favor completa el formulario, todos los campos son requeridos.",
+      life: 3000,
+    });
+    return false;
+  }
+
+  // Verificar que al menos uno de los campos `miniatura` o `selectedFile` esté presente
+  if (!selectedUsuario.value.fotoPerfil && !selectedFile) {
+    toast.add({
+      severity: "error",
+      summary: "Falta la Foto de Perfil",
+      detail: "Debes subir una nueva Foto de Perfil o conservar la existente.",
+      life: 3000,
+    });
+    return false;
+  }
+
+  return true;
+};
+const eliminarUsuario = (id) => {
+  usuarioToDelete.value = id;
+  isConfirmModalOpen.value = true;
+};
+
+const deleteUsuario = async () => {
+  try {
+    await api.delete(`/usuarios/eliminarUsuario/${usuarioToDelete.value}`);
+    fetchData();
+    closeConfirmModal();
+    toast.add({
+      severity: "success",
+      summary: "Usuario Eliminado",
+      detail: "El usuario ha sido eliminado con éxito.",
+      life: 3000,
+    });
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Hubo un problema al eliminar el usuario.",
+      life: 3000,
+    });
+  }
+};
+// Función para generar contraseña aleatoria
+
 const getRowIndex = (rowData) => {
   return usuarios.value.findIndex((user) => user.id === rowData.data.id) + 1;
 };
+const exportToExcel = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Usuarios");
 
-const handlePasswordChange = () => {
-  selectedUsuario.value.contrasenia = generatePassword();
-  toast.add({
-    severity: "info",
-    summary: "Contraseña Generada",
-    detail: "Se ha generado una nueva contraseña para el usuario.",
-    life: 3000,
+  // Agrega encabezados
+  worksheet.columns = [
+    { header: "Foto de Perfil", key: "fotoPerfil", width: 30 },
+    { header: "Nombres", key: "nombres", width: 20 },
+    { header: "Primer Apellido", key: "primerApellido", width: 15 },
+    { header: "Segundo Apellido", key: "segundoApellido", width: 15 },
+    { header: "Estado", key: "estado", width: 10 },
+    { header: "Email", key: "email", width: 20 },
+    { header: "Fecha de Nacimiento", key: "fechaNacimiento", width: 5 },
+  ];
+
+  // Agrega filas
+  usuarios.value.forEach((usuario) => {
+    worksheet.addRow(usuario);
   });
+
+  // Generar y descargar el archivo Excel
+  const buffer = await workbook.xlsx.writeBuffer();
+  saveAs(new Blob([buffer]), "usuarios.xlsx");
 };
 </script>

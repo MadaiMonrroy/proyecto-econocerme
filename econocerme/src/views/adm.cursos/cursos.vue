@@ -15,8 +15,8 @@
             </template>
       </Breadcrumb>
     </div>
-    <div class="card">
-      <h2 class="text-3xl mb-4 items-end">CURSOS</h2>
+    <div  class="card shadow-2xl dark:shadow-violet-600">
+      <h2 class="text-4xl mb-4 items-end text-shadow-3xl  font-sans  ">CURSOS</h2>
       <Divider />
 
       <!-- Contenedor para alinear el botón y el buscador en la misma línea -->
@@ -329,7 +329,7 @@ const reloadPage = () => {
 const fetchData = async () => {
   try {
     const response = await api.get("/cursos/curso");
-    cursos.value = response.data; // Aquí se espera que `response.data` sea el array de cursos
+    cursos.value = response.data.reverse();
   } catch (error) {
     console.error(error);
     // Manejar el error de forma adecuada

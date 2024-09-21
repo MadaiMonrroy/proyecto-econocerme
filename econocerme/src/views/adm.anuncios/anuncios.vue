@@ -481,7 +481,7 @@ const exportToExcel = async () => {
 const fetchAnuncios = async () => {
   try {
     const response = await api.get("/anuncios/anuncio");
-    anuncios.value = response.data;
+    anuncios.value = response.data.reverse();
   } catch (error) {
     console.error("Error al obtener anuncios:", error);
   }
