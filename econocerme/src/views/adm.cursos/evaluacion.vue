@@ -10,7 +10,9 @@
         >
           <a :href="href" v-bind="props.action" @click="navigate">
             <span :class="[item.icon, 'text-color']" />
-            <span class="text-primary font-semibold">{{ item.label }}</span>
+            <span class="text-black dark:text-white font-semibold">{{
+              item.label
+            }}</span>
           </a>
         </router-link>
         <a v-else :href="item.url" :target="item.target" v-bind="props.action">
@@ -43,15 +45,29 @@
             curso.especialidad
           }}</Message>
           <div class="flex space-x-4">
-            <Message severity="success" rounded
-              >Precio: {{ curso.precio }}</Message
+            <Message severity="success" rounded icon="pi pi-money-bill"
+              ><Tag severity="success"> {{ curso.precio }} Bs. </Tag>
+            </Message>
+            <Message severity="info" rounded icon="pi pi-clock">
+              <Tag severity="info"> {{ curso.duracion }} hora(s). </Tag>
+            </Message>
+            <Message
+              rounded
+              :icon="
+                curso.estado === 1
+                  ? 'pi pi-check-circle'
+                  : curso.estado === 2
+                    ? 'pi pi-spinner-dotted'
+                    : 'pi pi-question-circle'
+              "
+              :severity="
+                curso.estado === 1
+                  ? 'success'
+                  : curso.estado === 2
+                    ? 'warn'
+                    : 'info'
+              "
             >
-            <Message severity="info" rounded
-              >Duración: {{ curso.duracion }}</Message
-            >
-            <Message severity="secondary" rounded
-              >Estado:
-
               <Tag
                 v-if="curso.estado === 1"
                 value="Activo"
@@ -67,7 +83,7 @@
               <Tag
                 v-else
                 value="Desconocido"
-                severity="warning"
+                severity="info"
                 class="px-2 py-1"
               />
             </Message>
@@ -94,17 +110,17 @@
             :outlined="value !== '1'"
           />
         </div>
-        <Tabs v-model:value="value">
+        <Tabs v-model:value="value" @update:value="handleTabChange">
           <TabList>
-            <Tab value="0">Evaluación</Tab>
+            <Tab value="0">Evaluacion</Tab>
             <Tab value="1">Vista Previa</Tab>
           </TabList>
           <TabPanels>
             <TabPanel value="0">
-              <formEvaluacion :cursoId="cursoId" />
+              <formEvaluacion :cursoId="cursoId" @changeTab="changeTab" />
             </TabPanel>
             <TabPanel value="1">
-              <formModulo :cursoId="cursoId" />
+              <vistaPreviaEvalua :cursoId="cursoId" :isActive="value === '1'" />
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -126,9 +142,11 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/axiosConfig.js";
 import formEvaluacion from "@/views/adm.cursos/formEvaluacion.vue";
+import vistaPreviaEvalua from "./vistaPreviaEvalua.vue";
 export default {
   components: {
     formEvaluacion,
+    vistaPreviaEvalua,
   },
 
   setup() {
@@ -151,7 +169,10 @@ export default {
         route: `/panelControl/evaluacion/${cursoId}`,
       },
     ]);
-
+    // Función para cambiar de pestaña
+    const changeTab = (tabValue) => {
+      value.value = tabValue;
+    };
     const volverACursos = () => {
       router.push(`/panelControl/cursos`);
     };
@@ -177,10 +198,19 @@ export default {
         console.error(error);
       }
     };
+    // Manejar el cambio de pestaña y refrescar el contenido
+    const handleTabChange = (newValue) => {
+      if (newValue === "0") {
+        // Refrescar el contenido de la vista previa
+        cargarCurso();
+      } else if (newValue === "1") {
+        // Refrescar el contenido de la evaluación
+        cargarCurso(); // O cualquier otro método que sea necesario para refrescar la evaluación
+      }
+    };
     const pruebavista = () => {
       router.push(`/panelControl/leccion`);
     };
-
 
     onMounted(() => {
       cargarCurso();
@@ -188,13 +218,14 @@ export default {
 
     return {
       curso,
-
+      changeTab,
       cursoId,
       pruebavista,
       value,
       home,
       items,
       volverACursos,
+      handleTabChange,
     };
   },
 };

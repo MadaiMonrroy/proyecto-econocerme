@@ -34,6 +34,9 @@ import evaluacion from "@/views/adm.cursos/evaluacion.vue";
 import formEvaluacion from "@/views/adm.cursos/formEvaluacion.vue";
 import cuotas from "@/views/adm.inscripciones/cuotas.vue"
 import formEdit from "@/views/adm.usuarios/formEdit.vue";
+import vistaPrevia from "@/views/adm.cursos/vistaPreviaEvalua.vue";
+import detalleInscripcion from "@/views/adm.inscripciones/detalleInscripcion.vue";
+import reciboPago from "@/views/adm.inscripciones/reciboPago.vue";
 
 const routes = [
   { path: "/", component: LoginForm },
@@ -62,10 +65,15 @@ const routes = [
       { path: "formInscripcion", component: formInscripcion },
       { path: "formInscripcion/:idInscripcion", component: formInscripcion },
       { path: "evaluacion/:idCurso", component: evaluacion },
+      { path: "vistaPrevia/:idCurso", component: vistaPrevia },
       { path: "cuotas/:idInscripcion", component: cuotas},
+      { path: "detalleInscripcion/:idInscripcion", component: detalleInscripcion},
+
       
     ],
   },
+  { path: "/generarPdf/:idInscripcion", component: reciboPago },
+
   {
     path: "/panelEstudiante",
     component: panelEstudiante,

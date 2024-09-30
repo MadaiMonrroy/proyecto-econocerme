@@ -2,21 +2,37 @@
   <div class="p-4">
     <div class=" ">
       <Breadcrumb :home="home" :model="items" class="card h-14">
-      <template #item="{ item, props }">
-                <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
-                    <a :href="href" v-bind="props.action" @click="navigate">
-                        <span :class="[item.icon, 'text-color']" />
-                        <span class="text-primary font-semibold">{{ item.label }}</span>
-                    </a>
-                </router-link>
-                <a v-else :href="item.url" :target="item.target" v-bind="props.action">
-                    <span class="text-surface-700 dark:text-surface-0">{{ item.label }}</span>
-                </a>
-            </template>
+        <template #item="{ item, props }">
+          <router-link
+            v-if="item.route"
+            v-slot="{ href, navigate }"
+            :to="item.route"
+            custom
+          >
+            <a :href="href" v-bind="props.action" @click="navigate">
+              <span :class="[item.icon, 'text-color']" />
+              <span class="text-black dark:text-white font-semibold">{{
+                item.label
+              }}</span>
+            </a>
+          </router-link>
+          <a
+            v-else
+            :href="item.url"
+            :target="item.target"
+            v-bind="props.action"
+          >
+            <span class="text-surface-700 dark:text-surface-0">{{
+              item.label
+            }}</span>
+          </a>
+        </template>
       </Breadcrumb>
     </div>
     <div class="card">
-      <h2 class="text-3xl mb-4 items-end">ANUNCIOS</h2>
+      <h2 class="text-4xl mb-4 items-end text-shadow-3xl font-sans">
+        ANUNCIOS
+      </h2>
 
       <Divider />
 
@@ -47,193 +63,193 @@
         </div>
       </div>
       <Divider />
-      <Fieldset>
-        <template #legend>
-          <span class="text-2xl tracking-wide">Lista de Anuncios</span>
-        </template>
-        <div class="!overflow-x-auto">
-          <DataTable
-            :value="filteredAnunciosConNumeracion"
-            :rows="4"
-            :paginator="true"
-            :rowsPerPageOptions="[4, 8, 12]"
-            class="p-datatable-striped table-responsive min-w-[450px]"
-          >
-            <template #paginatorstart>
-              <Button
-                type="button"
-                icon="pi pi-refresh"
-                text
-                @click="reloadPage"
-              />
-            </template>
-            <template #paginatorend>
-              <Button
-                type="button"
-                icon="pi pi-download"
-                text
-                @click="exportToExcel"
-              />
-            </template>
-            <!-- Columnas de la tabla -->
-            <Column header="#" field="index" sortable class="px-3 py-2">
-              <template #body="rowData">
-                {{ rowData.data.index }}
-              </template>
-            </Column>
-            <Column field="titulo" header="Título" sortable class="px-3 py-2">
-              <template #body="rowData">
-                <div :title="rowData.data.titulo">
-                  {{ rowData.data.titulo }}
-                </div>
-              </template>
-            </Column>
-            <Column header="Miniatura" class="px-3 py-2 sm:px-6 sm:py-4">
-              <template #body="rowData">
-                <div
-                  class="truncate max-w-xs sm:max-w-md"
-                  :title="rowData.data.miniatura"
-                >
-                  <img
-                    v-if="rowData.data.miniatura"
-                    :src="rowData.data.miniatura"
-                    alt="Miniatura"
-                    class="h-12 w-12 sm:h-16 sm:w-16 object-cover rounded"
-                  />
-                </div>
-              </template>
-            </Column>
-            <Column header="Descripción" class="px-6 py-4">
-              <template #body="slotProps">
-                <div>
-                  <p v-if="!expandedModulos[slotProps.data.id]">
-                    <span
-                      v-html="slotProps.data.descripcion.slice(0, 120)"
-                    ></span
-                    >...
-                    <button
-                      @click="toggleExpand(slotProps.data.id)"
-                      class="text-blue-500 hover:underline focus:outline-none"
-                    >
-                      Ver más
-                    </button>
-                  </p>
-                  <p v-else>
-                    <span v-html="slotProps.data.descripcion"></span>
-                    <button
-                      @click="toggleExpand(slotProps.data.id)"
-                      class="text-blue-500 hover:underline focus:outline-none"
-                    >
-                      Ver menos
-                    </button>
-                  </p>
-                </div>
-              </template>
-            </Column>
+      <Divider align="center" type="solid">
+          <p class="text-2xl font-semibold tracking-wider leading-relaxed">
+            Lista de Anuncios
+          </p>
+        </Divider>
+      <div class="card dark:shadow-purple-950 shadow-2xl dark:shadow-2xl dark:border-violet-400">
+        
+        <DataTable
+          :value="filteredAnunciosConNumeracion"
+          :rows="4"
+          :paginator="true"
+          :rowsPerPageOptions="[4, 8, 12]"
+          stripedRows
 
-            <Column
-              header="Fecha de Inicio"
-              field="fecha_inicio"
-              sortable
-              class="px-3 py-2 sm:px-6 sm:py-4"
-            >
-              <template #body="rowData">
-                {{ formatDate(rowData.data.fecha_inicio) }}
-              </template>
-            </Column>
-            <Column
-              header="Fecha de Fin"
-              field="fecha_fin"
-              sortable
-              class="px-3 py-2 sm:px-6 sm:py-4"
-            >
-              <template #body="rowData">
-                {{ formatDate(rowData.data.fecha_fin) }}
-              </template>
-            </Column>
-            <Column field="estado" header="Estado" class="px-6 py-4">
-              <template #body="rowData">
-                <Tag
-                  v-if="rowData.data.estado === 1"
-                  value="Activo"
-                  severity="success"
-                  class="px-2 py-1"
-                />
-                <Tag
-                  v-else-if="rowData.data.estado === 2"
-                  value="Inactivo"
-                  severity="warn"
-                  class="px-2 py-1"
-                />
-                <Tag
-                  v-else
-                  value="Desconocido"
-                  severity="warning"
-                  class="px-2 py-1"
-                />
-              </template>
-            </Column>
-            <Column
-              field="tipo"
-              header="Tipo"
-              sortable
-              class="px-3 py-2 sm:px-6 sm:py-4"
+        >
+          <template #paginatorstart>
+            <Button
+              type="button"
+              icon="pi pi-refresh"
+              text
+              @click="reloadPage"
             />
-            <Column header="Acciones" class="px-3 py-2 sm:px-6 sm:py-4">
-              <template #body="rowData">
-                <div class="flex items-center space-x-2">
-                  <Button
-                    icon="pi pi-eye"
-                    class="p-button-rounded p-button-secondary"
-                    @click="showDetails(rowData.data)"
-                    v-tooltip.left="{
-                      value: 'Ver',
-                      showDelay: 0,
-                      hideDelay: 100,
-                    }"
-                    raised
-                  />
-                  <Button
-                    icon="pi pi-pencil"
-                    class="p-button-rounded p-button-info"
-                    @click="openEditView(rowData.data)"
-                    v-tooltip.top="{
-                      value: 'Editar',
-                      showDelay: 0,
-                      hideDelay: 100,
-                    }"
-                    raised
-                  />
+          </template>
+          <template #paginatorend>
+            <Button
+              type="button"
+              icon="pi pi-download"
+              text
+              @click="exportToExcel"
+            />
+          </template>
+          <!-- Columnas de la tabla -->
+          <Column header="#" field="index" sortable class="px-3 py-2">
+            <template #body="rowData">
+              {{ rowData.data.index }}
+            </template>
+          </Column>
+          <Column field="titulo" header="Título" sortable class="px-3 py-2">
+            <template #body="rowData">
+              <div :title="rowData.data.titulo">
+                {{ rowData.data.titulo }}
+              </div>
+            </template>
+          </Column>
+          <Column header="Miniatura" class="px-3 py-2 sm:px-6 sm:py-4">
+            <template #body="rowData">
+              <div
+                class="truncate max-w-xs sm:max-w-md"
+                :title="rowData.data.miniatura"
+              >
+                <img
+                  v-if="rowData.data.miniatura"
+                  :src="rowData.data.miniatura"
+                  alt="Miniatura"
+                  class="h-12 w-12 sm:h-16 sm:w-16 object-cover rounded"
+                />
+              </div>
+            </template>
+          </Column>
+          <Column header="Descripción" class="px-6 py-4">
+            <template #body="slotProps">
+              <div>
+                <p v-if="!expandedModulos[slotProps.data.id]">
+                  <span v-html="slotProps.data.descripcion.slice(0, 120)"></span
+                  >...
+                  <button
+                    @click="toggleExpand(slotProps.data.id)"
+                    class="text-blue-500 hover:underline focus:outline-none"
+                  >
+                    Ver más
+                  </button>
+                </p>
+                <p v-else>
+                  <span v-html="slotProps.data.descripcion"></span>
+                  <button
+                    @click="toggleExpand(slotProps.data.id)"
+                    class="text-blue-500 hover:underline focus:outline-none"
+                  >
+                    Ver menos
+                  </button>
+                </p>
+              </div>
+            </template>
+          </Column>
 
-                  <Button
-                    icon="pi pi-trash"
-                    class="p-button-rounded p-button-danger"
-                    @click="confirmarEliminacion(rowData.data.id)"
-                    v-tooltip.right="{
-                      value: 'Eliminar',
-                      showDelay: 0,
-                      hideDelay: 100,
-                    }"
-                    severity="danger"
-                    raised
-                  />
-                </div>
-              </template>
-            </Column>
-          </DataTable>
-        </div>
-      </Fieldset>
+          <Column
+            header="Fecha de Inicio"
+            field="fecha_inicio"
+            sortable
+            class="px-3 py-2 sm:px-6 sm:py-4"
+          >
+            <template #body="rowData">
+              {{ formatDate(rowData.data.fecha_inicio) }}
+            </template>
+          </Column>
+          <Column
+            header="Fecha de Fin"
+            field="fecha_fin"
+            sortable
+            class="px-3 py-2 sm:px-6 sm:py-4"
+          >
+            <template #body="rowData">
+              {{ formatDate(rowData.data.fecha_fin) }}
+            </template>
+          </Column>
+          <Column field="estado" header="Estado" class="px-6 py-4">
+            <template #body="rowData">
+              <Tag
+                v-if="rowData.data.estado === 1"
+                value="Activo"
+                severity="success"
+                class="px-2 py-1"
+              />
+              <Tag
+                v-else-if="rowData.data.estado === 2"
+                value="Inactivo"
+                severity="warn"
+                class="px-2 py-1"
+              />
+              <Tag
+                v-else
+                value="Desconocido"
+                severity="warning"
+                class="px-2 py-1"
+              />
+            </template>
+          </Column>
+          <Column
+            field="tipo"
+            header="Tipo"
+            sortable
+            class="px-3 py-2 sm:px-6 sm:py-4"
+          />
+          <Column header="Acciones" class="px-3 py-2 sm:px-6 sm:py-4">
+            <template #body="rowData">
+              <div class="flex items-center space-x-2">
+                <Button
+                  icon="pi pi-eye"
+                  class="p-button-rounded p-button-secondary"
+                  @click="showDetails(rowData.data)"
+                  v-tooltip.left="{
+                    value: 'Ver',
+                    showDelay: 0,
+                    hideDelay: 100,
+                  }"
+                  raised
+                />
+                <Button
+                  icon="pi pi-pencil"
+                  class="p-button-rounded p-button-info"
+                  @click="openEditView(rowData.data)"
+                  v-tooltip.top="{
+                    value: 'Editar',
+                    showDelay: 0,
+                    hideDelay: 100,
+                  }"
+                  raised
+                />
+
+                <Button
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-danger"
+                  @click="confirmarEliminacion(rowData.data.id)"
+                  v-tooltip.right="{
+                    value: 'Eliminar',
+                    showDelay: 0,
+                    hideDelay: 100,
+                  }"
+                  severity="danger"
+                  raised
+                />
+              </div>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
     </div>
     <ConfirmDialog group="headless">
       <template #container="{ message, acceptCallback, rejectCallback }">
         <div
-          class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded"
+          class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded-3xl"
         >
           <div
             class="rounded-full bg-primary text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20"
           >
             <i
-              class="pi pi-exclamation-triangle"
+              class="pi pi-exclamation-triangle !text-violet-950"
               style="color: dimgray; font-size: 3rem"
             ></i>
           </div>
@@ -248,7 +264,13 @@
               raised
               @click="acceptCallback"
             ></Button>
-            <Button label="Cancelar" outlined @click="rejectCallback"></Button>
+            <Button
+              label="Cancelar"
+              raised
+              severity="primary"
+              outlined
+              @click="rejectCallback"
+            ></Button>
           </div>
         </div>
       </template>
@@ -257,11 +279,12 @@
     <Dialog
       header="Detalles del Anuncio"
       v-model:visible="showModal"
-      maximizable modal
+      maximizable
+      modal
       :style="{ width: '60vw' }"
       @hide="closeModal"
     >
-    <Divider />
+      <Divider />
 
       <div v-if="selectedAnuncio">
         <form class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -289,19 +312,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label for="fecha_inicio">Fecha de Inicio</label>
-                <InputText
+                <DatePicker
                   v-model="selectedAnuncio.fecha_inicio"
-                  type="date"
                   id="fecha_inicio"
-                  class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  class="block text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   readonly
                 />
               </div>
               <div>
                 <label for="fecha_fin">Fecha de Fin</label>
-                <InputText
+                <DatePicker
                   v-model="selectedAnuncio.fecha_fin"
-                  type="date"
                   id="fecha_fin"
                   class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   readonly
@@ -320,7 +341,7 @@
                   :src="selectedAnuncio.miniatura"
                   alt="Miniatura"
                   preview
-                  class="my-4 h-44 w-44  rounded"
+                  class="my-4 h-44 w-44 rounded"
                 />
               </div>
             </div>
@@ -350,13 +371,15 @@ import api from "@/axiosConfig.js";
 const confirm = useConfirm();
 const toast = useToast();
 const home = ref({
-    icon: 'pi pi-home',
-    route: '/panelControl/main'
+  icon: "pi pi-home",
+  route: "/panelControl/main",
 });
 const items = ref([
-    { label: 'Anuncios', 
-      icon: "pi pi-megaphone",
-      route: '/panelControl/anuncios' }
+  {
+    label: "Anuncios",
+    icon: "pi pi-megaphone",
+    route: "/panelControl/anuncios",
+  },
 ]);
 const authStore = useAuthStore();
 const idUsuario = authStore.usuario.id;
@@ -430,7 +453,9 @@ const eliminarAnuncio = async (id) => {
   }
 };
 const showDetails = (anuncio) => {
-  selectedAnuncio.value = anuncio;
+  selectedAnuncio.value = { ...anuncio, fecha_inicio: formatDate(anuncio.fecha_inicio),fecha_fin: formatDate(anuncio.fecha_fin) };
+
+
   showModal.value = true;
 };
 

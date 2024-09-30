@@ -87,8 +87,8 @@ export const agregarLeccion = async (req, res) => {
     // Insertar la nueva lección
     
     const [result] = await connection.query(
-      "INSERT INTO leccion (idModulo, tituloSeccion, videoURL, descripcion, estado, idUsuario) VALUES (?, ?, ?, ?, ?, ?)",
-      [idModulo, tituloSeccion, videoUrl, descripcion, 1, idUsuario]
+      "INSERT INTO leccion (idModulo, tituloSeccion, videoURL, descripcion, idUsuario) VALUES (?, ?, ?, ?, ?)",
+      [idModulo, tituloSeccion, videoUrl, descripcion, idUsuario]
     );
 
     res.json({

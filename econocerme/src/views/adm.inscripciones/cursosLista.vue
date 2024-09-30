@@ -25,7 +25,7 @@
 							{{ isExpanded[curso.idCurso] ? '...Ver menos' : '...Ver más' }}
 						</button>
 					</div>
-					<div class="flex flex-col md:flex-row gap-4 mt-7 md:mt-4">
+					<div class="flex flex-col md:flex-row gap-4 mt-7 md:mt-4 pt-5">
 						<Message severity="warn" icon="pi pi-clock">
 							<Tag severity="warn" :value="`${curso.duracion} hora(s).`"></Tag>
 						</Message>
@@ -33,7 +33,7 @@
 							<Tag severity="success" :value="`${curso.precio} Bs.`"></Tag>
 						</Message>
 
-						<Message severity="secondary" rounded>
+						<Message severity="success" rounded>
 						<Tag v-if="curso.estado === 1" value="Activo" severity="success" class="px-2 py-1" />
 						<Tag v-else-if="curso.estado === 0" value="Eliminado" severity="danger" class="px-2 py-1" />
 						<Tag v-else-if="curso.estado === 2" value="Inactivo" severity="warn" class="px-2 py-1" />
@@ -50,7 +50,7 @@
 				aumentando para las grandes.</p>
 		</div> -->
 		<div class="flex justify-between items-center mt-6">
-			<Tag severity="info" :value="`Total de cursos: ${cursos.length}`" />
+			<Tag severity="info" :value="`Total curso(s): ${cursos.length}`" />
 			<Button label="Cerrar" @click="closeDialog" />
 		</div>
 	</div>

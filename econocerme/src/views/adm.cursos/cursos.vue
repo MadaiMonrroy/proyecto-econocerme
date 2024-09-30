@@ -1,12 +1,12 @@
 <template>
   <div class="p-4">
     <div class=" ">
-      <Breadcrumb :home="home" :model="items" class="card h-14">
+      <Breadcrumb :home="home" :model="items" class="card h-14 dark:shadow-violet-800">
       <template #item="{ item, props }">
                 <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
                     <a :href="href" v-bind="props.action" @click="navigate">
                         <span :class="[item.icon, 'text-color']" />
-                        <span class="text-primary font-semibold">{{ item.label }}</span>
+                        <span class="text-black dark:text-white font-semibold">{{ item.label }}</span>
                     </a>
                 </router-link>
                 <a v-else :href="item.url" :target="item.target" v-bind="props.action">
@@ -46,10 +46,8 @@
         </div>
       </div>
       <Divider />
-      <Fieldset>
-        <template #legend>
-          <span class="text-2xl tracking-wide">Lista de Cursos</span>
-        </template>
+
+      <div class="card dark:border-violet-500 dark:shadow-2xl dark:shadow-violet-950 shadow-2xl ">
         <DataTable
           :value="cursosConNumeracion"
           :rows="5"
@@ -64,7 +62,10 @@
             'estado',
             'precio',
           ]"
-          class="p-datatable-striped"
+          stripedRows
+          class="w-full"
+          responsiveLayout="stack"
+          breakpoint="960px"
         >
           <template #paginatorstart>
             <Button
@@ -105,7 +106,7 @@
           <template #body="slotProps">
             <div>
               <p v-if="!expandedCourses[slotProps.data.idCurso]">
-                {{ slotProps.data.descripcion.slice(0, 120) }}...
+                {{ slotProps.data.descripcion.slice(0, 30) }}...
                 <button
                   @click="toggleExpand(slotProps.data.idCurso)"
                   class="text-blue-500 hover:underline focus:outline-none"
@@ -164,7 +165,7 @@
                   severity="danger"
                   rounded
                    raised
-                  @click="eliminarCurso(slotProps.data)"
+                  @click="eliminarCurso(slotProps.data.idCurso)"
                   v-tooltip.top="{ value: 'Eliminar', showDelay: 0, hideDelay: 100 }"
                 />
                 <Button
@@ -187,31 +188,39 @@
             </template>
           </Column>
         </DataTable>
-      </Fieldset>
-    </div>
-    <!-- Modal para Confirmar Eliminación -->
-    <Dialog
-      v-model:visible="isConfirmModalOpen"
-      header="Confirmar Eliminación"
-      modal
-      class="w-full max-w-sm"
-    >
-      <div class="p-4">
-        <p>¿Estás seguro de que deseas eliminar este usuario?</p>
-        <div class="mt-4 flex justify-end space-x-4">
-          <Button
-            class="bg-red-500 text-white px-4 py-2 rounded-md"
-            @click="deletecurso"
-            >Eliminar</Button
-          >
-          <Button
-            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
-            @click="closeConfirmModal"
-            >Cancelar</Button
-          >
         </div>
-      </div>
-    </Dialog>
+    </div>
+    
+    <!-- Modal para Confirmar Eliminación -->
+    <ConfirmDialog group="headless">
+      <template #container="{ message, acceptCallback, rejectCallback }">
+        <div
+          class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded-3xl"
+        >
+          <div
+            class="rounded-full bg-primary text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20"
+          >
+            <i
+              class="pi pi-exclamation-triangle !text-violet-950"
+              style="color: dimgray; font-size: 3rem"
+            ></i>
+          </div>
+          <span class="font-bold text-2xl block mb-2 mt-6">{{
+            message.header
+          }}</span>
+          <p class="mb-0">{{ message.message }}</p>
+          <div class="flex items-center gap-2 mt-6">
+            <Button
+              label="Eliminar"
+              severity="help"
+              raised
+              @click="acceptCallback"
+            ></Button>
+            <Button label="Cancelar" raised severity="primary" outlined @click="rejectCallback"></Button>
+          </div>
+        </div>
+      </template>
+    </ConfirmDialog>
     
   </div>
 </template>
@@ -222,10 +231,13 @@ import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import ExcelJS from "exceljs";
+import { useConfirm } from "primevue/useconfirm";
+
 
 import api from "@/axiosConfig.js";
 const toast = useToast();
 const authStore = useAuthStore();
+const confirm = useConfirm();
 
 const cursos = ref([]);
 const router = useRouter();
@@ -257,21 +269,31 @@ const openEditView = (curso) => {
   console.log(curso);
 };
 const eliminarCurso = (idCurso) => {
-  cursoToDelete.value = idCurso.idCurso;
-  isConfirmModalOpen.value = true;
-};
-const closeConfirmModal = () => {
-  isConfirmModalOpen.value = false;
+  confirm.require({
+    group: "headless",
+    message: "¿Estás seguro de que deseas eliminar este curso?",
+    header: "Confirmación",
+    icon: "pi-exclamation-triangle",
+    accept: () => deletecurso(idCurso), // Llama a eliminarAnuncio solo si el usuario acepta
+
+    reject: () => {
+      // toast.add({
+      //   severity: "warn",
+      //   summary: "Cancelled",
+      //   detail: "Eliminación cancelada",
+      //   life: 3000,
+      // });
+    },
+  });
 };
 
 const deletecurso = async (idCurso) => {
   try {
-    await api.delete(`/cursos/eliminarCurso/${cursoToDelete.value}`, {
+    await api.delete(`/cursos/eliminarCurso/${idCurso}`, {
       params: { idUsuario }
     });
     cursos.value = cursos.value.filter((curso) => curso.idCurso !== idCurso);
     fetchData();
-    closeConfirmModal();
     toast.add({
       severity: "info",
       summary: "Curso Eliminado",

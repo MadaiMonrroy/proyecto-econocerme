@@ -37,7 +37,7 @@ export const obtenerPreguntasPorCurso = async (req, res) => {
   try {
     console.log(`Obteniendo preguntas para el cursoId: ${cursoId}`);
     const [preguntas] = await connection.query(
-      "SELECT idPregunta, pregunta, opcionesRespuesta, respuestaCorrecta FROM pregunta_respuesta WHERE idCurso = ? AND (estado = 1 OR estado = 2)",
+      "SELECT idPregunta, pregunta, opcionesRespuesta, respuestaCorrecta FROM pregunta_respuesta WHERE idCurso = ? AND (estado = 1)",
       [cursoId]
     );
     console.log("Preguntas obtenidas:", preguntas);

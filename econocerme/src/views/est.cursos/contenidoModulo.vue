@@ -2,7 +2,7 @@
     <div  class="card min-h-screen flex flex-col p-6 lg:p-12 bg-gray-100">
       <!-- Título de la Lección -->
       <div class="mb-8">
-        <h1 class="text-3xl lg:text-4xl font-bold  mb-4">{{ modulo.nombre }}</h1>
+        <h1 class="text-3xl lg:text-4xl font-bold  mb-4 ">{{ modulo.nombre }}</h1>
         <p class="text-sm text-gray-500">Última actualización: {{ formatearFecha(modulo.ultimaActualizacion) }}</p>
       </div>
       
@@ -24,7 +24,7 @@
       <!-- Descripción de la Lección -->
       <div class="card flex-grow bg-white p-6 rounded-lg shadow-lg mb-8">
         <h2 class="text-2xl font-semibold mb-4">Descripción</h2>
-        <p class="text-gray-700 leading-relaxed">{{ modulo.descripcion }}</p>
+        <p v-html="modulo.descripcion"></p>
       </div>
   
       

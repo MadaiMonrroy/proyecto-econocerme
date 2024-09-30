@@ -47,6 +47,7 @@
                   :formatter="formatHours"
                   :unformatter="parseHours"
                   showButtons
+                  fluid
                 />
               </div>
 
@@ -55,6 +56,7 @@
                 <InputNumber
                   v-model="curso.precio"
                   inputId="precio"
+                  locale="es-BO"
                   mode="currency"
                   currency="BOB"
                   class="w-full"
@@ -62,13 +64,14 @@
                   :formatter="formatPrice"
                   :unformatter="parsePrice"
                   showButtons
+                  fluid
                 />
               </div>
             </div>
 
             <div>
               <label for="descripcion" class="block text-sm font-medium  mb-2">Descripción</label>
-              <textarea
+              <Textarea
                 v-model="curso.descripcion"
                 id="descripcion"
                 class="block w-full h-56 text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"

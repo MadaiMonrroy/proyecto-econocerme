@@ -42,7 +42,7 @@
           class="flex-grow px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <input
+        <RadioButton
           type="radio"
           :name="'correctAnswer-' + index"
           :value="optIndex"
@@ -64,12 +64,10 @@
       <Button
         icon="pi pi-plus-circle"
         severity="info"
-        
         text
         @click="addOption(index)"
         label="Añadir Opción"
       />
-
     </div>
 
     <!-- Botones para añadir pregunta y guardar examen -->
@@ -185,7 +183,11 @@ export default {
           .post("/evaluaciones/agregarPreguntas", payloadNuevas)
           .then((response) => {
             console.log("Nuevas preguntas guardadas", payloadNuevas);
+            this.loadQuestions();
+            // this.redirectToAnotherView(); // Redirige después de actualizar
+
           })
+
           .catch((error) => {
             console.error(
               "Error al guardar nuevas preguntas",
@@ -200,6 +202,11 @@ export default {
           .put("/evaluaciones/editarPreguntas", payloadEditar)
           .then((response) => {
             console.log("Preguntas actualizadas", response.data);
+            this.loadQuestions();
+
+
+            // this.redirectToAnotherView(); // Redirige después de actualizar
+
           })
           .catch((error) => {
             console.error(
@@ -208,8 +215,13 @@ export default {
             );
           });
       }
-    },
+      this.$emit("changeTab", "1"); // Emitimos el evento para cambiar a la pestaña de vista previa
 
+    },
+    // // Método para redirigir a otra vista
+    // redirectToAnotherView() {
+    //   this.$router.push(`/panelControl/evaluacion/${this.cursoId}`);
+    // },
     // Cargar preguntas existentes desde el backend
     loadQuestions() {
       api

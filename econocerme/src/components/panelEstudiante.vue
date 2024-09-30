@@ -1,10 +1,11 @@
 <template>
   <div
-    style="background-color: rgba(99, 63, 191, 0.39)"
-    class="flex flex-col min-h-screen  bg-opacity-0"
+    style="background-color: rgba(77, 41, 165, 0.5)"
+    class=      'w-auto bg-gradient-to-tl from-custom-purple to-custom-pink dark:bg-gradient-to-tl dark:from-dark-purple dark:to-dark-pink'
+
   >
     <header
-      class="custom-gradient text-black p-5 flex justify-between items-center fixed top-0 left-0 w-full z-20 shadow-lg shadow-purple-800/50"
+    class="bg-gradient-to-t from-custom-purple to-custom-pink dark:bg-gradient-to-t dark:from-dark-purple dark:to-dark-pink text-black p-5 flex justify-between items-center fixed top-0 left-0 w-full z-20 shadow-lg shadow-purple-800/50"
     >
       <div class="flex items-center">
         <img src="@/assets/logoec.png" alt="Logo" class="h-10 mx-6" />

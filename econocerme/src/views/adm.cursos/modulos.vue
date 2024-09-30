@@ -10,7 +10,7 @@
         >
           <a :href="href" v-bind="props.action" @click="navigate">
             <span :class="[item.icon, 'text-color']" />
-            <span class="text-primary font-semibold">{{ item.label }}</span>
+            <span class="text-black dark:text-white font-semibold">{{ item.label }}</span>
           </a>
         </router-link>
         <a v-else :href="item.url" :target="item.target" v-bind="props.action">
@@ -38,39 +38,53 @@
         </div>
 
         <!-- Sección inferior con especialidad, precio y duración alineados abajo -->
+        <!-- Sección inferior con especialidad, precio y duración alineados abajo -->
         <div class="mt-4 flex items-center justify-between">
           <Message severity="secondary" rounded>{{
             curso.especialidad
           }}</Message>
           <div class="flex space-x-4">
-            <Message severity="success" rounded
-              >Precio: {{ curso.precio }}</Message
+            <Message severity="success" rounded icon="pi pi-money-bill"
+              ><Tag severity="success"> {{ curso.precio }} Bs. </Tag>
+            </Message>
+            <Message severity="info" rounded icon="pi pi-clock">
+              <Tag severity="info"> {{ curso.duracion }} hora(s). </Tag>
+            </Message>
+            <Message
+              rounded
+              :icon="
+                curso.estado === 1
+                  ? 'pi pi-check-circle'
+                  : curso.estado === 2
+                    ? 'pi pi-spinner-dotted'
+                    : 'pi pi-question-circle'
+              "
+              :severity="
+                curso.estado === 1
+                  ? 'success'
+                  : curso.estado === 2
+                    ? 'warn'
+                    : 'info'
+              "
             >
-            <Message severity="info" rounded
-              >Duración: {{ curso.duracion }}</Message
-            >
-            <Message severity="secondary" rounded
-              >Estado:
-              
-                <Tag
-                  v-if="curso.estado === 1"
-                  value="Activo"
-                  severity="success"
-                  class="px-2 py-1"
-                />
-                <Tag
-                  v-else-if="curso.estado === 2"
-                  value="Inactivo"
-                  severity="warn"
-                  class="px-2 py-1"
-                />
-                <Tag
-                  v-else
-                  value="Desconocido"
-                  severity="warning"
-                  class="px-2 py-1"
-                />
-              
+              <Tag
+                v-if="curso.estado === 1"
+                value="Activo"
+                severity="success"
+                class="px-2 py-1"
+              />
+              <Tag
+                v-else-if="curso.estado === 2"
+                value="Inactivo"
+                severity="warn"
+                class="px-2 py-1"
+              />
+              <Tag
+                v-else
+                value="Desconocido"
+                severity="info"
+                class="px-2 py-1"
+              />
             </Message>
           </div>
         </div>

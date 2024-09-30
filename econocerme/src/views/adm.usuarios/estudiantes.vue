@@ -66,11 +66,8 @@
       <!-- <Column header="#" sortable class="px-6 py-4"> </Column>-->
 
       <Divider />
-      <Fieldset>
-        <template #legend>
-          <span class="text-2xl tracking-wide">Lista de Usuarios</span>
-        </template>
-        <div>
+      
+        <div class="card dark:border-violet-500 dark:shadow-2xl dark:shadow-violet-950 shadow-2xl ">
           <DataTable
             :value="usuariosConNumeracion"
             :rows="5"
@@ -213,7 +210,6 @@
             </Column>
           </DataTable>
         </div>
-      </Fieldset>
     </div>
     <!-- Modal para Confirmar Eliminación -->
     <Dialog
@@ -584,7 +580,7 @@ const openEditModal = (usuario) => {
   selectedUsuario.value = { ...usuario };
   selectedUsuario.value.fechaNacimiento = formatDate(usuario.fechaNacimiento);
   selectedUsuario.value.idUsuario = idUsuario;
-  console.log(selectedUsuario.value.id);
+  console.log("sdfksl;dk;lskldfk",formatDate(usuario.fechaNacimiento));
   isModalOpen.value = true;
 };
 const formatToDateInput = (dateString) => {
@@ -828,8 +824,16 @@ const validarCampos = () => {
   }
   return true;
 };
+function formatFecha(fecha) {
+  // Separar la fecha por los guiones
+  const [dia, mes, anio] = fecha.split('-');
+  // Retornar la fecha en formato YYYY-MM-DD
+  return `${anio}-${mes}-${dia}`;
+}
+
 const updateUsuario = async () => {
   if (!validarCamposAct()) return;
+
   closeModal();
   const formData = new FormData();
   formData.append("nombres", selectedUsuario.value.nombres);
@@ -838,9 +842,8 @@ const updateUsuario = async () => {
   formData.append("email", selectedUsuario.value.email);
   formData.append(
     "fechaNacimiento",
-    convertirFechaAMysql(selectedUsuario.value.fechaNacimiento)
+    formatFecha(selectedUsuario.value.fechaNacimiento)
   );
-  console.log(convertirFechaAMysql(selectedUsuario.value.fechaNacimiento));
   formData.append("estado", selectedUsuario.value.estado);
   formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
   formData.append("id", selectedUsuario.value.id); // Agregar el ID del usuario

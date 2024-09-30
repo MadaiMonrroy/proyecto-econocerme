@@ -1,8 +1,7 @@
 <template>
   <div
-    style="background-color: rgba(77, 41, 165, 0.5)"
     :class="[
-      'flex flex-col min-h-screen  bg-opacity-0',
+      'w-auto bg-gradient-to-tl from-custom-purple to-custom-pink dark:bg-gradient-to-tl dark:from-dark-purple dark:to-dark-pink',
       { 'collapsed-sidebar': isSidebarCollapsed },
     ]"
   >
@@ -10,7 +9,11 @@
       class="bg-gradient-to-t from-custom-purple to-custom-pink dark:bg-gradient-to-t dark:from-dark-purple dark:to-dark-pink text-black p-5 flex justify-between items-center fixed top-0 left-0 w-full z-20 shadow-lg shadow-purple-800/50"
     >
       <div class="flex items-center">
-        <img src="@/assets/logoec.png" alt="Logo" class="h-10 mx-6 dark:brightness-0 dark:invert" />
+        <img
+          src="@/assets/logoec.png"
+          alt="Logo"
+          class="h-10 mx-6 dark:brightness-0 dark:invert"
+        />
         <button
           @click="toggleSidebar"
           class="mr-4 text-black hover:text-purple-950"
@@ -71,17 +74,20 @@
             {{ primerNombre }} {{ authStore.usuario.primerApellido }}
           </h2>
         </div>
-        <ul class="space-y-2 ">
-          <li v-for="(item, index) in menuItems" :key="index" class="w-full justify-start">
-            
+        <ul class="space-y-2">
+          <li
+            v-for="(item, index) in menuItems"
+            :key="index"
+            class="w-full justify-start"
+          >
             <div
               @click="handleMenuClick(item)"
-              class="flex items-start cursor-pointer rounded-3xl transition-colors duration-300 hover:bg-gradient-to-r from-custom-pink to-custom-purple dark:hover:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink  p-3"
+              class="flex items-start cursor-pointer rounded-3xl transition-colors duration-300 hover:bg-gradient-to-r from-custom-pink to-custom-purple dark:hover:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink p-3"
             >
               <i :class="item.icon" class="mr-3" style="font-size: 1.4rem"></i>
               <span
                 v-if="!isSidebarCollapsed"
-                class="ml-0 "
+                class="ml-0"
                 style="font-size: 1.1rem"
                 >{{ item.label }}</span
               >
@@ -118,8 +124,8 @@
           'ml-16': isSidebarCollapsed,
           'ml-[240px]': !isSidebarCollapsed,
         }"
-        class=""
-      >
+        class="w-full sm:w-[calc(100%-240px)] md:w-[calc(100%-240px)] lg:w-[calc(100%-240px)] xl:w-[calc(100%-240px)]"
+        >
         <p>Usuario: {{ authStore.usuario.email }}</p>
         <router-view></router-view>
       </main>

@@ -18,6 +18,7 @@ export const listaInscripciones = async (req, res) => {
       INNER JOIN usuario U ON U.id = I.idUsuario
       INNER JOIN pago P ON P.idInscripcion = I.idInscripcion
       LEFT JOIN cuota_pago CP ON P.idPago = CP.idPago
+      WHERE I.estado = 1
       GROUP BY I.idInscripcion, nombreCompleto, fotoPerfil, I.observacion, I.fechaInscripcion, P.montoTotal;
     `);
 
@@ -29,10 +30,11 @@ export const listaInscripciones = async (req, res) => {
         C.miniatura,
         C.descripcion,
         C.duracion,
-        C.precio
+        C.precio,
+        C.estado
       FROM detalle_inscripcion DI
-      INNER JOIN curso C ON DI.idCurso = C.idCurso;
-    `);
+      INNER JOIN curso C ON DI.idCurso = C.idCurso
+    `); //TODO: corregir esto
 
     // Combinar los resultados
     const inscripcionesConCursos = inscripciones.map(inscripcion => {
@@ -74,17 +76,118 @@ export const obtenerInscripcion = async (req, res) => {
 
 
 
+// export const agregarInscripcion = async (req, res) => {
+//   let montoCuota = 0;
+//   let fechaVencimiento = new Date();
+//   const {
+//     idUsuario,
+//     idCurso,
+//     observacion,
+//     cantidadCuotas,
+//     montoTotal,
+//     metodoPago,
+//     idUsuarioModificacion,
+//   } = req.body;
+//   // console.log(req.body);
+//   const conn = await connection.getConnection();
+//   try {
+//     await conn.beginTransaction();
+
+//     // Insertar en la tabla inscripcion
+//     const [inscripcionResult] = await conn.execute(
+//       `INSERT INTO inscripcion (idUsuario, observacion, idUsuarioModificacion) VALUES (?, ?, ?)`,
+//       [idUsuario, observacion, idUsuarioModificacion]
+//     );
+
+//     const idInscripcion = inscripcionResult.insertId;
+
+//     // Insertar en la tabla detalle_inscripcion para cada curso
+//     for (const curso of idCurso) {
+//       await conn.execute(
+//         `INSERT INTO detalle_inscripcion (idInscripcion, idCurso) VALUES (?, ?)`,
+//         [idInscripcion, curso.idCurso]
+//       );
+//     }
+
+//     // Insertar en la tabla pago
+//     const [pagoResult] = await conn.execute(
+//       `INSERT INTO pago (idInscripcion, montoTotal, idUsuarioModificacion) VALUES (?, ?, ?)`,
+//       [idInscripcion, montoTotal, idUsuarioModificacion]
+//     );
+
+//     const idPago = pagoResult.insertId;
+
+
+//     if (cantidadCuotas > 1) {
+//       // Insertar en la tabla cuota_pago
+//       montoCuota = ((montoTotal / cantidadCuotas) * 1.05);
+//     } else {
+//       montoCuota = (montoTotal / cantidadCuotas);
+
+//     }
+
+
+//     for (let i = 0; i < cantidadCuotas; i++) {
+//       const fechaCuota = new Date(fechaVencimiento);
+//       fechaCuota.setMonth(fechaVencimiento.getMonth() + i);
+//       await conn.execute(
+//         `INSERT INTO cuota_pago (idPago, montoCuota, fechaVencimiento, idUsuarioModificacion) VALUES (?, ?, ?, ?)`,
+//         [idPago, montoCuota, fechaCuota, idUsuarioModificacion]
+//       );
+//     }
+
+//     // Insertar cuotas en la tabla cuota_pago
+//     for (let i = 0; i < cantidadCuotas; i++) {
+//       const fechaCuota = new Date(fechaVencimiento);
+//       if (i === 0) {
+//         // Primera cuota
+//         await conn.execute(
+//           `INSERT INTO cuota_pago (idPago, montoCuota, estadoCuota, metodoPago, fechaPagoCuota, fechaVencimiento, idUsuarioModificacion) VALUES (?, ?, ?, ?, NOW(), ?, ?)`,
+//           [idPago, montoCuota, 1, metodoPago, fechaVencimiento, fechaVencimiento, idUsuarioModificacion]
+//         );
+//       } else {
+//         // Cuotas restantes
+//         fechaCuota.setMonth(fechaVencimiento.getMonth() + i); // Incrementar mes para cada cuota
+//         await conn.execute(
+//           `INSERT INTO cuota_pago (idPago, montoCuota, fechaVencimiento, idUsuarioModificacion) VALUES (?, ?, ?, ?)`,
+//           [idPago, montoCuota, fechaCuota, idUsuarioModificacion]
+//         );
+//       }
+//     }
+
+//     await conn.commit();
+
+
+
+//     res.status(200).json({
+//       mensaje: 'Inscripción agregada correctamente',
+//       idInscripcion: idInscripcion,
+//     });
+//   } catch (error) {
+//     await conn.rollback(); // Revertir en caso de error
+//     console.error(error);
+//     res.status(500).json({
+//       mensaje: 'Ocurrió un error en el servidor',
+//     });
+
+//   } finally {
+//     conn.release(); // Liberar la conexión
+//   }
+// };
+
+
+
 export const agregarInscripcion = async (req, res) => {
-  let montoCuota = 0;
   const {
     idUsuario,
     idCurso,
     observacion,
     cantidadCuotas,
     montoTotal,
+    metodoPago,
     idUsuarioModificacion,
   } = req.body;
-  console.log(req.body);
+
   const conn = await connection.getConnection();
   try {
     await conn.beginTransaction();
@@ -112,28 +215,41 @@ export const agregarInscripcion = async (req, res) => {
     );
 
     const idPago = pagoResult.insertId;
-    const montoCuota = montoTotal/cantidadCuotas;
-    
 
-
+    // Calcular el monto de la cuota
+    let montoCuota = cantidadCuotas > 1 ? (montoTotal) / cantidadCuotas : montoTotal / cantidadCuotas;
 
     let fechaVencimiento = new Date();
+    let idCuotaPagoConEstadoCuota1 = null; // Para almacenar el idCuotaPago con estadoCuota = 1
+
+
+    // Insertar cuotas en la tabla cuota_pago
     for (let i = 0; i < cantidadCuotas; i++) {
       const fechaCuota = new Date(fechaVencimiento);
-      fechaCuota.setMonth(fechaVencimiento.getMonth() + i);
-      await conn.execute(
-        `INSERT INTO cuota_pago (idPago, montoCuota, fechaVencimiento, idUsuarioModificacion) VALUES (?, ?, ?, ?)`,
-        [idPago, montoCuota, fechaCuota, idUsuarioModificacion]
-      );
+      if (i === 0) {
+        // Primera cuota con estadoCuota = 1
+        const [cuotaResult] = await conn.execute(
+          `INSERT INTO cuota_pago (idPago, montoCuota, estadoCuota, metodoPago, fechaPagoCuota, fechaVencimiento, idUsuarioModificacion) VALUES (?, ?, ?, ?, NOW(), ?, ?)`,
+          [idPago, montoCuota, 1, metodoPago, fechaCuota, idUsuarioModificacion]
+        );
+        idCuotaPagoConEstadoCuota1 = cuotaResult.insertId; // Guardar el idCuotaPago
+      } else {
+        // Cuotas restantes
+        await conn.execute(
+          `INSERT INTO cuota_pago (idPago, montoCuota, fechaVencimiento, idUsuarioModificacion) VALUES (?, ?, ?, ?)`,
+          [idPago, montoCuota, fechaCuota, idUsuarioModificacion]
+        );
+      }
+      // Actualizar la fecha de vencimiento para la siguiente cuota
+      fechaVencimiento.setMonth(fechaVencimiento.getMonth() + 1);
     }
 
     await conn.commit();
 
-
-
     res.status(200).json({
       mensaje: 'Inscripción agregada correctamente',
       idInscripcion: idInscripcion,
+      idCuotaPago: idCuotaPagoConEstadoCuota1, // Devolver el idCuotaPago con estadoCuota = 1
     });
   } catch (error) {
     await conn.rollback(); // Revertir en caso de error
@@ -141,11 +257,11 @@ export const agregarInscripcion = async (req, res) => {
     res.status(500).json({
       mensaje: 'Ocurrió un error en el servidor',
     });
-
   } finally {
     conn.release(); // Liberar la conexión
   }
 };
+
 
 
 

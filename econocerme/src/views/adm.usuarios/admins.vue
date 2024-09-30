@@ -1,6 +1,10 @@
 <template>
-  <div class="p-4 ">
-    <Breadcrumb :home="home" :model="items" class="card h-14 shadow-2xl dark:shadow-violet-800">
+  <div class="p-4">
+    <Breadcrumb
+      :home="home"
+      :model="items"
+      class="card h-14 shadow-2xl dark:shadow-violet-800"
+    >
       <template #item="{ item, props }">
         <router-link
           v-if="item.route"
@@ -10,20 +14,21 @@
         >
           <a :href="href" v-bind="props.action" @click="navigate">
             <span :class="[item.icon, 'text-color']" />
-            <span class="text-primary font-semibold">{{ item.label }}</span>
+            <span class="text-black dark:text-white font-semibold">{{
+              item.label
+            }}</span>
           </a>
         </router-link>
         <a v-else :href="item.url" :target="item.target" v-bind="props.action">
-          <span class="text-surface-700 dark:text-surface-0">{{
-            item.label
-          }}</span>
+          <span class="">{{ item.label }}</span>
         </a>
       </template>
     </Breadcrumb>
-    
 
-    <div v-animateonscroll="{ enterClass: 'animate-fadein', leaveClass: 'animate-fadeout' }" class="card shadow-2xl dark:shadow-violet-600 animate-duration-1000">
-      <h2 class="text-4xl mb-4 items-end text-shadow-3xl  font-sans  ">ADMINISTRADORES</h2>
+    <div class="card shadow-2xl dark:shadow-violet-600">
+      <h2 class="text-4xl mb-4 items-end text-shadow-3xl font-sans">
+        ADMINISTRADORES
+      </h2>
       <Divider />
 
       <!-- Contenedor para alinear el botón y el buscador en la misma línea -->
@@ -47,11 +52,11 @@
           <Button
             class="bg-green-500 text-white p-button-rounded p-button-success flex items-center"
             raised
+            icon="pi pi-user-plus"
+            label="Agregar Administrador"
             severity="success"
             @click="openAddModal"
           >
-            <i class="pi pi-user-plus mr-2"></i>
-            Agregar Estudiante
           </Button>
         </div>
       </div>
@@ -61,11 +66,8 @@
       <!-- <Column header="#" sortable class="px-6 py-4"> </Column>-->
 
       <Divider />
-      <Fieldset >
-        <template #legend>
-          <span class="text-2xl tracking-wide">Lista de Usuarios</span>
-        </template>
-        <div>
+      
+        <div class="card dark:border-violet-500 dark:shadow-2xl dark:shadow-violet-950 shadow-2xl ">
           <DataTable
             :value="usuariosConNumeracion"
             :rows="5"
@@ -79,6 +81,8 @@
               'email',
               'fechaNacimiento',
             ]"
+            :sortOrder="-1"
+            class="p-datatable-striped"
           >
             <template #paginatorstart>
               <Button
@@ -173,26 +177,40 @@
                     class="p-button-rounded p-button-secondary"
                     raised
                     @click="showUserDetails(rowData.data)"
+                    v-tooltip.left="{
+                      value: 'Ver',
+                      showDelay: 0,
+                      hideDelay: 100,
+                    }"
                   />
                   <Button
                     icon="pi pi-user-edit"
                     class="p-button-rounded p-button-info"
                     raised
                     @click="openEditModal(rowData.data)"
+                    v-tooltip.top="{
+                      value: 'Editar',
+                      showDelay: 0,
+                      hideDelay: 100,
+                    }"
                   />
                   <Button
                     icon="pi pi-user-minus"
                     class="p-button-rounded p-button-danger"
                     raised
                     @click="eliminarUsuario(rowData.data.id)"
+                    v-tooltip.right="{
+                      value: 'Eliminar',
+                      showDelay: 0,
+                      hideDelay: 100,
+                    }"
                   />
                 </div>
               </template>
             </Column>
           </DataTable>
         </div>
-      </Fieldset>
-        </div>
+    </div>
     <!-- Modal para Confirmar Eliminación -->
     <Dialog
       v-model:visible="isConfirmModalOpen"
@@ -209,10 +227,11 @@
             >Eliminar</Button
           >
           <Button
-            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
+            class="px-4 py-2 rounded-md"
             @click="closeConfirmModal"
-            >Cancelar</Button
-          >
+            severity="secondary"
+            label="Cancelar"
+          ></Button>
         </div>
       </div>
     </Dialog>
@@ -350,7 +369,6 @@
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
                 placeholder="Ingrese nombres"
                 @input="validarInput"
-                
               />
             </div>
             <div>
@@ -362,7 +380,6 @@
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
                 placeholder="Ingrese primer apellido"
                 @input="validarInput"
-                
               />
             </div>
             <div>
@@ -374,7 +391,6 @@
                 class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
                 placeholder="Ingrese segundo apellido"
                 @input="validarInput"
-
               />
             </div>
             <div>
@@ -403,9 +419,7 @@
             id="email"
             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
             placeholder="Ingrese el correo electronico"
-            
           />
-          
         </div>
         <div v-if="isEditMode" class="pl-5 pr-5 pb-4">
           <h1 for="email"><strong>Email</strong></h1>
@@ -417,19 +431,25 @@
             placeholder="Ingrese el correo electronico"
             readonly
           />
-          
         </div>
         <div class="p-4 flex justify-end space-x-4">
-          <Button type="submit" severity="help" class="px-4 py-2 rounded-md"
-            >Guardar</Button
-          >
+          <Button
+            type="submit"
+            severity="help"
+            class="px-4 py-2 rounded-md w-36"
+            label="Guardar"
+            raised
+            rounded
+          ></Button>
           <Button
             type="button"
             severity="secondary"
-            class="px-4 py-2 rounded-md"
+            class="px-4 py-2 rounded-md w-36"
+            label="Cancelar"
+            rounded
+            raised
             @click="closeModal"
-            >Cancelar</Button
-          >
+          ></Button>
         </div>
       </form>
     </Dialog>
@@ -473,9 +493,9 @@ const home = ref({
 });
 const items = ref([
   {
-    label: "Estudiantes",
-    icon: "pi pi-book",
-    route: "/panelControl/estudiantes",
+    label: "Administradores",
+    icon: "pi pi-user",
+    route: "/panelControl/administradores",
   },
 ]);
 
@@ -521,9 +541,9 @@ const fetchData = async () => {
   try {
     const response = await api.get(`/usuarios/usuario/${idUsuario}`);
     console.log(response);
-    usuarios.value = response.data.filter(
-      (usuario) => usuario.tipoUsuario === "admin"
-    ).reverse();
+    usuarios.value = response.data
+      .filter((usuario) => usuario.tipoUsuario === "admin")
+      .reverse(); // Invertir el arreglo
   } catch (error) {
     console.error(error);
   }
@@ -542,7 +562,7 @@ const openAddModal = () => {
     fotoPerfil: "",
     fechaNacimiento: "",
     tipoUsuario: "admin",
-    estado: 2,
+    estado: 1,
     idUsuario: idUsuario,
   };
   previewFotoPerfil.value = "";
@@ -627,7 +647,7 @@ const usuariosConNumeracion = computed(() => {
 const addUsuario = async () => {
   if (!validarCampos()) return;
 
-  closeModal(); 
+  closeModal();
 
   mostrarSpinner.value = true;
   const formData = new FormData();
@@ -643,8 +663,8 @@ const addUsuario = async () => {
   formData.append("contrasenia", selectedUsuario.value.contrasenia); // Se envía al backend
   formData.append("estado", selectedUsuario.value.estado);
   formData.append("idUsuario", selectedUsuario.value.idUsuario);
-  const nombre = nombreCompleto(); 
-  formData.append("nombreCompleto", nombre); 
+  const nombre = nombreCompleto();
+  formData.append("nombreCompleto", nombre);
   if (selectedFile) {
     formData.append("fotoPerfil", selectedFile);
   }
@@ -670,17 +690,18 @@ const addUsuario = async () => {
     console.error(error);
     mostrarSpinner.value = false; // Ocultar el spinner
 
-// Captura el mensaje del error del backend
-const errorMessage = error.response?.data?.mensaje || "No se pudo añadir el usuario. Por favor, intente de nuevo más tarde.";
+    // Captura el mensaje del error del backend
+    const errorMessage =
+      error.response?.data?.mensaje ||
+      "No se pudo añadir el usuario. Por favor, intente de nuevo más tarde.";
 
-// Mostrar el toast con el mensaje de error
-toast.add({
-  severity: "error",
-  summary: "Error",
-  detail: errorMessage,
-  life: 5000, // Duración del toast
-});
-
+    // Mostrar el toast con el mensaje de error
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: errorMessage,
+      life: 5000, // Duración del toast
+    });
   }
 };
 const searchTerm = ref("");
@@ -698,26 +719,24 @@ const filteredUsuarios = computed(() => {
   });
 });
 const nombreCompleto = () => {
- const nombress = selectedUsuario.value.nombres
-  const primerApellidos = selectedUsuario.value.primerApellido 
-      const nombres = nombress || ""; // Asegurarse de que `nombres` no sea undefined
-      const nombreCompleto = nombres.split(" ")[0] + " "+ primerApellidos;
-      
+  const nombress = selectedUsuario.value.nombres;
+  const primerApellidos = selectedUsuario.value.primerApellido;
+  const nombres = nombress || ""; // Asegurarse de que `nombres` no sea undefined
+  const nombreCompleto = nombres.split(" ")[0] + " " + primerApellidos;
 
-      return  nombreCompleto;// Dividir por espacios y retornar el primer elemento
+  return nombreCompleto; // Dividir por espacios y retornar el primer elemento
 };
-
 
 const updatePasswordUsuario = async () => {
   const formData = new FormData();
   formData.append("idUsuario", selectedUsuario.value.idUsuario);
-  selectedUsuario.value.contrasenia =  generatePassword();
+  selectedUsuario.value.contrasenia = generatePassword();
   formData.append("contrasenia", selectedUsuario.value.contrasenia); // Solo enviar si se cambia
   formData.append("email", selectedUsuario.value.email);
 
   try {
     // Esperar el valor de `nombreCompleto()` si es una función asíncrona.
-    const nombre = nombreCompleto(); 
+    const nombre = nombreCompleto();
     formData.append("nombreCompleto", nombre);
 
     // Agregar el toast de éxito antes de enviar la solicitud.
@@ -758,7 +777,6 @@ const validarInput = (event) => {
     selectedUsuario.value.nombres = event.target.value; // Actualizar el modelo de Vue
     selectedUsuario.value.primerApellido = event.target.value; // Actualizar el modelo de Vue
     selectedUsuario.value.segundoApellido = event.target.value; // Actualizar el modelo de Vue
-
   }
 };
 const generatePassword = () => {
@@ -798,17 +816,23 @@ const validarCampos = () => {
     toast.add({
       severity: "error",
       summary: "Campos incompletos",
-      detail: "Por favor completa el formulario, todos los campos son requeridos!.",
+      detail:
+        "Por favor completa el formulario, todos los campos son requeridos!.",
       life: 3000,
     });
     return false;
   }
   return true;
 };
-const updateUsuario = async () => {
+function formatFecha(fecha) {
+  // Separar la fecha por los guiones
+  const [dia, mes, anio] = fecha.split('-');
+  // Retornar la fecha en formato YYYY-MM-DD
+  return `${anio}-${mes}-${dia}`;
+}
 
-  
-  if (!validarCamposAct())return;
+const updateUsuario = async () => {
+  if (!validarCamposAct()) return;
   closeModal();
   const formData = new FormData();
   formData.append("nombres", selectedUsuario.value.nombres);
@@ -817,9 +841,8 @@ const updateUsuario = async () => {
   formData.append("email", selectedUsuario.value.email);
   formData.append(
     "fechaNacimiento",
-    convertirFechaAMysql(selectedUsuario.value.fechaNacimiento)
+    formatFecha(selectedUsuario.value.fechaNacimiento)
   );
-  console.log(convertirFechaAMysql(selectedUsuario.value.fechaNacimiento));
   formData.append("estado", selectedUsuario.value.estado);
   formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
   formData.append("id", selectedUsuario.value.id); // Agregar el ID del usuario
@@ -885,7 +908,8 @@ const validarCamposAct = () => {
     toast.add({
       severity: "error",
       summary: "Campos incompletos",
-      detail: "Por favor completa el formulario, todos los campos son requeridos.",
+      detail:
+        "Por favor completa el formulario, todos los campos son requeridos.",
       life: 3000,
     });
     return false;
