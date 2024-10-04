@@ -4,17 +4,17 @@ import connection from "../db.js";
 export const listaCuotas = async (req, res) => {
 	const idPago = req.params.id;
 	try {
-		const [result] = await connection.query(
-			"SELECT * FROM cuota_pago WHERE idPago = ?",
-			[idPago]
-		);
-
+		const [result] = await connection.query(`
+			SELECT CP.*, P.idInscripcion
+			FROM cuota_pago CP
+			INNER JOIN pago P ON CP.idPago = P.idPago
+			WHERE CP.idPago = ?
+		  `, [idPago]);
 		// Verificar si hay resultados
 		if (result.length === 0) {
 			return res.status(404).json({ mensaje: "No se encontraron cuotas para esta inscripcion" });
 		}
 
-		console.log(result);
 
 		// Responder con los módulos encontrados
 		res.json(result);

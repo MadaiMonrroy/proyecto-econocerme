@@ -82,7 +82,7 @@
           >
             <div
               @click="handleMenuClick(item)"
-              class="flex items-start cursor-pointer rounded-3xl transition-colors duration-300 hover:bg-gradient-to-r from-custom-pink to-custom-purple dark:hover:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink p-3"
+              class="flex items-start cursor-pointer transform hover:scale-105 rounded-3xl transition-colors duration-300 ease-in-out hover:bg-gradient-to-r from-custom-pink to-custom-purple dark:hover:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink p-3"
             >
               <i :class="item.icon" class="mr-3" style="font-size: 1.4rem"></i>
               <span
@@ -109,7 +109,7 @@
               <li v-for="(subItem, subIndex) in item.items" :key="subIndex">
                 <router-link
                   :to="subItem.route"
-                  class="block p-2 transition-colors rounded-3xl duration-300 hover:bg-gradient-to-r from-custom-pink to-custom-purple dark:hover:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink"
+                  class="block p-2 ease-in-out transform hover:scale-105 rounded-3xl duration-300 hover:bg-gradient-to-r from-custom-pink to-custom-purple dark:hover:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink"
                 >
                   {{ subItem.label }}
                 </router-link>
@@ -221,9 +221,12 @@ export default {
       },
       {
         key: "inscripciones",
-        label: "Inscripciones",
+        label: "inscripciones",
         icon: "pi pi-address-book",
-        route: "/panelControl/inscripciones",
+        items: [
+          { label: "Inscripciones", route: "/panelControl/inscripciones" },
+          { label: "Pre-Inscripciones", route: "/panelControl/preInscripciones" },
+        ],
       },
       {
         key: "anuncios",
@@ -231,6 +234,13 @@ export default {
         icon: "pi pi-megaphone",
         route: "/panelControl/anuncios",
       },
+      {
+        key: "reportes",
+        label: "Reportes",
+        icon: "pi pi-file-pdf",
+        route: "/panelControl/anuncios",
+      },
+
     ]);
 
     const profileItems = ref([

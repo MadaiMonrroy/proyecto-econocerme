@@ -11,6 +11,7 @@ import { useAuthStore } from './stores/authStore';
 
 const app = createApp(App)
 const pinia = createPinia();
+app.config.devtools = false;
 
 import PrimeVue from 'primevue/config';
 import 'primeicons/primeicons.css';

@@ -49,9 +49,7 @@
                   </div>
                 </div>
                 <div class="flex flex-col md:items-end gap-8">
-                  <span class="text-xl font-semibold text-green-600"
-                    >{{ curso.precio }} Bs</span
-                  >
+                  
                   <div class="flex flex-row-reverse md:flex-row gap-2">
                     <Button
                       icon="pi pi-external-link"
@@ -100,9 +98,7 @@
                   </p>
                 </div>
                 <div class="flex flex-col gap-6 mt-6">
-                  <span class="text-2xl font-semibold text-green-600"
-                    >{{ curso.precio }} Bs</span
-                  >
+                  
                   <Button
                     icon="pi pi-external-link"
                     label="Acceder al curso"

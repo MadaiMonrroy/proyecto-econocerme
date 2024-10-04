@@ -18,26 +18,25 @@
       <card class="mb-4">
         <template #content>
           <button @click="volverAInscripciones" class="mb-4 px-4 py-2 rounded">
-            <i class="pi pi-arrow-left" style="color: slateblue"></i> Volver a Inscripciones
+            <i class="pi pi-arrow-left" ></i> Volver a Inscripciones
           </button>
           <div class="flex items-center justify-between">
             <div class="flex justify-center flex-col">
-              <div>
-                <p>Usuari@: </p>
-              </div>
+
               <div class="flex items-center justify-center">
                 <img :src="pago.fotoPerfil" alt="Logo" class="w-28 h-28 rounded-full" />
                 <h1 class="ml-4 text-2xl font-bold">{{ pago.nombreCompleto }}</h1>
                 <Divider layout="vertical" class="h-28" />
-                <p class="m-0">Curso(s) Inscrito: {{ pago.cursos }}</p>
+                <p class="m-0">Nro. Cursos: {{ pago.cursos }} <br> Monto Total: {{ pago.montoTotal }}</p>
+
               </div>
             </div>
           </div>
           <div class="mt-4 flex items-center justify-end">
             <div class="flex space-x-4">
               <Message severity="info" rounded>Estado del Pago:
-                <Tag v-if="pago.estado === 1" value="Pendiente" severity="success" class="px-2 py-1" />
-                <Tag v-else-if="pago.estado === 2" value="Completado" severity="warn" class="px-2 py-1" />
+                <Tag v-if="pago.estado === 2" value="Pendiente" severity="warn" class="px-2 py-1" />
+                <Tag v-else-if="pago.estado === 1" value="Completado" severity="success" class="px-2 py-1" />
                 <Tag v-else value="Desconocido" severity="warning" class="px-2 py-1" />
               </Message>
             </div>
@@ -113,7 +112,8 @@
       const cargarPago = async () => {
         try {
           const response = await api.get(`/pagos/obtenerPago/${pagoId}`);
-  
+
+          console.log("asi esta llegando", response)
           if (response.data.data && response.data.data.length > 0) {
             const pagoData = response.data.data[0];
             pago.value = {
@@ -140,6 +140,7 @@
           try {
             const response = await api.get(`/cuotas/cuota/${pagoId}`);
             cuotas.value = response.data;
+            console.log(response)
           } catch (error) {
             console.error("Error al obtener los módulos:", error);
           }

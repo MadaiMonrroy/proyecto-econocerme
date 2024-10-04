@@ -1,83 +1,87 @@
 <template>
-    <div class="card p-4">
-      <h2 class="text-2xl font-semibold mb-4 text-center">
-        Detalle de Inscripción - Pago {{ data[0]?.numeroCuota }} /
-        {{ data[0]?.cantidadCuotas }}
-      </h2>
-  
-      <label class="font-semibold text-right">Nombre Completo:</label>
-      <label class="p-2 text-right">{{ data[0]?.nombreCompleto }}</label><br />
-      <label class="font-semibold text-right">Fecha de Vencimiento:</label>
-      <label class="p-2 text-right">{{ formatDate(data[0]?.fechaVencimientoCuota) }}</label><br />
-      <label class="pt-8 font-semibold text-right">Fecha de Pago:</label>
-      <label class="p-2 text-right">{{ formatDate(data[0]?.fechaPagoCuota) }}</label>
-  
-      <!-- Contenedor para la tabla con overflow -->
-      <div class="pt-4 overflow-x-auto">
-        <table class="min-w-full pt-8 !border-0">
-          <thead>
-            <tr class="whitespace-nowrap">
-              <th class="border border-violet-950 dark:border-violet-50 px-2 py-4 w-5 text-center">#</th>
-              <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-48 text-left">Curso(s)</th>
-              <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right">Precio del Curso</th>
-              <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right">5% Precio</th>
-              <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right">Precio + 5%</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, index) in data" :key="row.idCuotaPago" class="whitespace-nowrap">
-              <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-center w-5">
-                {{ index + 1 }}
-              </td>
-              <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-48">{{ row.curso }}</td>
-              <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32">
-                {{ formatCurrency(row.precioCurso) }}
-              </td>
-              <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32">
-                {{ calculateFivePercent(row) }}
-              </td>
-              <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32">
-                {{ calculateIncreasedPrice(row) }}
-              </td>
-            </tr>
-            <!-- Fila para Totales -->
-            <tr>
-              <td class=" px-2 py-2 font-semibold text-right" colspan="4">
-                Total Precio Bs.:
-              </td>
-              <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right">
-                {{ calculateTotalIncreasedPrice() }}
-              </td>
-            </tr>
-            <tr>
-              <td class=" px-2 py-2 font-semibold text-right" colspan="4">
-                Cantidad de Cuotas:
-              </td>
-              <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right">
-                {{ data[0]?.cantidadCuotas }}
-              </td>
-            </tr>
-            <tr>
-              <td class=" px-2 py-2 font-semibold text-right" colspan="4">
-                Monto Cuota Bs.:
-              </td>
-              <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right">
-                {{ calculateMontoCuota() }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-  
-      <!-- Datos adicionales al pie de la tabla -->
-      <div class="pt-4">
-        <label class="p-2 text-left">Son: {{ montoCuotaLiteral }}</label> <br>
-        <label class="p-2 font-semibold text-right">Método de pago:</label>
-        <label class="p-2 text-left uppercase">{{ data[0]?.metodoPago }}</label>
-  
-      </div>
+  <div class="min-h-screen p-4 !bg-white">
+    <h2 class="text-2xl font-semibold mb-4 text-center">
+      RECIBO DE INSCRIPCIÓN - PAGO {{ data[0]?.numeroCuota }} /
+      {{ data[0]?.cantidadCuotas }}
+    </h2>
+
+    <label class="font-semibold text-right">Nombre Completo:</label>
+    <label class="p-2 text-right">{{ data[0]?.nombreCompleto }}</label><br />
+    <label class="font-semibold text-right">Fecha de Vencimiento:</label>
+    <label class="p-2 text-right">{{ formatDate(data[0]?.fechaVencimientoCuota) }}</label><br />
+    <label class="pt-8 font-semibold text-right">Fecha de Pago:</label>
+    <label class="p-2 text-right">{{ formatDate(data[0]?.fechaPagoCuota) }}</label>
+
+    <!-- Contenedor para la tabla con overflow -->
+    <div class="pt-4 overflow-x-auto">
+      <table class="min-w-full pt-8 !border-0">
+        <thead>
+          <tr class="whitespace-nowrap bg-violet-200 dark:text-violet-50 dark:bg-violet-950">
+            <th class="border border-violet-950 dark:border-violet-50 px-2 py-4 w-5 text-center">CANT.</th>
+            <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-48 text-left">CURSOS(S)</th>
+            <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right">PRECIO</th>
+            <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right">CARGO ADICIONAL</th>
+            <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right">SUB TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row) in data" :key="row.idCuotaPago" class="whitespace-nowrap">
+            <!-- <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-center w-5">
+              {{ index + 1 }} 
+            </td> -->
+            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-center w-5">
+              1
+            </td>
+            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-48">{{ row.curso }}</td>
+            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32">
+              {{ formatCurrency(row.precioCurso) }}
+            </td>
+            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32">
+              {{ calculateFivePercent(row) }}
+            </td>
+            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32">
+              {{ calculateIncreasedPrice(row) }}
+            </td>
+          </tr>
+          <!-- Fila para Totales -->
+          <tr>
+            <td class=" px-2 py-2 font-semibold text-right" colspan="4">
+              TOTAL Bs.
+            </td>
+            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right">
+              {{ calculateTotalIncreasedPrice() }}
+            </td>
+          </tr>
+          <tr>
+            <td class=" px-2 py-2 font-semibold text-right" colspan="4">
+              CANTIDAD DE CUOTAS:
+            </td>
+            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right">
+              {{ data[0]?.cantidadCuotas }}
+            </td>
+          </tr>
+          <tr>
+            <td class=" px-2 py-2 font-semibold text-right" colspan="4">
+              MONTO POR CUOTA Bs.
+            </td>
+            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right">
+              {{ calculateMontoCuota() }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </template>
+
+    <!-- Datos adicionales al pie de la tabla -->
+    <div class="pt-4">
+      <label class="p-2 text-left font-semibold">Son: {{ montoCuotaLiteral }}</label> <br>
+      <label class="p-2 font-semibold text-right">Método de pago:</label>
+      <label class="p-2 text-left uppercase">{{ data[0]?.metodoPago }}</label>
+
+    </div>
+
+  </div>
+</template>
   
   
   
@@ -176,12 +180,13 @@
     try {
       console.log(idInscripcion, idCuotaPago)
       const response = await api.get(
-        `/recibos/detalleInscripcionPago/${idInscripcion}?idCuotaPago=${idCuotaPago}`
+        `/recibosSinPermiso/detalleInscripcionPago/${idInscripcion}?idCuotaPago=${idCuotaPago}`
       );
       // Asignar datos al valor reactivo
       data.value = response.data;
       calculateValues();
       montoCuotaLiteral.value = convertMontoCuotaToWords(); 
+      console.log("estoy entrando a la funcion fetchdata de recibo pago")
   
     } catch (error) {
       console.error("Error al obtener los detalles de inscripción:", error);
@@ -240,6 +245,7 @@
     const idCuotaPago = route.query.idCuotaPago;
     // Llamar a la función de obtención de datos
     fetchData(idInscripcion, idCuotaPago);
+
   });
   
   // Usar watch para observar cambios en `data`
@@ -249,6 +255,6 @@
   </script>
   
   <style scoped>
-  /* Estilos opcionales */
+
   </style>
   

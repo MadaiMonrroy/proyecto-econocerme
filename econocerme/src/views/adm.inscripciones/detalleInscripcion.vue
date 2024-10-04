@@ -77,7 +77,7 @@
       <label class="p-2 text-left font-semibold">Son: {{ montoCuotaLiteral }}</label> <br>
       <label class="p-2 font-semibold text-right">Método de pago:</label>
       <label class="p-2 text-left uppercase">{{ data[0]?.metodoPago }}</label>
-      <Button @click="generatePdf">Generar PDF</Button>
+      <Button @click="generatePdf" severity="help">Generar Recibo</Button>
 
     </div>
 
@@ -151,23 +151,27 @@ function numeroALetras(num) {
 //   // Abrir el PDF generado en una nueva pestaña
 //   window.open(backendUrl);
 // }
-async function generatePdf(){
-      // const pdfPath = await handleGeneratePDF();
-      // const pdfPath = await generatePDF();
-        const idInscripcion = route.params.idInscripcion;
-        const idCuotaPago = route.query.idCuotaPago;
+async function generatePdf() {
+  try {
+    const idInscripcion = route.params.idInscripcion;
+    const idCuotaPago = route.query.idCuotaPago;
 
-      const response = await api.post("/recibos/generarPdf",
-      {
-        idInscripcion,
-        idCuotaPago
-      }
-    );
+    const response = await api.post("/recibos/generarPdf", {
+      idInscripcion,
+      idCuotaPago
+    });
 
-    console.log(response.data.url)
-    window.open(response.data.url);
-
+    if (response.data.url) {
+      window.open(response.data.url);
+    } else {
+      throw new Error('No se pudo generar el PDF.');
+    }
+  } catch (error) {
+    console.error('Error generando el PDF:', error);
+    alert('Hubo un problema al generar el PDF. Intenta nuevamente.');
+  }
 }
+
 // Función para convertir el monto a letras, incluyendo decimales
 function convertirMontoCuota(monto) {
   const enteros = Math.floor(monto);

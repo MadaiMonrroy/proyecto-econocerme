@@ -75,7 +75,8 @@
               />
             </template>
           </Column>
-          <Column field="observacion" header="Observación" class="px-6 py-4" />
+          <Column field="idInscripcion" header="Cod. Inscripcion" class="px-6 py-4" />
+
           <Column
             field="fechaInscripcion"
             header="Fecha de Inscripción"
@@ -84,10 +85,12 @@
           >
             <template #body="slotProps">
               <span>{{
-                new Date(slotProps.data.fechaInscripcion).toLocaleDateString()
+               formatDate(slotProps.data.fechaInscripcion)
               }}</span>
             </template>
           </Column>
+          <Column field="observacion" header="Observación" class="px-6 py-4" />
+
           <Column
             field="montoTotal"
             sortable
@@ -130,12 +133,13 @@
                   @click="showCourses(slotProps.data)"
                 />
                 <span class="text-center pt-4">
-                  {{ slotProps.data.cursos.length }} curso(s)</span
+                  {{ slotProps.data.cursos.length }}</span
                 >
               </div>
             </template>
           </Column>
-          <Column header="Acciones" class="px-6 py-4">
+          
+          <Column header="Pagos" class="px-6 py-4">
             <template #body="slotProps">
               <div class="flex items-center space-x-2">
                 <!-- <Button icon="pi pi-pencil" class="p-button-rounded p-button-info"
@@ -144,11 +148,6 @@
                   icon="pi pi-dollar"
                   class="p-button-rounded p-button-success"
                   @click="openEditCuota(slotProps.data)"
-                />
-                <Button
-                  icon="pi pi-trash"
-                  class="p-button-rounded p-button-danger"
-                  @click="eliminarInscripcionId(slotProps.data.idInscripcion)"
                 />
               </div>
             </template>
@@ -255,6 +254,7 @@ const eliminarInscripcion = async (idInscripcion) => {
       `/inscripciones/eliminarInscripcion/${inscripcionToDelete.value}`
     );
     fetchData();
+
     closeConfirmModal();
     toast.add({
       severity: "success",
@@ -277,12 +277,20 @@ const fetchData = async () => {
   try {
     const response = await api.get("/inscripciones/inscripcion");
     inscripciones.value = response.data.data.reverse();
+    console.log(response)
     // console.log(response.data.data);
   } catch (error) {
     console.error(error);
   }
 };
-
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
 onMounted(() => {
   fetchData();
 });
@@ -291,15 +299,19 @@ const inscripcionesConNumeracion = computed(() => {
   // Filtrar cursos basado en globalFilter
   const filter = globalFilter.value.toLowerCase();
   return inscripciones.value
-    .filter((inscripcion) => {
+  .filter((inscripcion) => {
+      const nombreCompleto = inscripcion.nombreCompleto?.toLowerCase() || "";
+      const idInscripcion = inscripcion.idInscripcion?.toString() || "";
+      const fechaInscripcion = formatDate(inscripcion.fechaInscripcion || "");
+      const montoTotal = inscripcion.montoTotal?.toString() || "";
+
+      // Verificamos si alguno de los campos contiene el filtro
       return (
-        inscripcion.nombreCompleto.toLowerCase().includes(filter) ||
-        inscripcion.montoTotal.toString().includes(filter) // Filtrar por precio
-
-
-        
+        nombreCompleto.includes(filter) ||
+        idInscripcion.includes(filter) ||
+        fechaInscripcion.includes(filter) ||
+        montoTotal.includes(filter)
       );
-      
     })
     
     .map((inscripcion, index) => ({

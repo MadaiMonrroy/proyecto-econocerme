@@ -32,7 +32,7 @@ export const listaLecciones = async (req, res) => {
 
     // Verificar si hay resultados
     if (result.length === 0) {
-      return res.status(404).json({ mensaje: "No se encontraron lecciones para este módulo" });
+      return res.status(200).json({ mensaje: "No se encontraron lecciones para este módulo" });
     }
 
     // Responder con las lecciones encontradas
@@ -54,7 +54,7 @@ export const obtenerLeccion = async (req, res) => {
       [idLeccion]
     );
     if (result.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         mensaje: "Lección no encontrada",
       });
     }
@@ -119,7 +119,7 @@ export const editarLeccion = async (req, res) => {
       );
   
       if (oldLeccion.length === 0) {
-        return res.status(404).json({
+        return res.status(200).json({
           mensaje: "Lección no encontrada",
         });
       }

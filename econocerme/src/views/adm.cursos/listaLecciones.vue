@@ -15,7 +15,7 @@
             <div class="absolute top-0 right-0 space-x-2">
               <Button
                 @click="abrirDialog(leccion)"
-                severity="help"
+                severity="info"
                 icon="pi pi-pencil"
                 raised
                 outlined
@@ -24,7 +24,7 @@
               </Button>
               <Button
                 @click="eliminarLeccion(leccion.idLeccion)"
-                severity="help"
+                severity="danger"
                 icon="pi pi-trash"
                 raised
                 outlined
@@ -153,12 +153,51 @@
     </Dialog>
   </div>
   <!-- Mensaje cuando no hay módulos -->
-  <p v-else>No hay lecciones disponibles.</p>
+  <Message v-else>No hay lecciones disponibles.</Message>
+  <!-- Modal para Confirmar Eliminación -->
+  <ConfirmDialog group="headless">
+    <template #container="{ message, acceptCallback, rejectCallback }">
+      <div
+        class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded-3xl"
+      >
+        <div
+          class="rounded-full bg-primary text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20"
+        >
+          <i
+            class="pi pi-exclamation-triangle !text-violet-950"
+            style="color: dimgray; font-size: 3rem"
+          ></i>
+        </div>
+        <span class="font-bold text-2xl block mb-2 mt-6">{{
+          message.header
+        }}</span>
+        <p class="mb-0">{{ message.message }}</p>
+        <div class="flex items-center gap-2 mt-6">
+          <Button
+            label="Eliminar"
+            severity="help"
+            raised
+            @click="acceptCallback"
+          ></Button>
+          <Button
+            label="Cancelar"
+            raised
+            severity="primary"
+            outlined
+            @click="rejectCallback"
+          ></Button>
+        </div>
+      </div>
+    </template>
+  </ConfirmDialog>
 </template>
 
 <script>
 import { ref, onMounted } from "vue";
 import api from "@/axiosConfig.js";
+import { useConfirm } from "primevue/useconfirm";
+import { useAuthStore } from "@/stores/authStore";
+import { useToast } from 'primevue/usetoast';
 
 export default {
   props: {
@@ -168,10 +207,15 @@ export default {
     },
   },
   setup(props) {
+    const toast = useToast(); // Usar el servicio de Toast
+
     const lecciones = ref([]);
     const leccionActivo = ref(null); // Solo un módulo activo a la vez
     const visible = ref(false); // Estado del dialog
     const leccionSeleccionado = ref({}); // Datos del módulo seleccionado
+    const confirm = useConfirm();
+    const authStore = useAuthStore();
+    const idUsuario = authStore.usuario.id;
 
     // Función para obtener los módulos del curso
     const obtenerLecciones = async () => {
@@ -188,6 +232,50 @@ export default {
       }
     };
 
+    const deleteLeccion = async (idLeccion) => {
+      try {
+        await api.delete(`/lecciones/eliminarLeccion/${idLeccion}`, {
+          params: { idUsuario },
+        });
+        lecciones.value = lecciones.value.filter(
+          (leccion) => leccion.idLeccion !== idLeccion
+        );
+        obtenerLecciones();
+        toast.add({
+          severity: "info",
+          summary: "Lección Eliminado",
+          detail: "La lección ha sido eliminada con éxito.",
+          life: 3000,
+        });
+      } catch (error) {
+        console.error(error);
+        toast.add({
+          severity: "error",
+          summary: "Error",
+          detail: "Hubo un problema al eliminar la lección.",
+          life: 3000,
+        });
+        // Manejar el error de forma adecuada
+      }
+    };
+    const eliminarLeccion = (idLeccion) => {
+      confirm.require({
+        group: "headless",
+        message: "¿Estás seguro de que deseas eliminar este curso?",
+        header: "Confirmación",
+        icon: "pi-exclamation-triangle",
+        accept: () => deleteLeccion(idLeccion), // Llama a eliminarAnuncio solo si el usuario acepta
+
+        reject: () => {
+          // toast.add({
+          //   severity: "warn",
+          //   summary: "Cancelled",
+          //   detail: "Eliminación cancelada",
+          //   life: 3000,
+          // });
+        },
+      });
+    };
     // Función para alternar el estado de un módulo (expandir/colapsar)
     const toggleLeccion = (index) => {
       if (leccionActivo.value === index) {
@@ -238,6 +326,7 @@ export default {
       abrirDialog,
       cerrarDialog,
       guardarCambios,
+      eliminarLeccion,
       leccionSeleccionado,
     };
   },

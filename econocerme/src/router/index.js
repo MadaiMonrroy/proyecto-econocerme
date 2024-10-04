@@ -32,12 +32,13 @@ import contenidoLeccion from "@/views/est.cursos/contenidoLeccion.vue";
 import contenidoModulo from "@/views/est.cursos/contenidoModulo.vue";
 import evaluacion from "@/views/adm.cursos/evaluacion.vue";
 import formEvaluacion from "@/views/adm.cursos/formEvaluacion.vue";
-import cuotas from "@/views/adm.inscripciones/cuotas.vue"
+import cuotas from "@/views/adm.inscripciones/cuotas.vue";
 import formEdit from "@/views/adm.usuarios/formEdit.vue";
 import vistaPrevia from "@/views/adm.cursos/vistaPreviaEvalua.vue";
 import detalleInscripcion from "@/views/adm.inscripciones/detalleInscripcion.vue";
 import reciboPago from "@/views/adm.inscripciones/reciboPago.vue";
-
+import preInscripciones from "@/views/adm.inscripciones/preInscripciones.vue";
+import verMas from "@/views/est.cursos/verMas.vue";
 const routes = [
   { path: "/", component: LoginForm },
   { path: "/Registro", component: RegistroForm },
@@ -60,16 +61,18 @@ const routes = [
       { path: "formAnuncio/:id", component: formAnuncio },
       { path: "prueba", component: prueba },
       { path: "main", component: main },
-      { path: "formEdit", component: formEdit},
+      { path: "formEdit", component: formEdit },
       { path: "inscripciones", component: inscripciones },
+      { path: "preInscripciones", component: preInscripciones },
       { path: "formInscripcion", component: formInscripcion },
       { path: "formInscripcion/:idInscripcion", component: formInscripcion },
       { path: "evaluacion/:idCurso", component: evaluacion },
       { path: "vistaPrevia/:idCurso", component: vistaPrevia },
-      { path: "cuotas/:idInscripcion", component: cuotas},
-      { path: "detalleInscripcion/:idInscripcion", component: detalleInscripcion},
-
-      
+      { path: "cuotas/:idInscripcion", component: cuotas },
+      {
+        path: "detalleInscripcion/:idInscripcion",
+        component: detalleInscripcion,
+      },
     ],
   },
   { path: "/generarPdf/:idInscripcion", component: reciboPago },
@@ -80,8 +83,9 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: "dashboard", component: dashboard },
+      { path: "verMasCurso/:idCurso", component: verMas },
       { path: "misCursos", component: misCursos },
-      { path: "formEdit", component: formEdit},
+      { path: "formEdit", component: formEdit },
       { path: "certificaciones", component: certificaciones },
       {
         path: "panelCurso/:id",
@@ -98,10 +102,17 @@ const routes = [
     component: panelCoaches,
     meta: { requiresAuth: true },
     children: [
-      { path: "dashboard", component: dashboard },
-      { path: "misCursos", component: misCursos },
-      { path: "formEdit", component: formEdit},
-      { path: "certificaciones", component: certificaciones },
+      { path: "formEdit", component: formEdit },
+      { path: "cursos", component: cursos },
+      { path: "modulos", component: listaCursos },
+      { path: "lecciones/:idModulo", component: lecciones },
+      { path: "modulos/:idCurso", component: modulos },
+      { path: "formCurso", component: formCurso }, // Ruta para agregar curso
+      { path: "formCurso/:idCurso", component: formCurso },
+      { path: "anuncios", component: anuncios }, // Ruta para editar curso
+      { path: "formAnuncio", component: formAnuncio }, // Ruta para agregar curso
+      { path: "formAnuncio/:id", component: formAnuncio },
+      { path: "evaluacion/:idCurso", component: evaluacion },
     ],
   },
   { path: "/menuUser", component: menuUser },
@@ -114,21 +125,33 @@ const router = createRouter({
   routes,
 });
 
-// Middleware para verificar la autenticación
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  //console.log(`Navegando a: ${to.path}`); // Verificar a dónde intentas navegar
-  // console.log(
-  //   `Requiere autenticación: ${to.matched.some((record) => record.meta.requiresAuth)}`
-  // );
-  // console.log(`Autenticado: ${authStore.isAuthenticated}`);
+  const isAuthenticated = authStore.isAuthenticated;
+  const userRole = authStore.userRole; // Obtener el rol del usuario
+  // console.log('Navigating to:', to.path);
+  // console.log('Authenticated:', isAuthenticated);
+  // console.log('User Role:', userRole);
+
   if (
-    to.matched.some((record) => record.meta.requiresAuth) &&
-    !authStore.isAuthenticated
+    !isAuthenticated &&
+    to.matched.some((record) => record.meta.requiresAuth)
   ) {
-    next("/");
+    next("/"); // Si no está autenticado y la ruta requiere autenticación, redirige al login
   } else {
-    next();
+    // Verifica los roles según las rutas
+    if (to.path.startsWith("/panelControl") && userRole !== "admin") {
+      next("/"); // Si no es administrador, redirige
+    } else if (to.path.startsWith("/panelCoaches") && userRole !== "coach") {
+      next("/"); // Si no es coach, redirige
+    } else if (
+      to.path.startsWith("/panelEstudiante") &&
+      userRole !== "usuario"
+    ) {
+      next("/"); // Si no es estudiante, redirige
+    } else {
+      next(); // Si tiene acceso, permite la navegación
+    }
   }
 });
 

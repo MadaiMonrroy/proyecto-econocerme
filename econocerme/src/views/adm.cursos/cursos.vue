@@ -306,7 +306,7 @@ const deletecurso = async (idCurso) => {
     toast.add({
       severity: "error",
       summary: "Error",
-      detail: "Hubo un problema al eliminar el usuario.",
+      detail: "Hubo un problema al eliminar el curso.",
       life: 3000,
     });
     // Manejar el error de forma adecuada

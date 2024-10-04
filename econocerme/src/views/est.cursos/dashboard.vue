@@ -5,41 +5,73 @@
         <b class="text-3xl text-violet-950 dark:text-white">ANUNCIOS</b>
       </Divider>
 
-    
-
       <div v-if="anunciosFiltrados.length === 0" class="text-red-500 mb-4">
         No hay resultados que coincidan con su búsqueda.
       </div>
 
-        <Carousel
-          v-if="anunciosFiltrados.length > 0"
-          :value="anunciosFiltrados"
-          :numVisible="1"
-          :numScroll="1"
-          :responsiveOptions="responsiveOptions"
-        >
-          <template #item="slotProps">
-            <div class="border border-surface-200 dark:border-surface-700 rounded m-2  p-4">
-              <div class="relative mx-auto">
-                <Image
-                  :src="slotProps.data.miniatura"
-                  :alt="slotProps.data.titulo"
-                  preview
-                  class="w-full rounded"
-                />
-              </div>
-              <div class="mb-4 font-medium">{{ slotProps.data.titulo }}</div>
-                <p v-html="slotProps.data.descripcion" class="text-sm text-gray-500 mb-4">
-                  
-                </p>
+      <Carousel
+        v-if="anunciosFiltrados.length > 0"
+        :value="anunciosFiltrados"
+        :numVisible="1"
+        :numScroll="1"
+        orientation="vertical"
+        verticalViewPortHeight="270px"
+        :responsiveOptions="responsiveOptions"
+        :autoplayInterval="4000"
+        circular
+        containerClass="flex items-center justify-center"
+      >
+        <template #item="slotProps">
+          <div
+            class="card !bg-gradient-to-tr from-[rgba(191, 90, 242, 0.5)] to-[rgba(191, 90, 242, 0.2)] min-h-[240px] md:max-h-[310px] !border-0 !rounded-full m-2 p-4 flex flex-col md:flex-row items-center justify-center"
+          >
+            <!-- Imagen a la izquierda, ajustable para pantallas pequeñas -->
+
+            <div
+              class="w-1/5 h-40 flex-shrink-0 mb-4 md:mb-0 justify-center items-center"
+            >
+              <img
+                :src="slotProps.data.miniatura"
+                :alt="slotProps.data.titulo"
+                class="w-full h-full object-contain rounded-3xl border-0 shadow-2xl transform -rotate-6"
+              />
             </div>
-          </template>
-        </Carousel>
+
+            <!-- Contenedor para el título y la descripción -->
+            <div
+              class="w-1/2 flex flex-col md:ml-6 justify-center items-center"
+            >
+              <!-- Título centrado -->
+              <div
+                class="mb-2 font-bold text-xl md:text-2xl font-serif text-center md:text-left"
+              >
+                {{ slotProps.data.titulo }}
+              </div>
+
+              <!-- Descripción alineada a la izquierda -->
+              <div
+                class="hidden md:block w-auto md:w-auto md:ml-6 flex flex-col justify-center"
+              >
+                <div
+                  class="bg-violet-50 dark:bg-violet-900 p-3 items-center justify-center rounded-lg shadow-sm w-fit"
+                >
+                  <div
+                    v-html="slotProps.data.descripcion"
+                    class="text-sm text-left"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </Carousel>
     </div>
 
     <div class="card">
       <Divider align="left" type="solid">
-        <b class="text-3xl text-violet-950 dark:text-white">CURSOS DISPONIBLES</b>
+        <b class="text-3xl text-violet-950 dark:text-white"
+          >CURSOS DISPONIBLES</b
+        >
       </Divider>
 
       <!-- Contenedor para el buscador y el select -->
@@ -90,7 +122,7 @@
           </template>
 
           <Carousel
-            v-if="(cursosFiltradosPorEspecialidad(especialidad).length > 0)"
+            v-if="cursosFiltradosPorEspecialidad(especialidad).length > 0"
             :value="cursosFiltradosPorEspecialidad(especialidad)"
             :numVisible="4"
             :numScroll="1"
@@ -98,39 +130,44 @@
           >
             <template #item="slotProps">
               <div
-                class="border border-surface-200 dark:border-surface-700 m-2 p-4 flex flex-col justify-between h-full"
+                class="p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex flex-col h-full"
               >
-                <div class="w-full h-44 mb-4">
-                  <div class="w-full h-44 mb-4 relative overflow-hidden">
-                    <Image
+                <div class="bg-surface-50 flex justify-center rounded p-4 h-48">
+                  <div
+                    class="w-full h-44 mb-4 flex justify-center items-center overflow-hidden"
+                  >
+                    <img
                       :src="slotProps.data.miniatura"
                       :alt="slotProps.data.titulo"
-                      preview
-                      class="max-w-full max-h-full object-cover object-center rounded"
-                      style="top: 50%; left: 50%; transform: translate(-50%, -50%);"
+                      class="rounded object-cover"
+                      style="max-width: 100%; max-height: 100%"
                     />
                   </div>
                 </div>
-                <div class="mb-4 font-medium">{{ slotProps.data.titulo }}</div>
-                <ScrollPanel style="width: 100%; height: 100px">
-                  <div class="text-sm text-gray-500 mb-4">
-                    {{ slotProps.data.descripcion }}
+                <div class="pt-6 flex flex-col justify-between flex-grow">
+                  <div class="text-lg font-medium mt-1 uppercase">
+                    {{ slotProps.data.titulo }}
                   </div>
-                </ScrollPanel>
-                <div class="text-sm text-gray-500 mb-4">
-                  Duración: {{ slotProps.data.duracion }} horas
+                  <ScrollPanel style="width: 100%; height: 100px">
+                    <div class="text-gray-700 mb-4">
+                      {{ slotProps.data.descripcion }}
+                    </div>
+                  </ScrollPanel>
+                  <div class="text-sm text-gray-500 mb-4 pt-3">
+                    Duración: {{ slotProps.data.duracion }} horas
+                  </div>
+                  <div class="text-2xl font-semibold text-green-600">
+                    {{ slotProps.data.precio }} Bs
+                  </div>
+                  <Button
+                    icon="pi pi-external-link"
+                    severity="info"
+                    raised
+                    label="Ver más"
+                    class="flex-auto whitespace-nowrap"
+                    @click="accederCurso(slotProps.data.idCurso)"
+                  />
                 </div>
-                <div class="mt-0 font-semibold text-xl">
-                  {{ slotProps.data.precio }} Bs
-                </div>
-                <Button
-                  icon="pi pi-external-link"
-                  severity="info"
-                  raised
-                  label="Ver más"
-                  class="mt-2 w-32 object-right"
-                  @click="accederCurso(slotProps.data.idCurso)"
-                />
               </div>
             </template>
           </Carousel>
@@ -176,7 +213,9 @@ const obtenerAnuncios = async () => {
 // Función para obtener los cursos
 const obtenerCursos = async () => {
   try {
-    const response = await api.get(`/misCursos/obtenerCursosNoInscritos/${usuario}`);
+    const response = await api.get(
+      `/misCursos/obtenerCursosNoInscritos/${usuario}`
+    );
     cursos.value = response.data;
 
     // Obtener especialidades únicas
@@ -189,7 +228,7 @@ const obtenerCursos = async () => {
 };
 
 const accederCurso = (idCurso) => {
-  router.push(`/panelEstudiante/panelCurso/${idCurso}`);
+  router.push(`/panelEstudiante/verMasCurso/${idCurso}`);
 };
 
 // Computed para incluir la opción "Todas las especialidades"
@@ -238,5 +277,4 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

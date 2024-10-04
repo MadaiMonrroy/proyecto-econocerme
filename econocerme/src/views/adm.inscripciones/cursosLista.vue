@@ -90,7 +90,6 @@ const toggleExpand = (idCurso) => {
 	-webkit-box-orient: vertical;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	-webkit-line-clamp: 3;
 	/* Número de líneas visibles antes del truncamiento */
 }
 

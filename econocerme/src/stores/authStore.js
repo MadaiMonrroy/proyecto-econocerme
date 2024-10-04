@@ -18,6 +18,8 @@ export const useAuthStore = defineStore("auth", {
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
+    userRole: (state) => state.usuario?.tipoUsuario || '', // Agregar getter para el rol
+
   },
   actions: {
     async login(email, contrasenia) {
@@ -28,7 +30,7 @@ export const useAuthStore = defineStore("auth", {
         );
         this.usuario = response.data.usuario;
         this.token = response.data.token;
-
+        console.log(this.usuario)
         // Encriptar y guardar en una cookie
         const encryptedData = encriptar({
           usuario: this.usuario,

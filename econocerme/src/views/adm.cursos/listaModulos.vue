@@ -64,8 +64,11 @@
                       raised
                       outlined
                       rounded
-                      v-tooltip.left="{ value: 'Editar', showDelay: 200, hideDelay: 100 }"
-
+                      v-tooltip.left="{
+                        value: 'Editar',
+                        showDelay: 200,
+                        hideDelay: 100,
+                      }"
                     ></Button>
                     <Button
                       @click="eliminarModulo(modulo.idModulo)"
@@ -74,8 +77,11 @@
                       raised
                       outlined
                       rounded
-                      v-tooltip.top="{ value: 'Eliminar', showDelay: 200, hideDelay: 100 }"
-
+                      v-tooltip.top="{
+                        value: 'Eliminar',
+                        showDelay: 200,
+                        hideDelay: 100,
+                      }"
                     ></Button>
                     <Button
                       @click="verLecciones(modulo.idModulo)"
@@ -84,7 +90,11 @@
                       raised
                       outlined
                       rounded
-                      v-tooltip.right="{ value: 'Lecciones', showDelay: 200, hideDelay: 100 }"
+                      v-tooltip.right="{
+                        value: 'Lecciones',
+                        showDelay: 200,
+                        hideDelay: 100,
+                      }"
                     ></Button>
                   </div>
                 </div>
@@ -104,15 +114,14 @@
             <div
               class="p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex flex-col"
             >
-              <div class="bg-surface-50 flex justify-center rounded p-4">
-                <div class="relative mx-auto">
-                  <img
-                    class="rounded w-full"
+            <div class="bg-surface-50 flex justify-center rounded p-4 h-48">
+              <img
+                  class="rounded w-full h-full object-cover"
                     :src="modulo.imagen"
                     alt="Imagen del Módulo"
                     style="max-width: 300px"
                   />
-                </div>
+
               </div>
               <div class="pt-6">
                 <div class="flex flex-row justify-between items-start gap-2">
@@ -141,8 +150,11 @@
                       raised
                       outlined
                       rounded
-                      v-tooltip.left="{ value: 'Editar', showDelay: 200, hideDelay: 100 }"
-
+                      v-tooltip.left="{
+                        value: 'Editar',
+                        showDelay: 200,
+                        hideDelay: 100,
+                      }"
                     ></Button>
                     <Button
                       @click="eliminarModulo(modulo.idModulo)"
@@ -151,8 +163,11 @@
                       raised
                       outlined
                       rounded
-                      v-tooltip.top="{ value: 'Eliminar', showDelay: 200, hideDelay: 100 }"
-
+                      v-tooltip.top="{
+                        value: 'Eliminar',
+                        showDelay: 200,
+                        hideDelay: 100,
+                      }"
                     ></Button>
                     <Button
                       @click="verLecciones(modulo.idModulo)"
@@ -161,7 +176,11 @@
                       raised
                       outlined
                       rounded
-                      v-tooltip.right="{ value: 'Lecciones', showDelay: 200, hideDelay: 100 }"
+                      v-tooltip.right="{
+                        value: 'Lecciones',
+                        showDelay: 200,
+                        hideDelay: 100,
+                      }"
                     ></Button>
                   </div>
                 </div>
@@ -216,83 +235,137 @@
         </div>
 
         <!-- Aquí está el bloque del video -->
-  <div>
-    <label for="videoIntro" class="block text-sm font-medium">
-      Video de Introducción
-    </label>
+        <div>
+          <label for="videoIntro" class="block text-sm font-medium">
+            Video de Introducción
+          </label>
 
-    <!-- Si hay un video ya cargado y no estamos cambiándolo -->
-    <div v-if="(modulo.videoIntroURL || videoPreview) && !cambiandoVideo">
-      <div class="relative w-full h-0 pb-[56.25%]">
-        <video
-          controls
-          class="absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-lg"
-          controlsList="nodownload"
-          poster="/src/assets/fondo.jpg"
-          playsinline
-          loop
-          style="max-height: 300px"
-        >
-          <source :src="modulo.videoIntroURL || videoPreview" type="video/mp4" />
-          Tu navegador no soporta la visualización de videos.
-        </video>
-      </div>
-      <!-- Botón para cambiar el video -->
-      <Button 
-        label="Cambiar" 
-        @click="cambiarVideo" 
-        severity="warning" 
-        class="mt-2" 
-        icon="pi pi-pencil" 
-        rounded 
-        outlined />
-    </div>
-
-    <!-- Si el usuario ha presionado "Cambiar", mostrar FileUpload -->
-    <div v-if="cambiandoVideo">
-      <FileUpload
-        name="videoIntro"
-        @upload="onTemplatedUpload"
-        accept="video/*"
-        :maxFileSize="50000000"
-        :multiple="false"
-        @select="onSelectedFiles"
-        @progress="onProgress"
-      >
-        <template #header="{ chooseCallback, uploadCallback, clearCallback, files }">
-          <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
-            <div class="flex gap-2">
-              <Button @click="chooseCallback()" icon="pi pi-video" rounded outlined severity="secondary"></Button>
-              <Button @click="uploadEvent(uploadCallback)" icon="pi pi-cloud-upload" rounded outlined severity="success" :disabled="!files || files.length === 0"></Button>
-              <Button @click="clearCallback()" icon="pi pi-times" rounded outlined severity="danger" :disabled="!files || files.length === 0"></Button>
+          <!-- Si hay un video ya cargado y no estamos cambiándolo -->
+          <div v-if="(modulo.videoIntroURL || videoPreview) && !cambiandoVideo">
+            <div class="relative w-full h-0 pb-[56.25%]">
+              <video
+                controls
+                class="absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-lg"
+                controlsList="nodownload"
+                poster="/src/assets/fondo.jpg"
+                playsinline
+                loop
+                style="max-height: 300px"
+              >
+                <source
+                  :src="modulo.videoIntroURL || videoPreview"
+                  type="video/mp4"
+                />
+                Tu navegador no soporta la visualización de videos.
+              </video>
             </div>
-            <ProgressBar :value="progress" :showValue="false" class="md:w-20rem h-1 w-full md:ml-auto">
-              <span class="whitespace-nowrap">{{ totalSize }}B / 50Mb</span>
-            </ProgressBar>
+            <!-- Botón para cambiar el video -->
+            <Button
+              label="Cambiar"
+              @click="cambiarVideo"
+              severity="warning"
+              class="mt-2"
+              icon="pi pi-pencil"
+              rounded
+              outlined
+            />
           </div>
-        </template>
 
-        <template #content="{ files, removeFileCallback }">
-          <div v-if="files.length > 0">
-            <h5>Pending</h5>
-            <div v-for="(file, index) of files" :key="file.name + file.type + file.size">
-              <span>{{ file.name }}</span>
-              <div>{{ formatSize(file.size) }}</div>
-              <Badge value="Pending" severity="warn" />
-              <Button icon="pi pi-times" @click="onRemoveTemplatingFile(file, removeFileCallback, index)" outlined rounded severity="danger" />
-            </div>
-          </div>
-        </template>
+          <!-- Si el usuario ha presionado "Cambiar", mostrar FileUpload -->
+          <div v-if="cambiandoVideo">
+            <FileUpload
+              name="videoIntro"
+              @upload="onTemplatedUpload"
+              accept="video/*"
+              :maxFileSize="50000000"
+              :multiple="false"
+              @select="onSelectedFiles"
+              @progress="onProgress"
+            >
+              <template
+                #header="{
+                  chooseCallback,
+                  uploadCallback,
+                  clearCallback,
+                  files,
+                }"
+              >
+                <div
+                  class="flex flex-wrap justify-between items-center flex-1 gap-4"
+                >
+                  <div class="flex gap-2">
+                    <Button
+                      @click="chooseCallback()"
+                      icon="pi pi-video"
+                      rounded
+                      outlined
+                      severity="secondary"
+                    ></Button>
+                    <Button
+                      @click="uploadEvent(uploadCallback)"
+                      icon="pi pi-cloud-upload"
+                      rounded
+                      outlined
+                      severity="success"
+                      :disabled="!files || files.length === 0"
+                    ></Button>
+                    <Button
+                      @click="clearCallback()"
+                      icon="pi pi-times"
+                      rounded
+                      outlined
+                      severity="danger"
+                      :disabled="!files || files.length === 0"
+                    ></Button>
+                  </div>
+                  <ProgressBar
+                    :value="progress"
+                    :showValue="false"
+                    class="md:w-20rem h-1 w-full md:ml-auto"
+                  >
+                    <span class="whitespace-nowrap"
+                      >{{ totalSize }}B / 50Mb</span
+                    >
+                  </ProgressBar>
+                </div>
+              </template>
 
-        <template #empty>
-          <div class="flex items-center justify-center flex-col">
-            <i class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color" />
-            <p class="mt-6 mb-0">Arrastre el archivo de video aquí para subir.</p>
+              <template #content="{ files, removeFileCallback }">
+                <div v-if="files.length > 0">
+                  <h5>Pending</h5>
+                  <div
+                    v-for="(file, index) of files"
+                    :key="file.name + file.type + file.size"
+                  >
+                    <span>{{ file.name }}</span>
+                    <div>{{ formatSize(file.size) }}</div>
+                    <Badge value="Pending" severity="warn" />
+                    <Button
+                      icon="pi pi-times"
+                      @click="
+                        onRemoveTemplatingFile(file, removeFileCallback, index)
+                      "
+                      outlined
+                      rounded
+                      severity="danger"
+                    />
+                  </div>
+                </div>
+              </template>
+
+              <template #empty>
+                <div class="flex items-center justify-center flex-col">
+                  <i
+                    class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"
+                  />
+                  <p class="mt-6 mb-0">
+                    Arrastre el archivo de video aquí para subir.
+                  </p>
+                </div>
+              </template>
+            </FileUpload>
           </div>
-        </template>
-      </FileUpload>
-    </div>
-  </div>
+        </div>
 
         <Button
           label="Guardar Cambios"
@@ -303,8 +376,39 @@
       </form>
     </Dialog>
   </div>
+
   <!-- Mensaje cuando no hay módulos -->
-  <p v-else>No hay módulos disponibles.</p>
+  <Message v-else>No hay módulos disponibles.</Message>
+  <!-- Modal para Confirmar Eliminación -->
+  <ConfirmDialog group="headless">
+      <template #container="{ message, acceptCallback, rejectCallback }">
+        <div
+          class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded-3xl"
+        >
+          <div
+            class="rounded-full bg-primary text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20"
+          >
+            <i
+              class="pi pi-exclamation-triangle !text-violet-950"
+              style="color: dimgray; font-size: 3rem"
+            ></i>
+          </div>
+          <span class="font-bold text-2xl block mb-2 mt-6">{{
+            message.header
+          }}</span>
+          <p class="mb-0">{{ message.message }}</p>
+          <div class="flex items-center gap-2 mt-6">
+            <Button
+              label="Eliminar"
+              severity="help"
+              raised
+              @click="acceptCallback"
+            ></Button>
+            <Button label="Cancelar" raised severity="primary" outlined @click="rejectCallback"></Button>
+          </div>
+        </div>
+      </template>
+    </ConfirmDialog>
 </template>
 
 <script setup>
@@ -314,12 +418,17 @@ import { useToast } from "primevue/usetoast";
 import CustomFileInput from "@/components/CustomFileInput.vue";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "vue-router";
+import { useConfirm } from "primevue/useconfirm";
 
 const modulos = ref([]);
 const layout = ref("grid");
 const options = ref(["list", "grid"]);
 const optionLabel = ref("");
 const router = useRouter();
+const confirm = useConfirm();
+const authStore = useAuthStore();
+
+const idUsuario = authStore.usuario.id;
 
 //esto hay que eliminar
 const toast = useToast();
@@ -344,7 +453,7 @@ const isFormValid = computed(() => {
     modulo.value.nombre &&
     modulo.value.descripcion &&
     modulo.value.imagen &&
-    (!modulo.videoIntroURL ||videoPreview.value)&& // Asegura que haya un video
+    (!modulo.videoIntroURL || videoPreview.value) && // Asegura que haya un video
     isUploading.value
   );
 });
@@ -355,17 +464,15 @@ const cambiarVideo = () => {
 
 const formatSize = (bytes) => {
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 };
 
-
-
 const verLecciones = (idModulo) => {
   router.push({
     path: `/panelControl/lecciones/${idModulo}`,
-    query: { cursoId: props.cursoId } // Pasamos idCurso como parámetro de consulta
+    query: { cursoId: props.cursoId }, // Pasamos idCurso como parámetro de consulta
   });
 };
 
@@ -397,13 +504,15 @@ const onFileChange = (event) => {
   modulo.value.imagen = selectedFile;
 };
 
-
-
-
 const onTemplatedUpload = () => {
   isUploading.value = false; // Termina la subida
   cambiandoVideo.value = false; // Restablece el estado
-  toast.add({ severity: 'info', summary: 'Éxito', detail: 'Video subido', life: 3000 });
+  toast.add({
+    severity: "info",
+    summary: "Éxito",
+    detail: "Video subido",
+    life: 3000,
+  });
 };
 
 const onSelectedFiles = (event) => {
@@ -426,8 +535,13 @@ const uploadEvent = async (uploadCallback) => {
   try {
     //await uploadCallback(); // Llama a la función de carga
   } catch (error) {
-    console.error('Error durante la carga:', error);
-    toast.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el video', life: 3000 });
+    console.error("Error durante la carga:", error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "No se pudo cargar el video",
+      life: 3000,
+    });
   }
 };
 const onRemoveTemplatingFile = (file, removeFileCallback, index) => {
@@ -487,7 +601,6 @@ const props = defineProps({
 onMounted(async () => {
   const response = await api.get(`/modulos/modulo/${props.cursoId}`);
   modulos.value = response.data;
-
 });
 
 const guardarCambios = async () => {
@@ -498,8 +611,49 @@ const guardarCambios = async () => {
     console.error("Error al guardar los cambios:", error);
   }
 };
-
+const deleteModulo = async (idModulo) => {
+  try {
+    await api.delete(`/modulos/eliminarModulo/${idModulo}`, {
+      params: { idUsuario },
+    });
+    modulos.value = modulos.value.filter(
+      (modulo) => modulo.idModulo !== idModulo
+    );
+    const response = await api.get(`/modulos/modulo/${props.cursoId}`);
+    modulos.value = response.data;
+    toast.add({
+      severity: "info",
+      summary: "Modulo Eliminado",
+      detail: "El modulo ha sido eliminado con éxito.",
+      life: 3000,
+    });
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Hubo un problema al eliminar el modulo.",
+      life: 3000,
+    });
+    // Manejar el error de forma adecuada
+  }
+};
 const eliminarModulo = (idModulo) => {
-  // Eliminar el módulo
+  confirm.require({
+    group: "headless",
+    message: "¿Estás seguro de que deseas eliminar este curso?",
+    header: "Confirmación",
+    icon: "pi-exclamation-triangle",
+    accept: () => deleteModulo(idModulo), // Llama a eliminarAnuncio solo si el usuario acepta
+
+    reject: () => {
+      // toast.add({
+      //   severity: "warn",
+      //   summary: "Cancelled",
+      //   detail: "Eliminación cancelada",
+      //   life: 3000,
+      // });
+    },
+  });
 };
 </script>

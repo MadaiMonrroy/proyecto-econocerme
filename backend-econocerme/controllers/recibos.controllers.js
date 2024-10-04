@@ -154,6 +154,7 @@ const generarScreenshot = async (url) => {
 
 export const generarPdf = async (req, res) => {
     const { idInscripcion, idCuotaPago } = req.body; // Recibir la URL desde el cuerpo de la solicitud
+    console.log("estos datos estan llegando",idInscripcion, idCuotaPago)
     try {
 
       // Inicializar Puppeteer

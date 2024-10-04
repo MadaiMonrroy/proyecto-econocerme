@@ -1,10 +1,11 @@
 <template>
-  <div class="p-8 max-w-4xl mx-auto shadow-2xl">
+  <div class="pt-5">
+  <div class="p-8 max-w-4xl mx-auto rounded-3xl shadow-2xl dark:shadow-lg dark:shadow-violet-950">
     <!-- Formulario de preguntas -->
     <div
       v-for="(question, index) in questions"
       :key="index"
-      class="mb-8 shadow-md p-6 rounded-lg"
+      class="mb-8 shadow-lg p-6 rounded-3xl dar dark:shadow-lg dark:shadow-violet-950"
     >
       <div class="flex justify-between items-center mb-4">
         <label class="block text-xl font-medium"
@@ -87,6 +88,7 @@
       <i class="pi pi-save mr-2"></i> Guardar Examen
     </Button>
   </div>
+</div>
 </template>
 
 <script>
