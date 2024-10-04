@@ -125,6 +125,7 @@ import Drawer from 'primevue/drawer';
 import Carousel from 'primevue/carousel';
 import ConfirmDialog from 'primevue/confirmdialog';
 import AnimateOnScroll from 'primevue/animateonscroll';
+import Popover from 'primevue/popover';
 
 
 
@@ -160,7 +161,7 @@ app.component('Toolbar', Toolbar);
 app.component('DatePicker',DatePicker);
 app.component('Image', Image);
 app.component('Tag', Tag);
-
+app.component('Popover',Popover);
 app.component('ProgressSpinner', ProgressSpinner);
 app.component('Accordion', Accordion);
 app.component('AccordionPanel', AccordionPanel);

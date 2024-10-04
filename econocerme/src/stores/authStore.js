@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import axios from "axios";
 import CryptoJS from "crypto-js";
+import api from "@/axiosConfig.js";
 
 const encriptar = (data) => {
   return CryptoJS.AES.encrypt(JSON.stringify(data), "8468700lp").toString();
@@ -15,11 +16,13 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     usuario: null,
     token: null,
+    carrito: [], // Estado para el carrito de compras
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
-    userRole: (state) => state.usuario?.tipoUsuario || '', // Agregar getter para el rol
-
+    userRole: (state) => state.usuario?.tipoUsuario || "", // Agregar getter para el rol
+    // Devuelve la cantidad de cursos en el carrito
+    carritoCantidad: (state) => state.carrito.length,
   },
   actions: {
     async login(email, contrasenia) {
@@ -30,7 +33,8 @@ export const useAuthStore = defineStore("auth", {
         );
         this.usuario = response.data.usuario;
         this.token = response.data.token;
-        console.log(this.usuario)
+
+
         // Encriptar y guardar en una cookie
         const encryptedData = encriptar({
           usuario: this.usuario,
@@ -39,6 +43,8 @@ export const useAuthStore = defineStore("auth", {
         document.cookie = `auth=${encryptedData}; path=/;`;
         // console.log("Usuario:", this.usuario);
         // console.log("Token:", this.token);
+
+        // Cargar el carrito del localStorage basado en idUsuario
         return response.data;
       } catch (error) {
         console.error("Error en login:", error);
@@ -56,6 +62,9 @@ export const useAuthStore = defineStore("auth", {
           const decryptedValue = desencriptar(encryptedValue);
           this.usuario = decryptedValue.usuario;
           this.token = decryptedValue.token;
+
+          // Cargar el carrito del localStorage basado en idUsuario
+          this.cargarCarrito();
           // console.log("Usuario cargado:", this.usuario);
           // console.log("Token cargado:", this.token);
         } catch (error) {
@@ -70,11 +79,62 @@ export const useAuthStore = defineStore("auth", {
         token: this.token,
       });
       document.cookie = `auth=${encryptedData}; path=/;`; // Actualiza la cookie con los datos encriptados
-    }, 
+    },
     logout() {
+      const userId = this.usuario?.id; // Asegúrate de que el ID del usuario esté disponible
+
       this.usuario = null;
       this.token = null;
+      this.carrito = []; // Vaciar el carrito al cerrar sesión
+
       document.cookie = "auth=; Max-Age=0; path=/;";
+      // Limpiar el carrito del localStorage
+      localStorage.removeItem(`carrito_${userId}`); // Asegúrate de que estés utilizando el localStorage para el carrito
+
+    },
+    async cargarCarrito() {
+      const userId = this.usuario?.id; // Asegúrate de que el ID del usuario esté disponible
+      // Primero intenta cargar del localStorage
+      const carritoLocal = localStorage.getItem(`carrito_${userId}`);
+      if (carritoLocal) {
+        this.carrito = JSON.parse(carritoLocal);
+      } else if (this.usuario?.tipoUsuario === "usuario") {
+        // Si no hay carrito en localStorage, consulta a la base de datos
+        try {
+          const response = await api.get(
+            `/carritos/carrito/${userId}`
+          );
+          const carritoDB = response.data;
+
+          // Suponiendo que el campo idCurso es un JSON array
+          if (carritoDB && carritoDB[0].idCurso) {
+            const cursoIds = carritoDB[0].idCurso;
+            // Cargar los detalles de los cursos en base a los IDs
+            const cursos = await this.cargarCursos(cursoIds);
+
+            this.carrito = cursos;
+
+            // Guarda en localStorage
+            localStorage.setItem(`carrito_${userId}`, JSON.stringify(cursos));
+          }
+        } catch (error) {
+          console.error(
+            "Error al cargar el carrito de la base de datos:",
+            error
+          );
+        }
+      }
+    },
+    async cargarCursos(cursoIds) {
+      const cursoPromises = cursoIds.map(async (id) => {
+        const response = await api.get(
+          `/carritos/obtenerDetalleCurso/${id}`
+        );
+        return response.data; // Devuelve los datos del curso
+      });
+      console.log(await Promise.all(cursoPromises)); // Para verificar los datos de los cursos
+
+      return Promise.all(cursoPromises);
     },
   },
 });

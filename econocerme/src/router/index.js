@@ -123,6 +123,16 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  // Aquí agregamos el scrollBehavior
+  scrollBehavior(to, from, savedPosition) {
+    // Si hay una posición guardada (navegación hacia atrás/adelante), vuelve a esa posición
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      // Si no, vuelve a la parte superior de la página
+      return { top: 0 };
+    }
+  },
 });
 
 router.beforeEach((to, from, next) => {

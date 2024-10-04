@@ -4,6 +4,8 @@ import nodemailer from "nodemailer";
 import crypto from "crypto";
 import jwt from "jsonwebtoken"; // Importa jsonwebtoken
 
+
+
 // Configuración del transporte de correo
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",

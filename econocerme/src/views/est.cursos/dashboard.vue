@@ -2,7 +2,7 @@
   <div class="p-4">
     <div class="card">
       <Divider align="left" type="solid">
-        <b class="text-3xl text-violet-950 dark:text-white">ANUNCIOS</b>
+        <b class="text-3xl text-black dark:text-white">ANUNCIOS</b>
       </Divider>
 
       <div v-if="anunciosFiltrados.length === 0" class="text-red-500 mb-4">
@@ -69,7 +69,7 @@
 
     <div class="card">
       <Divider align="left" type="solid">
-        <b class="text-3xl text-violet-950 dark:text-white"
+        <b class="text-3xl text-black dark:text-white"
           >CURSOS DISPONIBLES</b
         >
       </Divider>
@@ -114,11 +114,12 @@
         :key="especialidad"
         class="mb-6"
       >
-        <Fieldset class="!border-2">
+        <Fieldset class="!border-spacing-3">
           <template #legend>
-            <span class="text-2xl tracking-wide text-violet-950">{{
-              especialidad
-            }}</span>
+            <span
+              class="text-2xl tracking-wide text-violet-950 dark:text-white"
+              >{{ especialidad }}</span
+            >
           </template>
 
           <Carousel
@@ -127,46 +128,63 @@
             :numVisible="4"
             :numScroll="1"
             :responsiveOptions="responsiveOptions"
+            class="m-3"
           >
             <template #item="slotProps">
               <div
-                class="p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex flex-col h-full"
+                class="p-8 mt-4 mb-4 ml-2 mr-2 border bg-surface-50 dark:bg-black border-violet-200 shadow-xl dark:border-gray-950  dark:shadow-lg dark:shadow-violet-950 rounded-2xl transform hover:scale-105 transition-all duration-300"
+                
+                style="height: 450px"
               >
-                <div class="bg-surface-50 flex justify-center rounded p-4 h-48">
+                <div class=" bg-violet-50   dark:bg-gray-900 flex justify-center rounded-xl pt-2  h-48">
                   <div
                     class="w-full h-44 mb-4 flex justify-center items-center overflow-hidden"
                   >
                     <img
                       :src="slotProps.data.miniatura"
                       :alt="slotProps.data.titulo"
-                      class="rounded object-cover"
+                      class="rounded-xl object-cover"
                       style="max-width: 100%; max-height: 100%"
                     />
                   </div>
                 </div>
                 <div class="pt-6 flex flex-col justify-between flex-grow">
-                  <div class="text-lg font-medium mt-1 uppercase">
+                  <div class="text-lg font-medium mt-1 uppercase h-16">
                     {{ slotProps.data.titulo }}
                   </div>
-                  <ScrollPanel style="width: 100%; height: 100px">
-                    <div class="text-gray-700 mb-4">
-                      {{ slotProps.data.descripcion }}
-                    </div>
-                  </ScrollPanel>
-                  <div class="text-sm text-gray-500 mb-4 pt-3">
+                  <div class="text-sm text-gray-500 mb-4 pt-6">
                     Duración: {{ slotProps.data.duracion }} horas
                   </div>
-                  <div class="text-2xl font-semibold text-green-600">
-                    {{ slotProps.data.precio }} Bs
+                  <div class="text-2xl font-semibold ">
+                    Bs. {{ slotProps.data.precio }} 
                   </div>
-                  <Button
-                    icon="pi pi-external-link"
-                    severity="info"
-                    raised
-                    label="Ver más"
-                    class="flex-auto whitespace-nowrap"
-                    @click="accederCurso(slotProps.data.idCurso)"
-                  />
+                  <div class="flex items-center space-x-3 pt-3 pb-3">
+                    <Button
+                      icon="pi pi-external-link"
+                      severity="contrast"
+                      raised
+                      label="Ver más"
+                      class="flex-auto whitespace-nowrap text-base py-3 px-4"
+                      @click="accederCurso(slotProps.data.idCurso)"
+                    ></Button>
+
+                    <Button
+                      rounded
+                      
+                      text raised
+                      outlined
+                      severity="success"
+                      
+                      
+                      v-tooltip.top="{
+                        value: 'Añadir a la cesta',
+                        showDelay: 0,
+                        hideDelay: 100,
+                      }"
+                    >
+                      <span class="pi pi-cart-arrow-down" style="font-size: x-large" @click="añadirACesta(slotProps.data.idCurso)"></span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </template>
@@ -180,6 +198,8 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useToast } from "primevue/usetoast";
+
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/axiosConfig.js";
 
@@ -194,12 +214,52 @@ const responsiveOptions = ref([
   { breakpoint: "767px", numVisible: 2, numScroll: 1 },
   { breakpoint: "575px", numVisible: 1, numScroll: 1 },
 ]);
+const toast = useToast();
 
 const authStore = useAuthStore();
 const usuario = authStore.usuario.id;
 const router = useRouter();
 const especialidades = ref([]);
+const añadirACesta = async (idCurso) => {
+  try {
+    // Obtener los detalles del curso desde el servidor
+    const cursoDetalles = await authStore.cargarCursos([idCurso]);
 
+    // Obtener el carrito del localStorage
+    let carrito = JSON.parse(localStorage.getItem(`carrito_${authStore.usuario.id}`)) || [];
+
+    // Verificar si el curso ya está en el carrito
+    const existeCurso = carrito.some(curso => curso.idCurso === idCurso);
+
+    if (existeCurso) {
+
+      console.log("El curso ya está en el carrito.");
+      toast.add({
+      severity: "info",
+      summary: "Carrito",
+      detail: "El curso ya está en el carrito.",
+      life: 3000
+    });
+      return; // No añadir el curso si ya está presente
+    }
+
+    // Añadir los detalles del nuevo curso al carrito
+    carrito.push(cursoDetalles[0]); // Añade el curso obtenido desde el endpoint
+
+    // Guardar el carrito actualizado en el localStorage
+    localStorage.setItem(`carrito_${authStore.usuario.id}`, JSON.stringify(carrito));
+
+    console.log("Curso añadido al carrito:", cursoDetalles[0]);
+      toast.add({
+      severity: "success",
+      summary: "Carrito",
+      detail: "El curso se ha añadido al carrito.",
+      life: 3000
+    });
+  } catch (error) {
+    console.error("Error al añadir curso a la cesta:", error);
+  }
+};
 // Función para obtener los anuncios
 const obtenerAnuncios = async () => {
   try {

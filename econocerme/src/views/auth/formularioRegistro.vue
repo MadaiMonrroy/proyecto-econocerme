@@ -219,7 +219,6 @@ const handleSubmit = async () => {
 
     if (response.status === 201) {
 
-      localStorage.setItem("token", response.data.token);
 // Limpiar los campos del formulario
       nombres.value = "";
       primerApellido.value = "";
