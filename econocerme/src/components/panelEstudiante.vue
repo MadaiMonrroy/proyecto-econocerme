@@ -10,33 +10,43 @@
         <img src="@/assets/logoec.png" alt="Logo" class="h-10 mx-6" />
       </div>
       <div class="flex items-center space-x-4">
-        <i
-          class="pi pi-shopping-cart"
-          @click="togglePopover"
-          style="font-size: 1.5rem"
-        ></i>
-        <button class="text-black hover:text-purple-950" @click="goToDashboard">
-          <i class="pi pi pi-home text-2x1" style="font-size: 21px">
-            Dashboard</i
-          >
-        </button>
-        <button class="text-black hover:text-purple-950" @click="goToCursos">
-          <i class="pi pi-book text-xl" style="font-size: 21px"> Mis Cursos</i>
-        </button>
-        <button
-          class="text-black hover:text-purple-950"
-          @click="goToCertificaciones"
-        >
-          <i class="pi pi-id-card text-xl" style="font-size: 21px">
-            Certificaciones</i
-          >
-        </button>
-        <theme-switcher class="w-14 h-14"></theme-switcher>
+       
         <div>
-        
-
-        
+          <button
+            class="text-black hover:text-purple-950"
+            @click="goToDashboard"
+          >
+            <i class="pi pi pi-home text-2x1" style="font-size: 21px">
+              Dashboard</i
+            >
+          </button>
         </div>
+        
+        <div>
+          <button class="text-black hover:text-purple-950" @click="goToCursos">
+            <i class="pi pi-book text-xl" style="font-size: 21px">
+              Mis Cursos</i
+            >
+          </button>
+        </div>
+       
+        <div>
+          <button
+            class="text-black hover:text-purple-950"
+            @click="goToCertificaciones"
+          >
+            <i class="pi pi-id-card text-xl" style="font-size: 21px">
+              Certificaciones</i
+            >
+          </button>
+        </div>
+        <div class="flex justify-end">
+          <carrito />
+        </div>
+        <div>
+          <theme-switcher class="w-14 h-14" />
+        </div>
+       
         <div
           class="flex justify-center items-center space-x-2 cursor-pointer group"
           @click="toggle"
@@ -71,46 +81,7 @@
         <router-view></router-view>
       </main>
     </div>
-    <Popover ref="op" >
-          <div class="flex flex-col gap-4 w-[25rem]">
-            <h2 class="font-medium block mb-2">Cursos en el Carrito</h2>
-            <ul class="list-none p-0 m-0 flex flex-col gap-4">
-              <li
-                v-for="curso in cursosCarrito"
-                :key="curso.idCurso"
-                class="flex flex-row items-center gap-4 p-4 border-b border-surface-200 dark:border-surface-700"
-              >
-                <img
-                  :src="curso.miniatura"
-                  alt="curso miniatura"
-                  class="w-20 h-20 object-cover rounded"
-                />
-                <div class="flex flex-col flex-1">
-                  <span class="font-medium">{{ curso.titulo }}</span>
-                  <span class="text-sm font-semibold"
-                    >Precio: {{ curso.precio }}</span
-                  >
-                </div>
-                <Button
-                  @click="eliminarCurso(curso.idCurso)"
-                  icon="pi pi-cart-minus"
-                  severity="danger"
-                  text raised
-                  rounded
-                  v-tooltip.top="{
-                        value: 'Eliminar de la cesta',
-                        showDelay: 0,
-                        hideDelay: 100,
-                      }"
-                >
-                  
-                </Button>
-              </li>
-            </ul>
-          </div>
-        </Popover>
   </div>
-  
 </template>
 <script>
 import { ref, onMounted, computed } from "vue";
@@ -118,6 +89,7 @@ import { useRouter, useRoute } from "vue-router";
 import Menu from "primevue/menu";
 import ThemeSwitcher from "./ThemeSwitcher.vue";
 import { useAuthStore } from "@/stores/authStore";
+import carrito from "./carrito.vue";
 
 export default {
   components: { ThemeSwitcher, Menu },
