@@ -20,6 +20,69 @@ fs.ensureDirSync(VIDEO_UPLOAD_DIR);
 // Crear carpeta si no existe
 fs.ensureDirSync(UPLOAD_DIR);
 
+
+export const listaModulosHabilitados = async (req, res) => {
+  const idCurso = req.params.idCurso;
+  const idUsuario = req.query.idUsuario; // Cambia a req.query para acceder a idUsuario
+
+  console.log("ID del curso recibido:", idCurso, "ID del usuario recibido:", idUsuario);
+
+  // Validar que el idCurso sea un número válido
+  if (isNaN(idCurso)) {
+    return res.status(400).json({ mensaje: "El id del curso es inválido" });
+  }
+
+  try {
+    // Obtener el número total de módulos del curso
+    const [modulosTotales] = await connection.query(
+      "SELECT COUNT(*) as totalModulos FROM modulo WHERE idCurso = ? AND estado = 1",
+      [idCurso]
+    );
+
+    const totalModulos = modulosTotales[0]?.totalModulos || 0;
+
+    // Verificar si el curso tiene módulos
+    if (totalModulos === 0) {
+      return res.status(404).json({ mensaje: "No se encontraron módulos para este curso" });
+    }
+
+    // Obtener el progresoPago (porcentaje) del detalle_inscripcion
+    const [detalleInscripcion] = await connection.query(
+      "SELECT di.progresoPago FROM detalle_inscripcion di JOIN inscripcion i ON di.idInscripcion = i.idInscripcion WHERE di.idCurso = ? AND i.idUsuario = ?",
+      [idCurso, idUsuario]
+    );
+
+    // Verificar si se encontró el detalle de inscripción
+    if (detalleInscripcion.length === 0) {
+      return res.status(404).json({ mensaje: "No se encontró detalle de inscripción para este curso y usuario" });
+    }
+
+    const progresoPago = detalleInscripcion[0]?.progresoPago || 0;
+
+    // Calcular el número de módulos habilitados basado en el progresoPago
+    const modulosHabilitados = Math.ceil((progresoPago / 100) * totalModulos);
+
+    // Obtener los primeros N módulos habilitados
+    const [modulos] = await connection.query(
+      "SELECT idModulo, nombre, descripcion, videoIntroURL, imagen, estado, fechaCreacion, ultimaActualizacion FROM modulo WHERE idCurso = ? AND estado = 1 ORDER BY fechaCreacion LIMIT ?",
+      [idCurso, modulosHabilitados]
+    );
+
+    // Verificar si hay resultados
+    if (modulos.length === 0) {
+      return res.status(404).json({ mensaje: "No se encontraron módulos habilitados para este curso" });
+    }
+    console.log(modulos)
+    // Responder con los módulos encontrados
+    res.json(modulos);
+  } catch (error) {
+    console.error("Error al obtener los módulos:", error);
+    return res.status(500).json({
+      mensaje: "Ocurrió un error en el servidor",
+    });
+  }
+};
+
 // Obtener todos los módulos de un curso
 export const listaModulos = async (req, res) => {
   const idCurso = req.params.idCurso;

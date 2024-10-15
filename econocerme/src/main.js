@@ -195,4 +195,5 @@ app.directive('animateonscroll', AnimateOnScroll);
 app.use(pinia);
 const authStore = useAuthStore();
 authStore.loadUser(); // Cargar el usuario y token desde localStorage
+
 app.mount('#app');

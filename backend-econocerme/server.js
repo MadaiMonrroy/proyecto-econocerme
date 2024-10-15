@@ -65,7 +65,7 @@ app.use('/api/evaluaciones', verificarToken, rutasEvaluaciones)
 app.use('/api/cuotas', verificarToken, rutasCuotas); // Protege esta ruta
 app.use('/api/recibos', verificarToken,rutasRecibos); // Protege esta ruta
 app.use('/api/recibosSinPermiso', rutasRecibosSinPermiso);
-app.use('/api/carritos',verificarToken, rutasCarritos);
+app.use('/api/carritos', rutasCarritos);
 // app.use('/usuarios', usuariosRoutes);
 
 

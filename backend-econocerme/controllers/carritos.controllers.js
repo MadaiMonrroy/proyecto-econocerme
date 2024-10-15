@@ -12,28 +12,29 @@ export const obtenerCarrito = async (req, res) => {
   }
 };
 
-// Función para agregar un producto al carrito
 export const agregarProductoCarrito = async (req, res) => {
-  const { idUsuario, idProducto } = req.body; // Asegúrate de que el cuerpo de la solicitud contenga estos datos
+  const { idUsuario, idCurso } = req.body; // idCurso es un array de IDs, como [25, 30]
+
   try {
-    // Verifica si el carrito ya existe
+    // Verifica si el carrito ya existe para el usuario
     const [carrito] = await connection.query('SELECT * FROM carrito WHERE idUsuario = ?', [idUsuario]);
 
     if (carrito.length > 0) {
-      // Si el carrito existe, agrega el producto
-      await connection.query('INSERT INTO carrito_items (idCarrito, idProducto) VALUES (?, ?)', [carrito[0].idCarrito, idProducto]);
+      // Si el carrito ya existe, actualizamos el campo idCurso como JSON
+      await connection.query('UPDATE carrito SET idCurso = ? WHERE id = ?', [JSON.stringify(idCurso), carrito[0].id]);
     } else {
-      // Si no existe, crea uno nuevo y luego agrega el producto
-      const [nuevoCarrito] = await connection.query('INSERT INTO carrito (idUsuario) VALUES (?)', [idUsuario]);
-      await connection.query('INSERT INTO carrito_items (idCarrito, idProducto) VALUES (?, ?)', [nuevoCarrito.insertId, idProducto]);
+      // Si no existe, creamos un nuevo carrito y almacenamos los ids en formato JSON
+      await connection.query('INSERT INTO carrito (idUsuario, idCurso) VALUES (?, ?)', [idUsuario, JSON.stringify(idCurso)]);
     }
 
-    res.status(201).send("Producto agregado al carrito");
+    res.status(201).send("Producto(s) agregado(s) al carrito en formato JSON");
   } catch (error) {
     console.error("Error al agregar al carrito:", error);
     res.status(500).send("Error en el servidor");
   }
 };
+
+
 
 // Función para eliminar un producto del carrito
 export const eliminarProductoCarrito = async (req, res) => {

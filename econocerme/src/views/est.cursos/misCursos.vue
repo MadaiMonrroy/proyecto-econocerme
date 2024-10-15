@@ -1,6 +1,7 @@
 <template>
   <div class="card">
     <Fieldset legend="MIS CURSOS">
+      <div  v-if="cursos.length > 0">
 
     <DataView :value="cursos" :layout="layout">
       <!-- Header -->
@@ -113,7 +114,12 @@
         </div>
       </template>
     </DataView>
-</Fieldset>
+      </div>
+      <!-- Mensaje cuando no hay cursos -->
+      <Message v-else>No estás inscrito en ningún curso todavía. Explora nuestra oferta de cursos y únete a uno que te interese.</Message>
+    </Fieldset>
+
+
 
   </div>
 </template>

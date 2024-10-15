@@ -1,5 +1,5 @@
 <template>
-    <div  class="card min-h-screen flex flex-col p-6 lg:p-12 bg-gray-100">
+    <div  class="card min-h-screen flex flex-col p-6 lg:p-12 ">
       <!-- Título de la Lección -->
       <div class="mb-8">
         <h1 class="text-3xl lg:text-4xl font-bold  mb-4 ">{{ modulo.nombre }}</h1>
@@ -7,14 +7,17 @@
       </div>
       
       <!-- Video -->
-       <div class="card rounded-lg shadow-lg">
-      <div class="aspect-w-16 aspect-h-9 mb-8 rounded-lg shadow-lg">
+       <div class="card rounded-lg shadow-xl  dark:shadow-xl dark:shadow-violet-950 dark:border dark:border-violet-900">
+      <div class="aspect-w-16 aspect-h-9  rounded-lg ">
         <video
           v-if="modulo.videoIntroURL"
           :src="modulo.videoIntroURL"
+          :poster="modulo.imagen"
           controls
-          class="w-full h-full rounded-lg shadow-lg"
-        >
+          class="w-full h-[500px] object-cover rounded-lg shadow-lg"
+          style="aspect-ratio: 16/9;"
+
+          >
           Tu navegador no soporta la reproducción de videos.
         </video>
         <p v-else class="text-center text-gray-500">El video no está disponible.</p>

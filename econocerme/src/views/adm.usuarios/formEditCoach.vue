@@ -1,8 +1,5 @@
 <template>
-  <div
-    
-    class="card shadow-lg  m-4"
-  >
+  <div class="card shadow-lg m-4">
     <form @submit.prevent="updateUsuario">
       <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-9 p-5">
         <!-- Columna izquierda -->
@@ -34,7 +31,6 @@
         <div
           class="card flex flex-col space-y-4 shadow-2xl dark:shadow-2xl dark:shadow-violet-950"
         >
-
           <div>
             <h1 for="nombres"><strong>Nombres</strong></h1>
             <InputText
@@ -104,7 +100,7 @@
       <div
         class="card ml-5 mr-5 pb-4 shadow-2xl dark:shadow-2xl dark:shadow-violet-950"
       >
-      <h1 for="biografia"><strong>Biografia</strong></h1>
+        <h1 for="biografia"><strong>Biografia</strong></h1>
 
         <Textarea
           v-model="selectedUsuario.biografia"
@@ -112,36 +108,35 @@
           class="block w-full h-56 text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           rows="4"
           placeholder="Ingrese Biografia"
-          
         />
       </div>
       <div
         class="card ml-5 mr-5 pb-4 shadow-2xl dark:shadow-2xl dark:shadow-violet-950"
       >
-      <h1 for="biografia"><strong>Experiencia</strong></h1>
-      <Editor
-            v-model="selectedUsuario.experiencia"
-            editorStyle="height: 120px"
-            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-          />
+        <h1 for="biografia"><strong>Experiencia</strong></h1>
+        <Editor
+          v-model="selectedUsuario.experiencia"
+          editorStyle="height: 120px"
+          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+        />
       </div>
       <div
         class="card ml-5 mr-5 pb-4 shadow-2xl dark:shadow-2xl dark:shadow-violet-950"
       >
-      <h1 for="especialidades"><strong>Especialidades</strong></h1>
+        <h1 for="especialidades"><strong>Especialidades</strong></h1>
         <div class="flex gap-2">
           <InputText
             v-model="especialidadInput"
             placeholder="Ingrese una especialidad y presione Enter"
             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-1"
-            @keydown.enter.stop.prevent="agregarEspecialidad" 
-            />
+            @keydown.enter.stop.prevent="agregarEspecialidad"
+          />
         </div>
 
         <div class="mt-4 flex flex-wrap gap-2">
           <Chip
             v-for="(item, index) in especialidades"
-            :key="index"
+            :key="item"
             :label="item"
             removable
             @remove="eliminarEspecialidad(index)"
@@ -205,7 +200,6 @@ const selectedUsuario = ref({
   idUsuario: idUsuario,
 });
 
-
 const especialidadInput = ref(""); // Input para la especialidad
 const especialidades = ref([]); // Array para almacenar especialidades
 
@@ -216,6 +210,7 @@ const agregarEspecialidad = () => {
 };
 
 const eliminarEspecialidad = (index) => {
+  console.log("Eliminando especialidad en índice:", index);
   if (index > -1 && index < especialidades.value.length) {
     especialidades.value.splice(index, 1); // Eliminar el elemento en el índice dado
   }
@@ -239,7 +234,9 @@ const validarInput = (event) => {
 // Función para obtener los datos de un usuario por su ID
 const obtenerUsuario = async (idUsuario) => {
   try {
-    const response = await api.get(`/usuarios/obtenerUsuarioCoach/${idUsuario}`);
+    const response = await api.get(
+      `/usuarios/obtenerUsuarioCoach/${idUsuario}`
+    );
     selectedUsuario.value = response.data;
     // Asignar las especialidades obtenidas del backend
     if (Array.isArray(selectedUsuario.value.especialidad)) {
@@ -307,6 +304,44 @@ const validarCamposAct = () => {
     });
     return false;
   }
+  // Verificar que la biografía no esté vacía y que tenga un tamaño adecuado
+  if (
+    !selectedUsuario.value.biografia ||
+    selectedUsuario.value.biografia.length < 20
+  ) {
+    toast.add({
+      severity: "warn",
+      summary: "Biografía incompleta",
+      detail: "La biografía debe tener al menos 10 caracteres.",
+      life: 3000,
+    });
+    return false;
+  }
+
+  // Verificar que la experiencia no esté vacía
+  if (
+    !selectedUsuario.value.experiencia ||
+    selectedUsuario.value.experiencia.trim() === ""
+  ) {
+    toast.add({
+      severity: "warn",
+      summary: "Experiencia incompleta",
+      detail: "Debe ingresar su experiencia.",
+      life: 3000,
+    });
+    return false;
+  }
+
+  // Verificar que al menos una especialidad esté presente
+  if (especialidades.value.length === 0) {
+    toast.add({
+      severity: "warn",
+      summary: "Especialidades faltantes",
+      detail: "Debe agregar al menos una especialidad.",
+      life: 3000,
+    });
+    return false;
+  }
 
   return true;
 };
@@ -364,7 +399,7 @@ const updateUsuario = async () => {
     const updatedUsuario = response.data.usuario; // Usuario actualizado
 
     authStore.actualizarUsuario(updatedUsuario); // Actualizar todos los campos del usuario en el store
-    console.log(authStore.usuario)
+    console.log(authStore.usuario);
     router.push("/panelControl/main");
   } catch (error) {
     console.error("Error al actualizar usuario:", error);

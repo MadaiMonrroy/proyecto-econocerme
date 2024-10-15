@@ -34,7 +34,6 @@ export const useAuthStore = defineStore("auth", {
         this.usuario = response.data.usuario;
         this.token = response.data.token;
 
-
         // Encriptar y guardar en una cookie
         const encryptedData = encriptar({
           usuario: this.usuario,
@@ -83,14 +82,16 @@ export const useAuthStore = defineStore("auth", {
     logout() {
       const userId = this.usuario?.id; // Asegúrate de que el ID del usuario esté disponible
 
+   
+
       this.usuario = null;
       this.token = null;
       this.carrito = []; // Vaciar el carrito al cerrar sesión
 
       document.cookie = "auth=; Max-Age=0; path=/;";
+
       // Limpiar el carrito del localStorage
       localStorage.removeItem(`carrito_${userId}`); // Asegúrate de que estés utilizando el localStorage para el carrito
-
     },
     async cargarCarrito() {
       const userId = this.usuario?.id; // Asegúrate de que el ID del usuario esté disponible
@@ -101,9 +102,7 @@ export const useAuthStore = defineStore("auth", {
       } else if (this.usuario?.tipoUsuario === "usuario") {
         // Si no hay carrito en localStorage, consulta a la base de datos
         try {
-          const response = await api.get(
-            `/carritos/carrito/${userId}`
-          );
+          const response = await api.get(`/carritos/carrito/${userId}`);
           const carritoDB = response.data;
 
           // Suponiendo que el campo idCurso es un JSON array
@@ -127,9 +126,7 @@ export const useAuthStore = defineStore("auth", {
     },
     async cargarCursos(cursoIds) {
       const cursoPromises = cursoIds.map(async (id) => {
-        const response = await api.get(
-          `/carritos/obtenerDetalleCurso/${id}`
-        );
+        const response = await api.get(`/carritos/obtenerDetalleCurso/${id}`);
         return response.data; // Devuelve los datos del curso
       });
       console.log(await Promise.all(cursoPromises)); // Para verificar los datos de los cursos

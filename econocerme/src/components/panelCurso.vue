@@ -2,7 +2,7 @@
   <div class="relative min-h-screen">
     <nav
       :class="[
-        'custom-gradient2 text-black font-semibold pb-4 fixed top-20 left-0 bottom-0 overflow-y-auto transition-all duration-300',
+        'bg-gradient-to-t from-custom-pink to-custom-purple dark:bg-gradient-to-t dark:from-dark-pink dark:to-dark-purple text-black font-semibold pb-4 fixed top-20 left-0 bottom-0 overflow-y-auto transition-all duration-300',
         { 'w-[250px]': !isSidebarCollapsed, 'w-[0px]': isSidebarCollapsed },
       ]"
       :style="{ zIndex: 10 }"
@@ -121,8 +121,12 @@ export default {
     });
 
     const cargarModulos = async (idCurso) => {
+      const idUsuario = authStore.usuario.id;
       try {
-        const response = await api.get(`/modulos/modulo/${idCurso}`);
+        const response = await api.get(`/modulos/listaModulosHabilitados/${idCurso}`, {
+      params: { idUsuario } // Incluye idUsuario como un parámetro de consulta
+    });
+        
         menuOptions.value = response.data;
 
         if (menuOptions.value.length > 0) {
@@ -172,6 +176,7 @@ export default {
 
     const handleSelectChange = async (event) => {
       const selectedModuloId = event.value;
+      
       if (selectedModuloId) {
         await cargarLecciones(selectedModuloId);
         // Verifica si la lección "Introducción" está presente
@@ -190,9 +195,13 @@ export default {
 
     const handleLeccionClick = (leccion) => {
       selectedLeccion.value = leccion.idLeccion;
-      router.push(
-        `/panelEstudiante/panelCurso/${idCurso}/leccion/${leccion.idLeccion}`
-      );
+      // Si la lección es 'Introducción', redirige a la ruta correspondiente
+  if (leccion.idLeccion === "introduccion") {
+    router.replace(`/panelEstudiante/panelCurso/${idCurso}/modulo/${selectedMenu.value}`);
+  } else {
+    // Redirige normalmente si es otra lección
+    router.push(`/panelEstudiante/panelCurso/${idCurso}/leccion/${leccion.idLeccion}`);
+  }
     };
 
     return {

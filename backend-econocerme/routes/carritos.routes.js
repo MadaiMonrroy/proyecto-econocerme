@@ -10,7 +10,7 @@ const router = Router();
 
 // Rutas
 router.get("/carrito/:idUsuario", obtenerCarrito);
-router.post("/carrito/agregar", agregarProductoCarrito);
+router.post("/agregarProductoCarrito", agregarProductoCarrito);
 router.delete("/carrito/eliminar", eliminarProductoCarrito);
 router.delete("/carrito/vaciar/:idUsuario", vaciarCarrito);
 router.get('/obtenerDetalleCurso/:cursoId', obtenerDetalleCurso);

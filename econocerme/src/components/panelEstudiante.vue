@@ -109,6 +109,8 @@ import Menu from "primevue/menu";
 import ThemeSwitcher from "./ThemeSwitcher.vue";
 import { useAuthStore } from "@/stores/authStore";
 import carrito from "./carrito.vue";
+import api from "@/axiosConfig.js";
+
 
 export default {
   components: { ThemeSwitcher, Menu },
@@ -164,12 +166,38 @@ export default {
       {
         label: "Cerrar sesión",
         icon: "pi pi-power-off",
-        command: () => {
+        command: async () => { // Cambia a async
+          guardarCarrito();
           authStore.logout();
           router.push("/");
         },
       },
     ]);
+    const guardarCarrito = async () => {
+  const userId = authStore.usuario?.id;
+  const carritoLocal = localStorage.getItem(`carrito_${userId}`);
+  let carritoData = [];
+
+  if (carritoLocal) {
+    // Extraer solo los ids de los cursos
+    carritoData = JSON.parse(carritoLocal).map(item => item.idCurso);
+  }
+
+  if (userId && carritoData.length > 0) {
+    const dataToSend = {
+      idUsuario: userId,
+      idCurso: carritoData, // Aquí ya tienes solo los IDs, sin los nombres de las claves
+    };
+
+    try {
+      const response = await api.post("/carritos/agregarProductoCarrito", dataToSend);
+      console.log("Carrito guardado exitosamente:", response.data);
+    } catch (error) {
+      console.error("Error al guardar el carrito:", error);
+    }
+  }
+};
+
 
     const toggle = (event) => {
       menu.value.toggle(event);
@@ -196,7 +224,7 @@ export default {
       togglePopover,
       cargarCarrito,
       cursosCarrito,
-
+      guardarCarrito,
       goToDashboard,
       goToCursos,
       goToCertificaciones,

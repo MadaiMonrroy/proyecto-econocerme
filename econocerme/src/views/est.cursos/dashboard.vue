@@ -103,9 +103,9 @@
       </div>
 
       <!-- Carruseles por especialidad -->
-      <div v-if="cursosFiltrados.length === 0" class="text-red-500 mb-4">
+      <Message v-if="cursosFiltrados.length === 0" class="" severity="info">
         No hay resultados que coincidan con su búsqueda en:
-      </div>
+      </Message>
 
       <div
         v-for="especialidad in especialidadSeleccionada
