@@ -4,12 +4,14 @@
       enterClass: 'animate-scalein',
       leaveClass: 'animate-fadeout',
     }"
-    class="card shadow-lg animate-duration-1000 animate-ease-in-out"
+    class="card shadow-lg animate-duration-1000 animate-ease-in-out m-4"
   >
     <form @submit.prevent="updateUsuario">
       <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-9 p-5">
         <!-- Columna izquierda -->
-        <div class="card shadow-2xl flex flex-col space-y-8">
+        <div
+          class="card shadow-2xl flex flex-col space-y-8 dark:shadow-2xl dark:shadow-violet-950"
+        >
           <div>
             <h1 for="fotoPerfil"><strong>Foto de Perfil</strong></h1>
             <CustomFileInput
@@ -32,7 +34,9 @@
         </div>
 
         <!-- Columna derecha -->
-        <div class="card flex flex-col space-y-4 shadow-2xl">
+        <div
+          class="card flex flex-col space-y-4 shadow-2xl dark:shadow-2xl dark:shadow-violet-950"
+        >
           <div>
             <h1 for="nombres"><strong>Nombres</strong></h1>
             <InputText
@@ -86,7 +90,9 @@
           </div>
         </div>
       </div>
-      <div class="card pl-5 pr-5 pb-4 shadow-2xl">
+      <div
+        class="card ml-5 mr-5 pb-4 shadow-2xl dark:shadow-2xl dark:shadow-violet-950"
+      >
         <h1 for="email"><strong>Email</strong></h1>
         <InputText
           v-model="selectedUsuario.email"
@@ -98,13 +104,19 @@
         />
       </div>
       <div class="p-4 flex justify-end space-x-4">
-        <Button type="submit" severity="help" class="px-4 py-2 rounded-md w-36">
+        <Button
+          type="submit"
+          severity="help"
+          raised
+          class="px-4 py-2 !rounded-2xl w-36"
+        >
           Guardar
         </Button>
         <Button
           type="button"
           severity="secondary"
-          class="px-4 py-2 rounded-md w-36"
+          raised
+          class="px-4 py-2 !rounded-2xl w-36"
           @click="cerrar"
         >
           Cerrar
@@ -156,7 +168,6 @@ const validarInput = (event) => {
     selectedUsuario.value.nombres = event.target.value; // Actualizar el modelo de Vue
     selectedUsuario.value.primerApellido = event.target.value; // Actualizar el modelo de Vue
     selectedUsuario.value.segundoApellido = event.target.value; // Actualizar el modelo de Vue
-
   }
 };
 
@@ -165,7 +176,7 @@ const obtenerUsuario = async (idUsuario) => {
   try {
     const response = await api.get(`/usuarios/obtenerUsuario/${idUsuario}`);
     selectedUsuario.value = response.data;
-    selectedUsuario.value.fechaNacimiento = formatDate(
+    selectedUsuario.value.fechaNacimiento = new Date(
       selectedUsuario.value.fechaNacimiento
     );
   } catch (error) {
@@ -178,24 +189,62 @@ const obtenerUsuario = async (idUsuario) => {
     });
   }
 };
-const formatDate = (dateString) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
+
 function convertirFechaAMysql(fecha) {
-  const d = new Date(fecha);
-  return d.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+    console.log("sdfd",fecha)
+    if (!(fecha instanceof Date)) {
+    return fecha; // Si ya es una cadena, regresa como está
+  }
+
+  // Formatear la fecha a dd-mm-yyyy antes de dividir
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript son de 0 a 11
+  const anio = fecha.getFullYear();
+  
+  return `${anio}-${mes}-${dia}`; // Regresar al formato yyyy-mm-dd
 }
+
 
 const cerrar = async () => {
   router.push("/panelControl/main"); // Redirigir a la página de inicio o login
 };
+
+const validarCamposAct = () => {
+  // Verificar si los campos requeridos están completos
+  if (
+    !selectedUsuario.value.nombres ||
+    !selectedUsuario.value.primerApellido ||
+    !selectedUsuario.value.segundoApellido ||
+    !selectedUsuario.value.fechaNacimiento
+  ) {
+    toast.add({
+      severity: "warn",
+      summary: "Campos incompletos",
+      detail:
+        "Por favor llene todos los campos, todos los campos son requeridos.",
+      life: 3000,
+    });
+    return false;
+  }
+
+  // Verificar que al menos uno de los campos `miniatura` o `selectedFile` esté presente
+  if (!selectedUsuario.value.fotoPerfil && !selectedFile) {
+    toast.add({
+      severity: "warn",
+      summary: "Falta la Foto de Perfil",
+      detail: "Debe subir una Foto de perfil para guardar cambios",
+      life: 3000,
+    });
+    return false;
+  }
+
+  return true;
+};
+
 // Función para actualizar el usuario
 const updateUsuario = async () => {
+  if (!validarCamposAct()) return;
+  console.log("sadfasd");
   const formData = new FormData();
   formData.append("nombres", selectedUsuario.value.nombres);
   formData.append("primerApellido", selectedUsuario.value.primerApellido);

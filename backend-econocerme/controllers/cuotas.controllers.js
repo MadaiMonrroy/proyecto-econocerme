@@ -1,8 +1,31 @@
 import connection from "../db.js";
 
+
+export const obtenerIdPagoPorInscripcion = async (req, res) => {
+	const idInscripcion = req.params.id;
+
+	try {
+	  const [pagoResult] = await connection.query(`
+		SELECT idPago 
+		FROM pago 
+		WHERE idInscripcion = ?
+	  `, [idInscripcion]);
+  
+	  if (pagoResult.length === 0) {
+		return res.status(404).json({ message: "No se encontró ningún pago" });
+	}
+
+	  return res.status(200).json({ idPago: pagoResult[0].idPago });
+	} catch (error) {
+	  throw new Error("Error al obtener el idPago: " + error.message);
+	}
+  };
+  
 // Obtener todas las cuotas de un pago
+
 export const listaCuotas = async (req, res) => {
 	const idPago = req.params.id;
+	console.log("idpago",idPago)
 	try {
 		const [result] = await connection.query(`
 			SELECT CP.*, P.idInscripcion

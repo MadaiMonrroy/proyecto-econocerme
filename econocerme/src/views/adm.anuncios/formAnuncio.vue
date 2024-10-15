@@ -230,8 +230,8 @@ const actualizarAnuncio = async () => {
   const formData = new FormData();
   formData.append("titulo", anuncio.titulo);
   formData.append("tipo", anuncio.tipo);
-  formData.append("fecha_inicio", formatDate(anuncio.fecha_inicio));
-  formData.append("fecha_fin", formatDate(anuncio.fecha_fin));
+  formData.append("fecha_inicio", convertirFechaAMysql(anuncio.fecha_inicio));
+  formData.append("fecha_fin", convertirFechaAMysql(anuncio.fecha_fin));
   formData.append("descripcion", anuncio.descripcion);
   formData.append("idUsuario", anuncio.idUsuario);
   if (selectedFile) {
@@ -277,8 +277,8 @@ const agregarAnuncio = async () => {
   const formData = new FormData();
   formData.append("titulo", anuncio.titulo);
   formData.append("tipo", anuncio.tipo);
-  formData.append("fecha_inicio", formatDate(anuncio.fecha_inicio));
-  formData.append("fecha_fin", formatDate(anuncio.fecha_fin));
+  formData.append("fecha_inicio", convertirFechaAMysql(anuncio.fecha_inicio));
+  formData.append("fecha_fin", convertirFechaAMysql(anuncio.fecha_fin));
   formData.append("descripcion", anuncio.descripcion);
   formData.append("miniatura", selectedFile);
   formData.append("idUsuario", anuncio.idUsuario);
@@ -306,9 +306,25 @@ const agregarAnuncio = async () => {
   }
 };
 const formatDate = (date) => {
-  const d = new Date(date);
-  return d.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+  const fecha = new Date(date);
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript van de 0 a 11
+  const anio = fecha.getFullYear();
+  return `${dia}-${mes}-${anio}`;
 };
+function convertirFechaAMysql(fecha) {
+  console.log(fecha)
+  if (!(fecha instanceof Date)) {
+    return fecha; // Si ya es una cadena, regresa como está
+  }
+
+  // Formatear la fecha a dd-mm-yyyy antes de dividir
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript son de 0 a 11
+  const anio = fecha.getFullYear();
+  
+  return `${anio}-${mes}-${dia}`; // Regresar al formato yyyy-mm-dd
+}
 const cancelarEdicion = () => {
   router.push("/panelControl/anuncios");
 };

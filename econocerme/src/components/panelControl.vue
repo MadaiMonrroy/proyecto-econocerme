@@ -1,8 +1,10 @@
 <template>
   <div
     :class="[
-      'w-auto bg-gradient-to-tl from-custom-purple to-custom-pink dark:bg-gradient-to-tl dark:from-dark-purple dark:to-dark-pink',
+      'w-full min-h-screen bg-gradient-to-tl from-custom-purple to-custom-pink dark:bg-gradient-to-tl dark:from-dark-purple dark:to-dark-pink',
       { 'collapsed-sidebar': isSidebarCollapsed },
+      'sm:w-full md:w-full lg:w-full xl:w-full' // Aseguramos que ocupe el 100% en pantallas grandes
+
     ]"
   >
     <header
@@ -124,7 +126,7 @@
           'ml-16': isSidebarCollapsed,
           'ml-[240px]': !isSidebarCollapsed,
         }"
-        class="w-full sm:w-[calc(100%-240px)] md:w-[calc(100%-240px)] lg:w-[calc(100%-240px)] xl:w-[calc(100%-240px)]"
+        class="w-full  min-h-screen sm:w-[calc(100%-240px)] md:w-[calc(100%-240px)] lg:w-[calc(100%-240px)] xl:w-[calc(100%-240px)]   "
         >
         <p>Usuario: {{ authStore.usuario.email }}</p>
         <router-view></router-view>

@@ -49,7 +49,7 @@ export const detalleInscripcionPago = async (req, res) => {
             i.fechaInscripcion,
             CONCAT(u.nombres, ' ', u.primerApellido, ' ', u.segundoApellido) AS nombreCompleto,
             c.titulo AS curso,
-            c.precio AS precioCurso,
+            di.precioCurso AS precioCurso,
             cu.cantidadCuotas,
             cu.fechaPagoCuota,
             cu.metodoPago,

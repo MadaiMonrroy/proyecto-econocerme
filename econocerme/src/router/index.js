@@ -39,6 +39,9 @@ import detalleInscripcion from "@/views/adm.inscripciones/detalleInscripcion.vue
 import reciboPago from "@/views/adm.inscripciones/reciboPago.vue";
 import preInscripciones from "@/views/adm.inscripciones/preInscripciones.vue";
 import verMas from "@/views/est.cursos/verMas.vue";
+import formCompletarInscripcion from "@/views/adm.inscripciones/formCompletarInscripcion.vue";
+import mainCoach from "@/views/coach.inscritos/main.vue"
+import formEditCoach from "@/views/adm.usuarios/formEditCoach.vue";
 const routes = [
   { path: "/", component: LoginForm },
   { path: "/Registro", component: RegistroForm },
@@ -66,6 +69,7 @@ const routes = [
       { path: "preInscripciones", component: preInscripciones },
       { path: "formInscripcion", component: formInscripcion },
       { path: "formInscripcion/:idInscripcion", component: formInscripcion },
+      { path: "formCompletarInscripcion/:idInscripcion", component: formCompletarInscripcion },
       { path: "evaluacion/:idCurso", component: evaluacion },
       { path: "vistaPrevia/:idCurso", component: vistaPrevia },
       { path: "cuotas/:idInscripcion", component: cuotas },
@@ -102,7 +106,8 @@ const routes = [
     component: panelCoaches,
     meta: { requiresAuth: true },
     children: [
-      { path: "formEdit", component: formEdit },
+      { path: "mainCoach", component: mainCoach },
+      { path: "formEditCoach", component: formEditCoach },
       { path: "cursos", component: cursos },
       { path: "modulos", component: listaCursos },
       { path: "lecciones/:idModulo", component: lecciones },

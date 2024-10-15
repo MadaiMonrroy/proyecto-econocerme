@@ -2,10 +2,10 @@
     
       <button
         type="button"
-        class="inline-flex w-8 h-8 p-0 items-center justify-center surface-0 dark:surface-800 border border-surface-100  surface-600 rounded"
+        class="inline-flex w-9 h-9 -m-1 items-center justify-center surface-0 dark:surface-800  rounded-full shadow-xl"
         @click="onThemeToggler"
       >
-        <i :class="`dark:text-white pi ${iconClass}`" />
+        <i :class="`dark:text-white !text-xl pi ${iconClass}`" />
       </button>
     
       <!--<button

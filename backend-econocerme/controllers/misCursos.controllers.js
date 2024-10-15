@@ -73,7 +73,7 @@ export const obtenerCursoCompleto = async (req, res) => {
       `SELECT 
         c.titulo, 
         c.miniatura, 
-        c.especialidad, 
+        c.especialidad as especialidadCurso, 
         c.descripcion, 
         c.duracion, 
         c.precio, 
@@ -126,7 +126,7 @@ export const obtenerCursoCompleto = async (req, res) => {
       curso: {
         titulo: curso[0].titulo,
         miniatura: curso[0].miniatura,
-        especialidad: curso[0].especialidad,
+        especialidadCurso: curso[0].especialidadCurso,
         descripcion: curso[0].descripcion,
         duracion: curso[0].duracion,
         precio: curso[0].precio,
@@ -151,7 +151,7 @@ export const obtenerCursoCompleto = async (req, res) => {
         lecciones: (modulo.lecciones ? modulo.lecciones.split(',').map(leccion => leccion.trim()) : [])
       }))
     };
-    console.log(resultado);
+    console.log(resultado,"Sdfsd");
     return res.status(200).json(resultado);
   } catch (error) {
     console.error(error);

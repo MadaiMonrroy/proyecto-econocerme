@@ -15,11 +15,26 @@ const UPLOAD_DIR = path.join(__dirname, "../uploads/cursos");
 // Crear carpeta si no existe
 fs.ensureDirSync(UPLOAD_DIR);
 
+// Obtener todos los cursos por coach
+export const listaCursosCoach = async (req, res) => {
+  const idUsuario = req.params.idUsuario;
+  try {
+    const [result] = await connection.query(
+      "SELECT idCurso, titulo, miniatura, especialidad, descripcion, duracion, precio, estado FROM curso WHERE (estado = 1 OR estado = 2) AND idUsuario = ?",
+      [idUsuario]
+    );
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      mensaje: "Ocurrió un error en el servidor",
+    });
+  }
+};
+
 // Obtener todos los cursos
 export const listaCursos = async (req, res) => {
   try {
-   
-
     const [result] = await connection.query(
       "SELECT idCurso, titulo, miniatura, especialidad, descripcion, duracion, precio, estado FROM curso WHERE estado = 1 OR estado = 2"
     );

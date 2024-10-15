@@ -1,7 +1,8 @@
 <template>
 
-  <div class="flex justify-center items-center p-2">
-    <div class="card w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
+  <div class="flex justify-center items-center ">
+    <div class="card w-full max-w-4xl  p-6 rounded-lg shadow-2xl !border-none dark:shadow-inner dark:shadow-violet-900">
+
       <h2 class="text-2xl font-semibold mb-6 text-center">{{ curso.idCurso ? 'Editar Curso' : 'Agregar Nuevo Curso' }}</h2>
       <form @submit.prevent="curso.idCurso ? actualizarCurso() : agregarCurso()">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -225,7 +226,12 @@ const agregarCurso = async () => {
       },
     });
     logFormData(formData);  // Log the form data
-    router.push('/panelControl/cursos');
+    if(authStore.usuario.tipoUsuario === "admin"){
+      router.push('/panelControl/cursos');
+    }else
+    if(authStore.usuario.tipoUsuario === "coach") {
+      router.push("/panelCoaches/cursos"); // Ruta para agregar curso
+    }
 
     toast.add({
       severity: "success",
@@ -287,8 +293,12 @@ const actualizarCurso = async () => {
       detail: "El curso se ha editado correctamente.",
       life: 3000,
     });
-
+    if(authStore.usuario.tipoUsuario === "admin"){
       router.push('/panelControl/cursos');
+  }else
+    if(authStore.usuario.tipoUsuario === "coach") {
+      router.push('/panelCoaches/cursos');
+    }
 
   } catch (error) {
     console.error(error);
@@ -334,7 +344,12 @@ const validarCamposAct = () => {
   return true;
 };
 const cancelarEdicion = () => {
-  router.push('/panelControl/cursos');
+  if(authStore.usuario.tipoUsuario === "admin"){
+    router.push('/panelControl/cursos');
+  }else
+    if(authStore.usuario.tipoUsuario === "coach") {
+      router.push('/panelCoaches/cursos');
+    }
 };
 
 onMounted(() => {

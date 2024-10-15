@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'w-auto bg-gradient-to-tl from-custom-purple to-custom-pink dark:bg-gradient-to-tl dark:from-dark-purple dark:to-dark-pink',
+      'w-full bg-gradient-to-tl from-custom-purple to-custom-pink dark:bg-gradient-to-tl dark:from-dark-purple dark:to-dark-pink',
       { 'collapsed-sidebar': isSidebarCollapsed },
     ]"
   >
@@ -124,7 +124,7 @@
           'ml-16': isSidebarCollapsed,
           'ml-[240px]': !isSidebarCollapsed,
         }"
-        class="w-full sm:w-[calc(100%-240px)] md:w-[calc(100%-240px)] lg:w-[calc(100%-240px)] xl:w-[calc(100%-240px)]"
+        class="w-full  min-h-screen sm:w-[calc(100%-240px)] md:w-[calc(100%-240px)] lg:w-[calc(100%-240px)] xl:w-[calc(100%-240px)]   "
         >
         <p>Usuario: {{ authStore.usuario.email }}</p>
         <router-view></router-view>
@@ -197,6 +197,12 @@ export default {
       }
     );
     const menuItems = ref([
+    {
+        key: "main",
+        label: "Principal",
+        icon: "pi pi-home",
+        route: "/panelCoaches/mainCoach",
+      },
       {
         key: "cursos",
         label: "Cursos",
@@ -223,7 +229,7 @@ export default {
         label: "Perfil",
         icon: "pi pi-user",
         command: () => {
-          router.push("/panelControl/formEdit");
+          router.push("/panelCoaches/formEditCoach");
         },
       },
       {

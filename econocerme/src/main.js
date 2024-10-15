@@ -126,7 +126,7 @@ import Carousel from 'primevue/carousel';
 import ConfirmDialog from 'primevue/confirmdialog';
 import AnimateOnScroll from 'primevue/animateonscroll';
 import Popover from 'primevue/popover';
-
+import FloatLabel from 'primevue/floatlabel';
 
 
 app.component('Button', Button);
@@ -169,7 +169,7 @@ app.component('AccordionHeader',AccordionHeader);
 app.component('AccordionContent',AccordionContent);
 app.component('Fieldset',Fieldset);
 app.component('Breadcrumb',Breadcrumb);
-
+app.component('FloatLabel',FloatLabel);
 app.component('Tabs', Tabs);
 app.component('TabList', TabList);
 app.component('Tab', Tab);

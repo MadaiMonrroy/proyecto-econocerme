@@ -170,7 +170,7 @@ const handleSubmit = async () => {
         } else if (tipoUsuario === "usuario") {
           router.push("/panelEstudiante/dashboard");
         } else if (tipoUsuario === "coach") {
-          router.push("/panelCoaches/");
+          router.push("/panelCoaches/mainCoach");
         }
       }, 1000);
       if (remember.value) {

@@ -114,14 +114,13 @@
             <div
               class="p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex flex-col"
             >
-            <div class="bg-surface-50 flex justify-center rounded p-4 h-48">
-              <img
+              <div class="bg-surface-50 flex justify-center rounded p-4 h-48">
+                <img
                   class="rounded w-full h-full object-cover"
-                    :src="modulo.imagen"
-                    alt="Imagen del Módulo"
-                    style="max-width: 300px"
-                  />
-
+                  :src="modulo.imagen"
+                  alt="Imagen del Módulo"
+                  style="max-width: 300px"
+                />
               </div>
               <div class="pt-6">
                 <div class="flex flex-row justify-between items-start gap-2">
@@ -381,34 +380,40 @@
   <Message v-else>No hay módulos disponibles.</Message>
   <!-- Modal para Confirmar Eliminación -->
   <ConfirmDialog group="headless">
-      <template #container="{ message, acceptCallback, rejectCallback }">
+    <template #container="{ message, acceptCallback, rejectCallback }">
+      <div
+        class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded-3xl"
+      >
         <div
-          class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded-3xl"
+          class="rounded-full bg-primary text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20"
         >
-          <div
-            class="rounded-full bg-primary text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20"
-          >
-            <i
-              class="pi pi-exclamation-triangle !text-violet-950"
-              style="color: dimgray; font-size: 3rem"
-            ></i>
-          </div>
-          <span class="font-bold text-2xl block mb-2 mt-6">{{
-            message.header
-          }}</span>
-          <p class="mb-0">{{ message.message }}</p>
-          <div class="flex items-center gap-2 mt-6">
-            <Button
-              label="Eliminar"
-              severity="help"
-              raised
-              @click="acceptCallback"
-            ></Button>
-            <Button label="Cancelar" raised severity="primary" outlined @click="rejectCallback"></Button>
-          </div>
+          <i
+            class="pi pi-exclamation-triangle !text-violet-950"
+            style="color: dimgray; font-size: 3rem"
+          ></i>
         </div>
-      </template>
-    </ConfirmDialog>
+        <span class="font-bold text-2xl block mb-2 mt-6">{{
+          message.header
+        }}</span>
+        <p class="mb-0">{{ message.message }}</p>
+        <div class="flex items-center gap-2 mt-6">
+          <Button
+            label="Eliminar"
+            severity="help"
+            raised
+            @click="acceptCallback"
+          ></Button>
+          <Button
+            label="Cancelar"
+            raised
+            severity="primary"
+            outlined
+            @click="rejectCallback"
+          ></Button>
+        </div>
+      </div>
+    </template>
+  </ConfirmDialog>
 </template>
 
 <script setup>
@@ -470,10 +475,17 @@ const formatSize = (bytes) => {
 };
 
 const verLecciones = (idModulo) => {
-  router.push({
-    path: `/panelControl/lecciones/${idModulo}`,
+  if (authStore.usuario.tipoUsuario === "admin") {
+    router.push({
+      path: `/panelControl/lecciones/${idModulo}`,
+      query: { cursoId: props.cursoId }, // Pasamos idCurso como parámetro de consulta
+    });
+  } else if (authStore.usuario.tipoUsuario === "coach") {
+    router.push({
+    path: `/panelCoaches/lecciones/${idModulo}`,
     query: { cursoId: props.cursoId }, // Pasamos idCurso como parámetro de consulta
-  });
+  });  }
+
 };
 
 // Función para abrir el diálogo y cargar los datos del módulo

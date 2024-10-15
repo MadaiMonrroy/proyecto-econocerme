@@ -1,22 +1,40 @@
 <template>
   <div class="p-4">
     <div class=" ">
-      <Breadcrumb :home="home" :model="items" class="card h-14 dark:shadow-violet-800">
-      <template #item="{ item, props }">
-                <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
-                    <a :href="href" v-bind="props.action" @click="navigate">
-                        <span :class="[item.icon, 'text-color']" />
-                        <span class="text-black dark:text-white font-semibold">{{ item.label }}</span>
-                    </a>
-                </router-link>
-                <a v-else :href="item.url" :target="item.target" v-bind="props.action">
-                    <span class="text-surface-700 dark:text-surface-0">{{ item.label }}</span>
-                </a>
-            </template>
+      <Breadcrumb
+        :home="home"
+        :model="items"
+        class="card h-14 dark:shadow-violet-800"
+      >
+        <template #item="{ item, props }">
+          <router-link
+            v-if="item.route"
+            v-slot="{ href, navigate }"
+            :to="item.route"
+            custom
+          >
+            <a :href="href" v-bind="props.action" @click="navigate">
+              <span :class="[item.icon, 'text-color']" />
+              <span class="text-black dark:text-white font-semibold">{{
+                item.label
+              }}</span>
+            </a>
+          </router-link>
+          <a
+            v-else
+            :href="item.url"
+            :target="item.target"
+            v-bind="props.action"
+          >
+            <span class="text-surface-700 dark:text-surface-0">{{
+              item.label
+            }}</span>
+          </a>
+        </template>
       </Breadcrumb>
     </div>
-    <div  class="card shadow-2xl dark:shadow-violet-600">
-      <h2 class="text-4xl mb-4 items-end text-shadow-3xl  font-sans  ">CURSOS</h2>
+    <div class="card shadow-2xl dark:shadow-violet-600">
+      <h2 class="text-4xl mb-4 items-end text-shadow-3xl font-sans">CURSOS</h2>
       <Divider />
 
       <!-- Contenedor para alinear el botón y el buscador en la misma línea -->
@@ -47,7 +65,9 @@
       </div>
       <Divider />
 
-      <div class="card dark:border-violet-500 dark:shadow-2xl dark:shadow-violet-950 shadow-2xl ">
+      <div
+        class="card dark:border-violet-500 dark:shadow-2xl dark:shadow-violet-950 shadow-2xl"
+      >
         <DataTable
           :value="cursosConNumeracion"
           :rows="5"
@@ -103,51 +123,57 @@
             class="px-6 py-4"
           />
           <Column header="Descripción" class="px-6 py-4">
-          <template #body="slotProps">
-            <div>
-              <p v-if="!expandedCourses[slotProps.data.idCurso]">
-                {{ slotProps.data.descripcion.slice(0, 30) }}...
-                <button
-                  @click="toggleExpand(slotProps.data.idCurso)"
-                  class="text-blue-500 hover:underline focus:outline-none"
-                >
-                  Ver más
-                </button>
-              </p>
-              <p v-else>
-                {{ slotProps.data.descripcion }}
-                <button
-                  @click="toggleExpand(slotProps.data.idCurso)"
-                  class="text-blue-500 hover:underline focus:outline-none"
-                >
-                  Ver menos
-                </button>
-              </p>
-            </div>
-          </template>
-        </Column>
+            <template #body="slotProps">
+              <div>
+                <p v-if="!expandedCourses[slotProps.data.idCurso]">
+                  {{ slotProps.data.descripcion.slice(0, 30) }}...
+                  <button
+                    @click="toggleExpand(slotProps.data.idCurso)"
+                    class="text-blue-500 hover:underline focus:outline-none"
+                  >
+                    Ver más
+                  </button>
+                </p>
+                <p v-else>
+                  {{ slotProps.data.descripcion }}
+                  <button
+                    @click="toggleExpand(slotProps.data.idCurso)"
+                    class="text-blue-500 hover:underline focus:outline-none"
+                  >
+                    Ver menos
+                  </button>
+                </p>
+              </div>
+            </template>
+          </Column>
           <Column field="estado" header="Estado" class="px-6 py-4">
-          <template #body="rowData">
-            <Tag
-              v-if="rowData.data.estado === 1"
-              value="Activo"
-              severity="success"
-              class="px-2 py-1"
-            />
-            <Tag
-              v-else-if="rowData.data.estado === 2"
-              value="Inactivo"
-              severity="warn"
-              class="px-2 py-1"
-            />
-            <Tag
-              v-else
-              value="Desconocido"
-              severity="warning"
-              class="px-2 py-1"
-            />
-          </template>
-        </Column>          <Column field="duracion" header="Duración" sortable class="px-6 py-4" />
+            <template #body="rowData">
+              <Tag
+                v-if="rowData.data.estado === 1"
+                value="Activo"
+                severity="success"
+                class="px-2 py-1"
+              />
+              <Tag
+                v-else-if="rowData.data.estado === 2"
+                value="Inactivo"
+                severity="warn"
+                class="px-2 py-1"
+              />
+              <Tag
+                v-else
+                value="Desconocido"
+                severity="warning"
+                class="px-2 py-1"
+              />
+            </template>
+          </Column>
+          <Column
+            field="duracion"
+            header="Duración"
+            sortable
+            class="px-6 py-4"
+          />
           <Column field="precio" header="Precio" sortable class="px-6 py-4" />
           <Column header="Acciones" class="px-6 py-4">
             <template #body="slotProps">
@@ -155,42 +181,58 @@
                 <Button
                   icon="pi pi-pencil"
                   rounded
-                   raised
+                  raised
                   severity="info"
                   @click="openEditView(slotProps.data)"
-                  v-tooltip.left="{ value: 'Editar', showDelay: 0, hideDelay: 100 }"
+                  v-tooltip.left="{
+                    value: 'Editar',
+                    showDelay: 0,
+                    hideDelay: 100,
+                  }"
                 />
                 <Button
                   icon="pi pi-trash"
                   severity="danger"
                   rounded
-                   raised
+                  raised
                   @click="eliminarCurso(slotProps.data.idCurso)"
-                  v-tooltip.top="{ value: 'Eliminar', showDelay: 0, hideDelay: 100 }"
+                  v-tooltip.top="{
+                    value: 'Eliminar',
+                    showDelay: 0,
+                    hideDelay: 100,
+                  }"
                 />
                 <Button
                   icon="pi pi-file-check"
                   severity="warn"
                   rounded
-                   raised
+                  raised
                   @click="openEvaluacionView(slotProps.data)"
-                  v-tooltip.top="{ value: 'Evaluación', showDelay: 0, hideDelay: 100 }"
+                  v-tooltip.top="{
+                    value: 'Evaluación',
+                    showDelay: 0,
+                    hideDelay: 100,
+                  }"
                 />
                 <Button
                   icon="pi pi-plus-circle"
                   severity="help"
                   rounded
-                   raised
+                  raised
                   @click="openModulosView(slotProps.data)"
-                  v-tooltip.right="{ value: 'Modulos', showDelay: 0, hideDelay: 100 }"
+                  v-tooltip.right="{
+                    value: 'Modulos',
+                    showDelay: 0,
+                    hideDelay: 100,
+                  }"
                 />
               </div>
             </template>
           </Column>
         </DataTable>
-        </div>
+      </div>
     </div>
-    
+
     <!-- Modal para Confirmar Eliminación -->
     <ConfirmDialog group="headless">
       <template #container="{ message, acceptCallback, rejectCallback }">
@@ -216,12 +258,17 @@
               raised
               @click="acceptCallback"
             ></Button>
-            <Button label="Cancelar" raised severity="primary" outlined @click="rejectCallback"></Button>
+            <Button
+              label="Cancelar"
+              raised
+              severity="primary"
+              outlined
+              @click="rejectCallback"
+            ></Button>
           </div>
         </div>
       </template>
     </ConfirmDialog>
-    
   </div>
 </template>
 
@@ -233,7 +280,6 @@ import { useAuthStore } from "@/stores/authStore";
 import ExcelJS from "exceljs";
 import { useConfirm } from "primevue/useconfirm";
 
-
 import api from "@/axiosConfig.js";
 const toast = useToast();
 const authStore = useAuthStore();
@@ -244,29 +290,51 @@ const router = useRouter();
 const token = authStore.token;
 const idUsuario = authStore.usuario.id;
 
-
 const isConfirmModalOpen = ref(false);
 let cursoToDelete = ref(null); // Usuario a eliminar
 
 // Agregar una variable para el filtro global
 const globalFilter = ref(""); // Variable para almacenar el valor del buscador global
 
-const home = ref({
-    icon: 'pi pi-home',
-    route: '/panelControl/main'
+// Computed para asignar dinámicamente la ruta de 'home' según el tipo de usuario
+const home = computed(() => {
+  const tipoUsuario = authStore.usuario.tipoUsuario;
+  return {
+    icon: "pi pi-home",
+    route: tipoUsuario === "admin" 
+            ? "/panelControl/main" 
+            : "/panelCoaches/mainCoach",
+  };
 });
-const items = ref([
-    { label: 'Cursos', 
+// Computed para asignar dinámicamente la ruta según el tipo de usuario
+const items = computed(() => {
+  const tipoUsuario = authStore.usuario.tipoUsuario;
+
+  return [
+    {
+      label: "Cursos",
       icon: "pi pi-book",
-      route: '/panelControl/cursos' }
-]);
+      route: tipoUsuario === "admin" 
+              ? "/panelControl/cursos" 
+              : "/panelCoaches/cursos",
+    },
+    // Aquí puedes añadir más opciones de menú según sea necesario
+  ];
+});
 const openAddView = () => {
-  router.push("/panelControl/formCurso"); // Ruta para agregar curso
+  if (authStore.usuario.tipoUsuario === "admin") {
+    router.push("/panelControl/formCurso"); // Ruta para agregar curso
+  } else if (authStore.usuario.tipoUsuario === "coach") {
+    router.push("/panelCoaches/formCurso"); // Ruta para agregar curso
+  }
 };
 
 const openEditView = (curso) => {
-  router.push(`/panelControl/formCurso/${curso.idCurso}`); // Ruta para editar curso
-  console.log(curso);
+  if (authStore.usuario.tipoUsuario === "admin") {
+    router.push(`/panelControl/formCurso/${curso.idCurso}`); // Ruta para editar curso
+  } else if (authStore.usuario.tipoUsuario === "coach") {
+    router.push(`/panelCoaches/formCurso/${curso.idCurso}`); // Ruta para editar curso
+  }
 };
 const eliminarCurso = (idCurso) => {
   confirm.require({
@@ -290,7 +358,7 @@ const eliminarCurso = (idCurso) => {
 const deletecurso = async (idCurso) => {
   try {
     await api.delete(`/cursos/eliminarCurso/${idCurso}`, {
-      params: { idUsuario }
+      params: { idUsuario },
     });
     cursos.value = cursos.value.filter((curso) => curso.idCurso !== idCurso);
     fetchData();
@@ -300,7 +368,6 @@ const deletecurso = async (idCurso) => {
       detail: "El curso ha sido eliminado con éxito.",
       life: 3000,
     });
-    
   } catch (error) {
     console.error(error);
     toast.add({
@@ -314,10 +381,18 @@ const deletecurso = async (idCurso) => {
 };
 
 const openModulosView = (curso) => {
-  router.push(`/panelControl/modulos/${curso.idCurso}`);
+  if (authStore.usuario.tipoUsuario === "admin") {
+    router.push(`/panelControl/modulos/${curso.idCurso}`);
+  } else if (authStore.usuario.tipoUsuario === "coach") {
+    router.push(`/panelCoaches/modulos/${curso.idCurso}`);
+  }
 };
 const openEvaluacionView = (curso) => {
-  router.push(`/panelControl/evaluacion/${curso.idCurso}`);
+  if (authStore.usuario.tipoUsuario === "admin") {
+    router.push(`/panelControl/evaluacion/${curso.idCurso}`);
+  } else if (authStore.usuario.tipoUsuario === "coach") {
+    router.push(`/panelCoaches/evaluacion/${curso.idCurso}`);
+  }
 };
 const exportToExcel = async () => {
   const workbook = new ExcelJS.Workbook();
@@ -332,7 +407,6 @@ const exportToExcel = async () => {
     { header: "Estado", key: "estado", width: 10 },
     { header: "Duración", key: "duracion", width: 10 },
     { header: "Precio", key: "precio", width: 10 },
-
   ];
 
   // Agrega filas
@@ -350,11 +424,13 @@ const reloadPage = () => {
 };
 const fetchData = async () => {
   try {
-    const response = await api.get("/cursos/curso");
+    const response =
+      authStore.usuario.tipoUsuario === "admin"
+        ? await api.get("/cursos/curso")
+        : await api.get(`/cursos/cursoCoach/${authStore.usuario.id}`);
     cursos.value = response.data.reverse();
   } catch (error) {
     console.error(error);
-    // Manejar el error de forma adecuada
   }
 };
 const expandedCourses = ref({}); // Para manejar la expansión de las descripciones
@@ -375,16 +451,13 @@ const cursosConNumeracion = computed(() => {
         curso.estado.toString().includes(filter) || // Filtrar por duración
         curso.duracion.toString().includes(filter) || // Filtrar por duración
         curso.precio.toString().includes(filter) // Filtrar por precio
-        
       );
-      
     })
-    
+
     .map((curso, index) => ({
       ...curso,
       index: index + 1,
-      expanded: false // Añadir la propiedad `expanded` por defecto
-
+      expanded: false, // Añadir la propiedad `expanded` por defecto
     }));
 });
 </script>

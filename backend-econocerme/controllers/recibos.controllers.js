@@ -150,66 +150,71 @@ const generarScreenshot = async (url) => {
 //     }
 //   };
 
-
-
 export const generarPdf = async (req, res) => {
-    const { idInscripcion, idCuotaPago } = req.body; // Recibir la URL desde el cuerpo de la solicitud
-    console.log("estos datos estan llegando",idInscripcion, idCuotaPago)
-    try {
+  const { idInscripcion, idCuotaPago } = req.body; // Recibir la URL desde el cuerpo de la solicitud
+  console.log("estos datos estan llegando", idInscripcion, idCuotaPago);
+  try {
+    // Inicializar Puppeteer
+    const browser = await puppeteer.launch({
+      headless: true,
+    });
 
-      // Inicializar Puppeteer
-      const browser = await puppeteer.launch({
-        headless: true,});
+    const page = await browser.newPage();
+    const url = `http://localhost:5173/generarPdf/${idInscripcion}?idCuotaPago=${idCuotaPago}`;
 
-      const page = await browser.newPage();
-      const url = `http://localhost:5173/generarPdf/${idInscripcion}?idCuotaPago=${idCuotaPago}`;
-
-      // Navegar a la URL proporcionada
-      await page.goto(url, { waitUntil: 'networkidle2' });
-      // Generar el PDF
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: {
-          top: '20mm',
-          right: '20mm',
-          bottom: '20mm',
-          left: '20mm'
-        },
-        displayHeaderFooter: true,
-        headerTemplate: '<div></div>',
-        footerTemplate: `
+    // Navegar a la URL proporcionada
+    await page.goto(url, { waitUntil: "networkidle2" });
+    // Generar el PDF
+    const pdfBuffer = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: {
+        top: "20mm",
+        right: "20mm",
+        bottom: "20mm",
+        left: "20mm",
+      },
+      displayHeaderFooter: true,
+      headerTemplate: "<div></div>",
+      footerTemplate: `
           <div style="font-size: 10px; text-align: center; width: 100%;">
             <span class="pageNumber"></span> / <span class="totalPages"></span>
           </div>
         `,
-        scale: 0.8
-      });
-  
-      // Cerrar el navegador
-      await browser.close();
-  
-      // Definir la ruta donde se guardará el archivo PDF
-      const outputDir = path.resolve('uploads/pdfs'); // Carpeta donde guardarás los PDFs
-      const pdfFilename = `url-report-${Date.now()}.pdf`;
-      const pdfPath = path.join(outputDir, pdfFilename);
-  
-      // Crear el directorio si no existe
-      if (!fs.existsSync(outputDir)) {
-        await fs.mkdir(outputDir, { recursive: true });
-      }
-  
-      // Guardar el archivo PDF en el servidor
-      await fs.writeFile(pdfPath, pdfBuffer);
-  
-      // Generar la URL pública del archivo PDF
-      const pdfUrl = `http://localhost:3000/uploads/pdfs/${pdfFilename}`; // Cambia el puerto si es necesario
-  
-      // Enviar la URL del PDF como respuesta
-      res.send({ url: pdfUrl });
+      scale: 0.8,
+    });
 
-    } catch (error) {
-      console.error('Error al generar el PDF desde URL:', error);
-      res.status(500).send('No se pudo generar el PDF desde la URL');
+    // Cerrar el navegador
+    await browser.close();
+
+    // Definir la ruta donde se guardará el archivo PDF
+    const outputDir = path.resolve("uploads/pdfs"); // Carpeta donde guardarás los PDFs
+    const pdfFilename = `url-report-${Date.now()}.pdf`;
+    const pdfPath = path.join(outputDir, pdfFilename);
+
+    // Eliminar cualquier archivo PDF existente en la carpeta
+    const files = await fs.readdir(outputDir);
+    for (const file of files) {
+      if (file.endsWith(".pdf")) {
+        await fs.unlink(path.join(outputDir, file)); // Eliminar el archivo existente
+      }
     }
-  };
+
+    // Crear el directorio si no existe
+    if (!fs.existsSync(outputDir)) {
+      await fs.mkdir(outputDir, { recursive: true });
+    }
+
+    // Guardar el archivo PDF en el servidor
+    await fs.writeFile(pdfPath, pdfBuffer);
+
+    // Generar la URL pública del archivo PDF
+    const pdfUrl = `http://localhost:3000/uploads/pdfs/${pdfFilename}`; // Cambia el puerto si es necesario
+
+    // Enviar la URL del PDF como respuesta
+    res.send({ url: pdfUrl });
+  } catch (error) {
+    console.error("Error al generar el PDF desde URL:", error);
+    res.status(500).send("No se pudo generar el PDF desde la URL");
+  }
+};

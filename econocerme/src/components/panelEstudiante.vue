@@ -4,41 +4,58 @@
     class="w-auto bg-gradient-to-tl from-custom-purple to-custom-pink dark:bg-gradient-to-tl dark:from-dark-purple dark:to-dark-pink"
   >
     <header
-      class="bg-gradient-to-t from-custom-purple to-custom-pink dark:bg-gradient-to-t dark:from-dark-purple dark:to-dark-pink text-black p-5 flex justify-between items-center fixed top-0 left-0 w-full z-20 shadow-lg shadow-purple-800/50"
+      class="bg-gradient-to-t from-custom-purple to-custom-pink dark:bg-gradient-to-t dark:from-dark-purple dark:to-dark-pink text-black h-auto flex justify-between items-center p-5 fixed top-0 left-0 w-full z-10 shadow-lg shadow-purple-800/50"
     >
       <div class="flex items-center">
-        <img src="@/assets/logoec.png" alt="Logo" class="h-10 mx-6" />
+        <img
+          src="@/assets/logoec.png"
+          alt="Logo"
+          class="h-10 mx-6 dark:brightness-0 dark:invert"
+        />
       </div>
       <div class="flex items-center space-x-4">
-       
-        <div>
-          <button
-            class="text-black hover:text-purple-950"
+        <div class="-mr-2">
+          <Button
+            class="flex items-center justify-center !text-lg dark:text-white !bg-transparent !hover:bg-transparent !border-none"
+            text
+            severity="contrast"
+            label="Dashboard"
             @click="goToDashboard"
+            icon="pi pi pi-home "
+            iconClass="!text-lg " 
+
+            outlined=""
           >
-            <i class="pi pi pi-home text-2x1" style="font-size: 21px">
-              Dashboard</i
-            >
-          </button>
+          </Button>
         </div>
-        
-        <div>
-          <button class="text-black hover:text-purple-950" @click="goToCursos">
-            <i class="pi pi-book text-xl" style="font-size: 21px">
-              Mis Cursos</i
-            >
-          </button>
+
+        <div class="-mr-4">
+          <Button
+            class="flex items-center justify-center !text-lg dark:text-white !bg-transparent !font-extralight !border-none"
+            text
+            severity="contrast"
+            label="Mi Aprendizaje"
+            @click="goToCursos"
+            icon="pi pi pi-book "
+            iconClass="!text-lg " 
+            outlined=""
+          >
+          </Button>
         </div>
-       
-        <div>
-          <button
-            class="text-black hover:text-purple-950"
+
+        <div class="-mr-2">
+          <Button
+            class="flex items-center justify-center text-black !text-lg dark:text-white !bg-transparent !hover:bg-transparent !border-none"
+            text
+            severity="contrast"
+            label="Certificaciones"
             @click="goToCertificaciones"
+            icon="pi pi-id-card"
+            iconClass="!text-lg " 
+
+            outlined=""
           >
-            <i class="pi pi-id-card text-xl" style="font-size: 21px">
-              Certificaciones</i
-            >
-          </button>
+          </Button>
         </div>
         <div class="flex justify-end">
           <carrito />
@@ -46,7 +63,7 @@
         <div>
           <theme-switcher class="w-14 h-14" />
         </div>
-       
+
         <div
           class="flex justify-center items-center space-x-2 cursor-pointer group"
           @click="toggle"
@@ -59,25 +76,27 @@
             class="w-12 h-11 rounded-full group-hover:shadow-2xl transition duration-300"
           />
           <span
-            class="text-base font-medium group-hover:shadow-xl transition duration-300"
+            class="text-base font-medium group-hover:shadow-xl dark:text-white transition duration-300"
           >
             {{ primerNombre }}
           </span>
           <i
-            class="pi pi-chevron-down group-hover:shadow-lg transition duration-300"
+            class="pi pi-chevron-down group-hover:shadow-lg dark:text-white transition duration-300"
           ></i>
           <Menu
+            :autoZIndex="false"
             ref="menu"
             id="overlay_menu"
             :model="profileItems"
             :popup="true"
+            class="pt-4"
           />
         </div>
       </div>
     </header>
 
-    <div class="flex flex-1 pt-16">
-      <main class="flex-1 p-5">
+    <div class="flex flex-1 pt-24">
+      <main class="flex-1 p-5 min-h-screen">
         <router-view></router-view>
       </main>
     </div>

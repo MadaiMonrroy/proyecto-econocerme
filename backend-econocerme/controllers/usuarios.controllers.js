@@ -41,8 +41,14 @@ export const listaUsuariosInscripciones = async (req, res) => {
   }
 };
 // Función para enviar correo con la contraseña
-async function enviarCorreoContrasenia(email, contrasenia, tokenConfirmacion, nombreCompleto) {
-  const imageURL ='https://res.cloudinary.com/dgzjotfzz/image/upload/v1726678334/logoec_dxrwql.png';
+async function enviarCorreoContrasenia(
+  email,
+  contrasenia,
+  tokenConfirmacion,
+  nombreCompleto
+) {
+  const imageURL =
+    "https://res.cloudinary.com/dgzjotfzz/image/upload/v1726678334/logoec_dxrwql.png";
   const nombreUsuario = nombreCompleto;
   const mailOptions = {
     from: "desarrollatuesencia2810@gmail.com",
@@ -164,6 +170,25 @@ export const obtenerUsuario = async (req, res) => {
   }
 };
 
+
+// Obtener un usuario por ID
+export const obtenerUsuarioCoach = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const [result] = await connection.query(
+      `SELECT id, nombres, primerApellido, segundoApellido, email, fotoPerfil, biografia, especialidad,  experiencia,  fechaNacimiento, tipoUsuario, estado FROM usuario WHERE id = ?`,
+      [id]
+    );
+    if (result.length === 0) {
+      return res.status(404).json({ mensaje: "Usuario no encontrado" });
+    }
+    res.json(result[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Ocurrió un error en el servidor" });
+  }
+};
+
 // Agregar un nuevo usuario
 export const agregarUsuario = async (req, res) => {
   const {
@@ -198,7 +223,10 @@ export const agregarUsuario = async (req, res) => {
     if (existingUsuario.length > 0) {
       return res
         .status(400)
-        .json({ mensaje: "Ingresa un nuevo usuario porque ya existe un usuario con este email" });
+        .json({
+          mensaje:
+            "Ingresa un nuevo usuario porque ya existe un usuario con este email",
+        });
     }
 
     const hashedPassword = await bcrypt.hash(contrasenia, 10);
@@ -231,7 +259,12 @@ export const agregarUsuario = async (req, res) => {
     );
 
     // Enviar la contraseña generada y el enlace de confirmación al usuario por correo
-    await enviarCorreoContrasenia(email, contrasenia, tokenConfirmacion, nombreCompleto);
+    await enviarCorreoContrasenia(
+      email,
+      contrasenia,
+      tokenConfirmacion,
+      nombreCompleto
+    );
 
     res.json({
       id: result.insertId,
@@ -418,8 +451,8 @@ export const editarUsuario = async (req, res) => {
       ]
     );
 
-     // Realizar una nueva consulta para obtener el usuario actualizado
-     const [updatedUsuario] = await connection.query(
+    // Realizar una nueva consulta para obtener el usuario actualizado
+    const [updatedUsuario] = await connection.query(
       "SELECT * FROM usuario WHERE id = ?",
       [id]
     );
@@ -438,7 +471,7 @@ export const editarUsuario = async (req, res) => {
 // Función para gestionar el cambio de contraseña
 export const cambiarContrasenia = async (req, res) => {
   const id = req.params.id;
-  const { idUsuario,contrasenia, email, nombreCompleto } = req.body;
+  const { idUsuario, contrasenia, email, nombreCompleto } = req.body;
   try {
     const [existingUser] = await connection.query(
       "SELECT contrasenia FROM usuario WHERE id = ?",
@@ -460,10 +493,10 @@ export const cambiarContrasenia = async (req, res) => {
               WHERE id = ?`,
         [hashedPassword, idUsuario, id]
       );
-      console.log(nombreCompleto)
+      console.log(nombreCompleto);
       // Enviar correo con la nueva contraseña
       await enviarCorreoNuevaContrasenia(email, contrasenia, nombreCompleto);
-      
+
       if (result.affectedRows === 0) {
         return res.status(404).json({ mensaje: "Usuario no encontrado" });
       }
@@ -484,97 +517,86 @@ export const editarUsuariocoach = async (req, res) => {
     primerApellido,
     segundoApellido,
     email,
-    contrasenia,
     fechaNacimiento,
-    tipoUsuario,
     biografia,
-    especialidad,
     experiencia,
-    videoPresentacion,
+    especialidad,
+    tipoUsuario,
+    idUsuario,
   } = req.body;
 
   try {
-    // Obtener el usuario existente
-    const [existingUser] = await connection.query(
-      "SELECT contrasenia FROM usuario WHERE id = ?",
+    const [oldFotPerfil] = await connection.query(
+      "SELECT fotoPerfil FROM usuario WHERE id = ?",
       [id]
     );
-    if (existingUser.length === 0) {
-      return res.status(404).json({ mensaje: "Usuario no encontrado" });
-    }
 
-    let hashedPassword = existingUser[0].contrasenia; // Mantener la contraseña actual por defecto
+    const oldFotoPerfilUrl = oldFotPerfil[0].fotoPerfil;
+    let fotoPerfil = oldFotoPerfilUrl;
 
-    // Si se proporciona una nueva contraseña, actualizarla y enviar correo
-    if (contrasenia && contrasenia !== hashedPassword) {
-      hashedPassword = await bcrypt.hash(contrasenia, 10);
-      // Enviar correo con la nueva contraseña
-      await enviarCorreoNuevaContrasenia(email, contrasenia);
-    }
-
-    let fotoPerfilUrl = null;
+    // Gestionar el cambio de imagen de perfil si se proporciona una nueva
     if (req.files && req.files.fotoPerfil) {
       const file = req.files.fotoPerfil;
-      const fileTypes = ["image/jpeg", "image/png", "image/jpg"];
-      const imageSize = 1024;
+      const ext = path.extname(file.name);
+      fotoPerfil = `${uuidv4()}${ext}`;
+      const filePath = path.join(UPLOAD_DIR, fotoPerfil);
+      await file.mv(filePath);
+      fotoPerfil = `http://localhost:3000/uploads/usuarios/${fotoPerfil}`;
 
-      if (!fileTypes.includes(file.mimetype)) {
-        return res
-          .status(400)
-          .json({ mensaje: "Formato de imagen no soportado" });
-      }
-      if (file.size / 1024 > imageSize) {
-        return res
-          .status(400)
-          .json({ mensaje: `La imagen debe ser menor de ${imageSize} KB` });
-      }
-
-      try {
-        const cloudFile = await upload(file.tempFilePath, "Usuarios");
-        await fs.unlink(file.tempFilePath);
-        fotoPerfilUrl = cloudFile.secure_url;
-      } catch (uploadError) {
-        console.error("Error al subir la imagen:", uploadError);
-        return res.status(500).json({ mensaje: "Error al subir la imagen" });
+      // Eliminar la imagen anterior si existe
+      if (oldFotoPerfilUrl && oldFotoPerfilUrl !== "null") {
+        const oldFotoPerfilPath = path.join(
+          UPLOAD_DIR,
+          path.basename(oldFotoPerfilUrl)
+        );
+        if (fs.existsSync(oldFotoPerfilPath)) {
+          fs.unlinkSync(oldFotoPerfilPath);
+        }
       }
     }
 
+    // Actualizar los demás datos del usuario
     const [result] = await connection.query(
       `UPDATE usuario SET
                 nombres = ?,
                 primerApellido = ?,
                 segundoApellido = ?,
                 email = ?,
-                contrasenia = ?,
+                biografia = ?,
+                experiencia = ?,
+                especialidad = ?,
                 fotoPerfil = ?,
                 fechaNacimiento = ?,
                 tipoUsuario = ?,
-                biografia = ?,
-                especialidad = ?,
-                experiencia = ?,
-                videoPresentacion = ?
+                idUsuario = ?
             WHERE id = ?`,
       [
         nombres,
         primerApellido,
         segundoApellido,
         email,
-        hashedPassword,
-        fotoPerfilUrl,
+        biografia,
+        experiencia,
+        especialidad,
+        fotoPerfil,
         fechaNacimiento,
         tipoUsuario,
-        biografia,
-        especialidad,
-        experiencia,
-        videoPresentacion,
+        idUsuario,
         id,
       ]
     );
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ mensaje: "Usuario no encontrado" });
-    }
-    res.json({ mensaje: "Usuario actualizado correctamente" });
+    // Realizar una nueva consulta para obtener el usuario actualizado
+    const [updatedUsuario] = await connection.query(
+      "SELECT * FROM usuario WHERE id = ?",
+      [id]
+    );
+
+    // Devolver el usuario actualizado en la respuesta
+    res.json({
+      mensaje: "Usuario actualizado correctamente",
+      usuario: updatedUsuario[0], // Devuelve el usuario actualizado
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Ocurrió un error en el servidor" });
@@ -582,7 +604,11 @@ export const editarUsuariocoach = async (req, res) => {
 };
 
 // Función para enviar la nueva contraseña por correo
-async function enviarCorreoNuevaContrasenia(email, contrasenia, nombreCompleto) {
+async function enviarCorreoNuevaContrasenia(
+  email,
+  contrasenia,
+  nombreCompleto
+) {
   const imageURL = `https://res.cloudinary.com/dgzjotfzz/image/upload/v1726678334/logoec_dxrwql.png`;
   const loginURL = `http://localhost:5173/`;
   const mailOptions = {

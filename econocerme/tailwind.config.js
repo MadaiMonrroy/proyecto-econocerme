@@ -12,7 +12,7 @@ export default {
       },
       colors: {
         'custom-purple': 'rgba(153, 99, 219)',  // Violeta más claro
-        'custom-pink': 'rgb(203, 159, 236)',   // Violeta claro
+        'custom-pink': 'rgba(250, 240, 255)',   // Violeta claro
         'dark-purple': 'rgba(50, 25, 120)', // Color para el modo oscuro
         'dark-pink': 'rgba(180, 70, 230)',   // Otro color para el modo oscuro
       },

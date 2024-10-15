@@ -75,7 +75,11 @@
               />
             </template>
           </Column>
-          <Column field="idInscripcion" header="Cod. Inscripcion" class="px-6 py-4" />
+          <Column
+            field="idInscripcion"
+            header="Cod. Inscripcion"
+            class="px-6 py-4"
+          />
 
           <Column
             field="fechaInscripcion"
@@ -84,9 +88,7 @@
             sortable
           >
             <template #body="slotProps">
-              <span>{{
-               formatDate(slotProps.data.fechaInscripcion)
-              }}</span>
+              <span>{{ formatDate(slotProps.data.fechaInscripcion) }}</span>
             </template>
           </Column>
           <Column field="observacion" header="Observación" class="px-6 py-4" />
@@ -138,7 +140,7 @@
               </div>
             </template>
           </Column>
-          
+
           <Column header="Pagos" class="px-6 py-4">
             <template #body="slotProps">
               <div class="flex items-center space-x-2">
@@ -147,7 +149,12 @@
                 <Button
                   icon="pi pi-dollar"
                   class="p-button-rounded p-button-success"
-                  @click="openEditCuota(slotProps.data)"
+                  @click="obtenerIdPagoPorInscripcion(slotProps.data)"
+                  v-tooltip.top="{
+                  value: 'Ver Cuotas',
+                  showDelay: 0,
+                  hideDelay: 100,
+                }"
                 />
               </div>
             </template>
@@ -200,6 +207,7 @@ const router = useRouter();
 const isConfirmModalOpen = ref(false);
 let inscripcionToDelete = ref(null);
 const globalFilter = ref(""); // Variable para almacenar el valor del buscador global
+const pagoId = ref(null); // Usamos una ref para el idPago
 
 const openAddView = () => {
   router.push("/panelControl/formInscripcion");
@@ -208,10 +216,28 @@ const openAddView = () => {
 const openEditView = (inscripcion) => {
   router.push(`/panelControl/formInscripcion/${inscripcion.idInscripcion}`);
 };
+const obtenerIdPagoPorInscripcion = async (inscripcion) => {
+  try {
 
-const openEditCuota = (inscripcion) => {
-  router.push(`/panelControl/cuotas/${inscripcion.idInscripcion}`);
+    const response = await api.get(
+      `/cuotas/obtenerIdPagoPorInscripcion/${inscripcion.idInscripcion}`
+    );
+    if (response.data.idPago) {
+      pagoId.value = response.data.idPago; // Asignamos el idPago
+      openEditCuota(inscripcion);
+    } else {
+      console.warn("No se encontró un idPago para esta inscripción.");
+    }
+  } catch (error) {
+    console.error("Error al obtener el idPago:", error);
+  }
 };
+const openEditCuota = (inscripcion) => {
+  console.log(pagoId)
+  router.push({
+        path: `/panelControl/cuotas/${inscripcion.idInscripcion}`,
+        query: { pagoId: pagoId.value }  // Enviamos el pagoId como parámetro de consulta
+      });};
 
 const closeConfirmModal = () => {
   isConfirmModalOpen.value = false;
@@ -277,7 +303,7 @@ const fetchData = async () => {
   try {
     const response = await api.get("/inscripciones/inscripcion");
     inscripciones.value = response.data.data.reverse();
-    console.log(response)
+    console.log(response);
     // console.log(response.data.data);
   } catch (error) {
     console.error(error);
@@ -299,7 +325,7 @@ const inscripcionesConNumeracion = computed(() => {
   // Filtrar cursos basado en globalFilter
   const filter = globalFilter.value.toLowerCase();
   return inscripciones.value
-  .filter((inscripcion) => {
+    .filter((inscripcion) => {
       const nombreCompleto = inscripcion.nombreCompleto?.toLowerCase() || "";
       const idInscripcion = inscripcion.idInscripcion?.toString() || "";
       const fechaInscripcion = formatDate(inscripcion.fechaInscripcion || "");
@@ -313,12 +339,11 @@ const inscripcionesConNumeracion = computed(() => {
         montoTotal.includes(filter)
       );
     })
-    
+
     .map((inscripcion, index) => ({
       ...inscripcion,
       index: index + 1,
-      expanded: false // Añadir la propiedad `expanded` por defecto
-
+      expanded: false, // Añadir la propiedad `expanded` por defecto
     }));
 });
 const dialog = useDialog();

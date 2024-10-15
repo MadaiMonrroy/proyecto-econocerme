@@ -1,13 +1,13 @@
 <template>
-  <div class="p-4">
+  <div class="">
     <div class="card">
       <Divider align="left" type="solid">
         <b class="text-3xl text-black dark:text-white">ANUNCIOS</b>
       </Divider>
 
-      <div v-if="anunciosFiltrados.length === 0" class="text-red-500 mb-4">
-        No hay resultados que coincidan con su búsqueda.
-      </div>
+      <Message severity="info" v-if="anunciosFiltrados.length === 0">
+        No hay anuncios en este momento.
+      </Message>
 
       <Carousel
         v-if="anunciosFiltrados.length > 0"
@@ -15,16 +15,18 @@
         :numVisible="1"
         :numScroll="1"
         orientation="vertical"
-        verticalViewPortHeight="270px"
+        verticalViewPortHeight="260px"
         :responsiveOptions="responsiveOptions"
         :autoplayInterval="4000"
         circular
         containerClass="flex items-center justify-center"
+        class="w-full"
       >
         <template #item="slotProps">
           <div
-            class="card !bg-gradient-to-tr from-[rgba(191, 90, 242, 0.5)] to-[rgba(191, 90, 242, 0.2)] min-h-[240px] md:max-h-[310px] !border-0 !rounded-full m-2 p-4 flex flex-col md:flex-row items-center justify-center"
+            class="card !bg-gradient-to-tr from-[rgba(191, 90, 242, 0.5)] to-[rgba(191, 90, 242, 0.2)] min-h-[180px] sm:min-h-[200px] lg:min-h-[240px] min-w-[320px] sm:min-w-[640px] md:min-w-[800px] lg:min-w-[1000px] xl:min-w-[1200px] 2xl:min-w-[1400px] md:max-h-[200px] !border-0 !rounded-full m-2 p-4 flex flex-col md:flex-row items-center justify-center"
           >
+            
             <!-- Imagen a la izquierda, ajustable para pantallas pequeñas -->
 
             <div
@@ -69,9 +71,7 @@
 
     <div class="card">
       <Divider align="left" type="solid">
-        <b class="text-3xl text-black dark:text-white"
-          >CURSOS DISPONIBLES</b
-        >
+        <b class="text-3xl text-black dark:text-white">CURSOS DISPONIBLES</b>
       </Divider>
 
       <!-- Contenedor para el buscador y el select -->
@@ -132,11 +132,12 @@
           >
             <template #item="slotProps">
               <div
-                class="p-8 mt-4 mb-4 ml-2 mr-2 border bg-surface-50 dark:bg-black border-violet-200 shadow-xl dark:border-gray-950  dark:shadow-lg dark:shadow-violet-950 rounded-2xl transform hover:scale-105 transition-all duration-300"
-                
+                class="p-9 mt-4 mb-4 ml-3 mr-2 border bg-surface-50 dark:bg-black border-violet-200 shadow-xl dark:border-gray-950 dark:shadow-lg dark:shadow-violet-950 rounded-2xl transform hover:scale-105 transition-all duration-300"
                 style="height: 450px"
               >
-                <div class=" bg-violet-50   dark:bg-gray-900 flex justify-center rounded-xl pt-2  h-48">
+                <div
+                  class="bg-violet-50 dark:bg-gray-900 flex justify-center rounded-xl pt-2 h-48"
+                >
                   <div
                     class="w-full h-44 mb-4 flex justify-center items-center overflow-hidden"
                   >
@@ -155,8 +156,8 @@
                   <div class="text-sm text-gray-500 mb-4 pt-6">
                     Duración: {{ slotProps.data.duracion }} horas
                   </div>
-                  <div class="text-2xl font-semibold ">
-                    Bs. {{ slotProps.data.precio }} 
+                  <div class="text-2xl font-semibold">
+                    Bs. {{ slotProps.data.precio }}
                   </div>
                   <div class="flex items-center space-x-3 pt-3 pb-3">
                     <Button
@@ -170,19 +171,21 @@
 
                     <Button
                       rounded
-                      
-                      text raised
+                      text
+                      raised
                       outlined
                       severity="success"
-                      
-                      
                       v-tooltip.top="{
                         value: 'Añadir a la cesta',
                         showDelay: 0,
                         hideDelay: 100,
                       }"
                     >
-                      <span class="pi pi-cart-arrow-down" style="font-size: x-large" @click="añadirACesta(slotProps.data.idCurso)"></span>
+                      <span
+                        class="pi pi-cart-arrow-down"
+                        style="font-size: x-large"
+                        @click="añadirACesta(slotProps.data.idCurso)"
+                      ></span>
                     </Button>
                   </div>
                 </div>
@@ -226,20 +229,20 @@ const añadirACesta = async (idCurso) => {
     const cursoDetalles = await authStore.cargarCursos([idCurso]);
 
     // Obtener el carrito del localStorage
-    let carrito = JSON.parse(localStorage.getItem(`carrito_${authStore.usuario.id}`)) || [];
+    let carrito =
+      JSON.parse(localStorage.getItem(`carrito_${authStore.usuario.id}`)) || [];
 
     // Verificar si el curso ya está en el carrito
-    const existeCurso = carrito.some(curso => curso.idCurso === idCurso);
+    const existeCurso = carrito.some((curso) => curso.idCurso === idCurso);
 
     if (existeCurso) {
-
       console.log("El curso ya está en el carrito.");
       toast.add({
-      severity: "info",
-      summary: "Carrito",
-      detail: "El curso ya está en el carrito.",
-      life: 3000
-    });
+        severity: "info",
+        summary: "Carrito",
+        detail: "El curso ya está en el carrito.",
+        life: 3000,
+      });
       return; // No añadir el curso si ya está presente
     }
 
@@ -247,14 +250,17 @@ const añadirACesta = async (idCurso) => {
     carrito.push(cursoDetalles[0]); // Añade el curso obtenido desde el endpoint
 
     // Guardar el carrito actualizado en el localStorage
-    localStorage.setItem(`carrito_${authStore.usuario.id}`, JSON.stringify(carrito));
+    localStorage.setItem(
+      `carrito_${authStore.usuario.id}`,
+      JSON.stringify(carrito)
+    );
 
     console.log("Curso añadido al carrito:", cursoDetalles[0]);
-      toast.add({
+    toast.add({
       severity: "success",
       summary: "Carrito",
       detail: "El curso se ha añadido al carrito.",
-      life: 3000
+      life: 3000,
     });
   } catch (error) {
     console.error("Error al añadir curso a la cesta:", error);

@@ -212,7 +212,7 @@ const obtenerCursoCompleto = async (idCurso) => {
     usuario.value = data.usuario;
     modulos.value = data.modulos;
     // Actualizar la propiedad 'home' después de que el curso se haya cargado
-    home.value.label = curso.value.especialidad;
+    home.value.label = curso.value.especialidadCurso;
     items.value[0].label = curso.value.titulo;
 
     console.log(data.curso);

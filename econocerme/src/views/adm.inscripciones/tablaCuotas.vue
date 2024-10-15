@@ -355,6 +355,7 @@ const fetchData = async () => {
     const response = await api.get(`/cuotas/cuota/${props.pagoId}`);
 
     cuotas.value = response.data;
+
   } catch (error) {
     console.error(error);
   }

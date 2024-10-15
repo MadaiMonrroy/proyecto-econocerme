@@ -148,7 +148,12 @@ export default {
     });
     const activeModuloIndex = ref(null);
     const volverAModulos = () => {
-      router.push(`/panelControl/modulos/${cursoId}`);
+      if(authStore.usuario.tipoUsuario === "admin"){
+        router.push(`/panelControl/modulos/${cursoId}`);
+      }else
+    if(authStore.usuario.tipoUsuario === "coach") {
+      router.push(`/panelCoaches/modulos/${cursoId}`);
+    }
     };
 
     const cargarModulo = async () => {
@@ -173,6 +178,7 @@ export default {
       }
     };
     const pruebavista = () => {
+      
       router.push(`/panelControl/leccion`);
     };
     const obtenerModulos = async () => {

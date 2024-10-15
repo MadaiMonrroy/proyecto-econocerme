@@ -174,7 +174,13 @@ export default {
       value.value = tabValue;
     };
     const volverACursos = () => {
-      router.push(`/panelControl/cursos`);
+
+      if(authStore.usuario.tipoUsuario === "admin"){
+    router.push('/panelControl/cursos');
+  }else
+    if(authStore.usuario.tipoUsuario === "coach") {
+      router.push('/panelCoaches/cursos');
+    }
     };
     const cargarCurso = async () => {
       try {
