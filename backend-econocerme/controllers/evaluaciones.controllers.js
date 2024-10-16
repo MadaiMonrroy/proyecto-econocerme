@@ -92,11 +92,11 @@ export const ingresarEvaluacion = async (req, res) => {
 export const generarCertificado = async (req, res) => {
   const { idUsuario, idCurso } = req.body; // Recibir idUsuario e idCurso desde el cuerpo de la solicitud
   console.log("Datos para generar certificado", idUsuario, idCurso);
-  
+
   try {
     // Definir la ruta donde se guardará el certificado PDF
     const outputDir = path.resolve("uploads/certificates");
-    
+
     // Crear el directorio si no existe
     if (!fs.existsSync(outputDir)) {
       await fs.mkdir(outputDir, { recursive: true });
@@ -115,16 +115,16 @@ export const generarCertificado = async (req, res) => {
 
     // Generar el PDF del certificado
     const pdfBuffer = await page.pdf({
-      width: '11in',   // Ancho de carta en pulgadas
-  height: '8.5in', // Alto de carta en pulgadas
-  printBackground: true,
-  margin: {
-    top: "0mm",
-    right: "0mm",
-    bottom: "0mm",
-    left: "0mm",
-  },
-  displayHeaderFooter: false,
+      width: "11in", // Ancho de carta en pulgadas
+      height: "8.5in", // Alto de carta en pulgadas
+      printBackground: true,
+      margin: {
+        top: "0mm",
+        right: "0mm",
+        bottom: "0mm",
+        left: "0mm",
+      },
+      displayHeaderFooter: false,
     });
 
     // Cerrar el navegador
@@ -154,7 +154,6 @@ export const generarCertificado = async (req, res) => {
     res.status(500).send("No se pudo generar el certificado PDF");
   }
 };
-
 
 // Agregar preguntas y respuestas para un curso (transaccional)
 export const agregarPreguntas = async (req, res) => {
