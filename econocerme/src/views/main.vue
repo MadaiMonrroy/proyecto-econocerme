@@ -1,110 +1,220 @@
-
 <template>
-    
-<div class="grid grid-cols-4 grid-rows-5 gap-4">
-    <div >1 
-        <Button
-        @click="addOption(index)"
-        severity="info"
-        text
-        raised
-        icon="pi pi-plus-circle"
-        label="Añadir Opción"
-        class="dark:text-sky-500"
-      >
-      </Button>
-    </div>
-    <div >2</div>
-    <div >3</div>
-    <div >4</div>
-    <div class="col-start-3 row-start-5">6</div>
-    <div class="row-span-2 col-start-1 row-start-3">7</div>
-    <div class="col-start-1 row-start-2">
-        <div class="card max-w-lg">
-        <Chart type="bar" :data="chartData" :options="chartOptions" class="max-w-lg"  />
-    </div>
-    </div>
-    <div class="row-span-2 col-start-2 row-start-2">
-        <template>
-    <div class="flex justify-end">
-        <SelectButton v-model="layout" :options="options" :allowEmpty="false">
-            <template #option="{ option }">
-                <i :class="[option.value === 'list' ? 'pi pi-bars' : 'pi pi-table']"></i>
+    <div class="">
+      <!-- Cards Section -->
+      <div class="p-4">
+        <!-- Cards Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <Card>
+              <template #title>
+                <i class="pi pi-chart-line mr-2"></i>Card 1
+              </template>
+              <template #content>
+                <h2 class="text-2xl font-bold">150</h2>
+                <p>Active Users</p>
+              </template>
+            </Card>
+          </div>
+          <div>
+            <Card>
+              <template #title>
+                <i class="pi pi-dollar mr-2"></i>Card 2
+              </template>
+              <template #content>
+                <h2 class="text-2xl font-bold">$3,500</h2>
+                <p>Monthly Revenue</p>
+              </template>
+            </Card>
+          </div>
+          <div>
+            <Card>
+              <template #title> <i class="pi pi-users mr-2"></i>Card 3 </template>
+              <template #content>
+                <h2 class="text-2xl font-bold">25</h2>
+                <p>New Signups</p>
+              </template>
+            </Card>
+          </div>
+          <div>
+            <Card>
+              <template #title> <i class="pi pi-users mr-2"></i>Card 4 </template>
+              <template #content>
+                <h2 class="text-2xl font-bold">25</h2>
+                <p>New Signups</p>
+              </template>
+            </Card>
+          </div>
+        </div>
+      </div>
+      <div class="p-4">
+        <!-- Grid Container -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Card 1: Large Chart Card -->
+          <div class="col-span-1 md:col-span-2 shadow">
+            <Card>
+              <template #title> <i class="pi pi-users mr-2"></i>Card 4 </template>
+              <template #content>
+                <!-- Contenido del gráfico grande -->
+                <h3 class="text-lg font-bold">Chart Overview</h3>
+                <div
+                  class="h-48 bg-gray-100 rounded mt-4 flex items-center justify-center"
+                >
+                  Gráfico Principal
+                </div>
+              </template>
+            </Card>
+          </div>
+  
+          <!-- Card 2: Small Line Chart Card -->
+          <Card>
+            <template #title> <i class="pi pi-users mr-2"></i>Card 4 </template>
+            <template #content>
+              <div class="shadow">
+                <!-- Contenido del gráfico de línea -->
+                <h3 class="text-lg font-bold">Line Chart</h3>
+                <div
+                  class="h-auto bg-gray-100 rounded mt-4 flex items-center justify-center"
+                >
+                  
+                </div>
+                <div
+                  class="h-auto bg-gray-100 rounded mt-4 flex items-center justify-center"
+                >
+                  <Chart
+                    type="polarArea"
+                    :data="chartData"
+                    :options="chartOptions"
+                    class="w-full md:w-[30rem]"
+                  />
+                </div>
+              </div>
             </template>
-        </SelectButton>
+          </Card>
+          <Card>
+            <template #title> <i class="pi pi-users mr-2"></i>Card 4 </template>
+            <template #content>
+              <!-- Card 3: Statistics Card -->
+              <div class="">
+                <!-- Contenido de estadísticas -->
+                <h3 class="text-lg font-bold">Statistics</h3>
+                <p class="mt-4">
+                  Metric 1: <span class="text-green-500 font-bold">45 ↑</span>
+                </p>
+                <p>
+                  Metric 2: <span class="text-red-500 font-bold">19.7k ↓</span>
+                </p>
+                <p>Metric 3: <span class="text-gray-500 font-bold">1.2%</span></p>
+              </div>
+            </template>
+          </Card>
+  
+          <Card>
+            <template #title> <i class="pi pi-users mr-2"></i>Card 4 </template>
+            <template #content>
+              <!-- Card 4: Bar Chart Card -->
+              <div class="">
+                <!-- Contenido del gráfico de barras -->
+                <h3 class="text-lg font-bold">Bar Chart</h3>
+                <div
+                  class="h-24 bg-gray-100 rounded mt-4 flex items-center justify-center"
+                >
+                  Gráfico de Barras
+                </div>
+              </div>
+            </template>
+          </Card>
+  
+          <Card>
+            <template #title> <i class="pi pi-users mr-2"></i>Card 4 </template>
+            <template #content>
+              <!-- Card 5: Summary Card -->
+              <div class="col-span-1 md:col-span-2 lg:col-span-1">
+                <!-- Contenido del resumen -->
+                <h3 class="text-lg font-bold">Summary</h3>
+                <div class="flex justify-between items-center mt-4">
+                  <div>
+                    <p class="text-2xl font-bold">570</p>
+                    <p class="text-green-500">↑ 13%</p>
+                  </div>
+                  <div>
+                    <p class="text-2xl font-bold">234</p>
+                    <p class="text-blue-500">↑ 8%</p>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </Card>
+        </div>
+      </div>
+  
+      
     </div>
-</template>
-
-
-
-    </div>
-    <div class="row-span-2 col-start-2 row-start-4">10</div>
-    <div class="col-start-4 row-start-5">11</div>
-    <div class="col-start-1 row-start-5">12</div>
-    <div class="col-span-2 row-span-3 col-start-3 row-start-2">14</div>
-</div>
-    
-    
-</template>
-
-<script setup>
-import { ref, onMounted } from "vue";
-
-onMounted(() => {
-    chartData.value = setChartData();
-    chartOptions.value = setChartOptions();
-});
-
-const chartData = ref();
-const chartOptions = ref();
-
-const setChartData = () => {
-    return {
-        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-        datasets: [
+  </template>
+  
+  <script>
+  export default {
+    components: {},
+    data() {
+      return {
+        chartData: null,
+        chartOptions: null
+        
+        
+    }},
+    mounted() {
+      this.chartData = this.setChartData();
+      this.chartOptions = this.setChartOptions();
+    },
+    methods: {
+      setChartData() {
+        const documentStyle = getComputedStyle(document.documentElement);
+  
+        return {
+          datasets: [
             {
-                label: 'Sales',
-                data: [540, 325, 702, 620],
-                backgroundColor: ['rgba(249, 115, 22, 0.2)', 'rgba(6, 182, 212, 0.2)', 'rgb(107, 114, 128, 0.2)', 'rgba(139, 92, 246 0.2)'],
-                borderColor: ['rgb(249, 115, 22)', 'rgb(6, 182, 212)', 'rgb(107, 114, 128)', 'rgb(139, 92, 246)'],
-                borderWidth: 1
-            }
-        ]
-    };
-};
-const setChartOptions = () => {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--p-text-color');
-    const textColorSecondary = documentStyle.getPropertyValue('--p-text-muted-color');
-    const surfaceBorder = documentStyle.getPropertyValue('--p-content-border-color');
-
-    return {
-        plugins: {
-            legend: {
-                labels: {
-                    color: textColor
-                }
-            }
-        },
-        scales: {
-            x: {
-                ticks: {
-                    color: textColorSecondary
-                },
-                grid: {
-                    color: surfaceBorder
-                }
+              data: [11, 16, 7, 3, 14],
+              backgroundColor: [
+                documentStyle.getPropertyValue("--p-pink-500"),
+                documentStyle.getPropertyValue("--p-gray-500"),
+                documentStyle.getPropertyValue("--p-orange-500"),
+                documentStyle.getPropertyValue("--p-purple-500"),
+                documentStyle.getPropertyValue("--p-cyan-500"),
+              ],
+              label: "My dataset",
             },
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: textColorSecondary
-                },
-                grid: {
-                    color: surfaceBorder
-                }
-            }
-        }
-    };
-}
-</script>
+          ],
+          labels: ["Pink", "Gray", "Orange", "Purple", "Cyan"],
+        };
+      },
+      setChartOptions() {
+        const documentStyle = getComputedStyle(document.documentElement);
+        const textColor = documentStyle.getPropertyValue("--p-text-color");
+        const surfaceBorder = documentStyle.getPropertyValue(
+          "--p-content-border-color"
+        );
+  
+        return {
+          plugins: {
+            legend: {
+              labels: {
+                color: textColor,
+              },
+            },
+          },
+          scales: {
+            r: {
+              grid: {
+                color: surfaceBorder,
+              },
+            },
+          },
+        };
+      },
+    },
+  }
+  </script>
+  
+  <style scoped>
+  /* Aquí puedes agregar estilos personalizados */
+  </style>
+  

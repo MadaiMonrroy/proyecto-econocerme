@@ -64,19 +64,19 @@
       </div>
       <Divider />
       <Divider align="center" type="solid">
-          <p class="text-2xl font-semibold tracking-wider leading-relaxed">
-            Lista de Anuncios
-          </p>
-        </Divider>
-      <div class="card dark:shadow-purple-950 shadow-2xl dark:shadow-2xl dark:border-violet-400">
-        
+        <p class="text-2xl font-semibold tracking-wider leading-relaxed">
+          Lista de Anuncios
+        </p>
+      </Divider>
+      <div
+        class="card dark:shadow-purple-950 shadow-2xl dark:shadow-2xl dark:border-violet-400"
+      >
         <DataTable
           :value="filteredAnunciosConNumeracion"
           :rows="4"
           :paginator="true"
           :rowsPerPageOptions="[4, 8, 12]"
           stripedRows
-
         >
           <template #paginatorstart>
             <Button
@@ -370,17 +370,33 @@ import api from "@/axiosConfig.js";
 
 const confirm = useConfirm();
 const toast = useToast();
-const home = ref({
-  icon: "pi pi-home",
-  route: "/panelControl/main",
+const home = computed(() => {
+  const tipoUsuario = authStore.usuario.tipoUsuario;
+  return {
+    icon: "pi pi-home",
+    route:
+      tipoUsuario === "admin"
+        ? "/panelControl/main"
+        : "/panelCoaches/mainCoach",
+  };
 });
-const items = ref([
-  {
-    label: "Anuncios",
-    icon: "pi pi-megaphone",
-    route: "/panelControl/anuncios",
-  },
-]);
+// Computed para asignar dinámicamente la ruta según el tipo de usuario
+const items = computed(() => {
+  const tipoUsuario = authStore.usuario.tipoUsuario;
+
+  return [
+    {
+      label: "Anuncios",
+      icon: "pi pi-megaphone",
+      route:
+        tipoUsuario === "admin"
+          ? "/panelControl/anuncios"
+          : "/panelCoaches/anuncios",
+    },
+    // Aquí puedes añadir más opciones de menú según sea necesario
+  ];
+});
+
 const authStore = useAuthStore();
 const idUsuario = authStore.usuario.id;
 
@@ -401,11 +417,19 @@ const formatDate = (dateString) => {
 };
 
 const openAddView = () => {
-  router.push("/panelControl/formAnuncio");
+  if (authStore.usuario.tipoUsuario === "admin") {
+    router.push("/panelControl/formAnuncio");
+  } else if (authStore.usuario.tipoUsuario === "coach") {
+    router.push("/panelCoaches/formAnuncio");
+  }
 };
 
 const openEditView = (anuncio) => {
-  router.push(`/panelControl/formAnuncio/${anuncio.id}`);
+  if (authStore.usuario.tipoUsuario === "admin") {
+    router.push(`/panelControl/formAnuncio/${anuncio.id}`);
+  } else if (authStore.usuario.tipoUsuario === "coach") {
+    router.push(`/panelCoaches/formAnuncio/${anuncio.id}`);
+  }
 };
 // Función para recargar la página
 const reloadPage = () => {
@@ -453,8 +477,11 @@ const eliminarAnuncio = async (id) => {
   }
 };
 const showDetails = (anuncio) => {
-  selectedAnuncio.value = { ...anuncio, fecha_inicio: formatDate(anuncio.fecha_inicio),fecha_fin: formatDate(anuncio.fecha_fin) };
-
+  selectedAnuncio.value = {
+    ...anuncio,
+    fecha_inicio: formatDate(anuncio.fecha_inicio),
+    fecha_fin: formatDate(anuncio.fecha_fin),
+  };
 
   showModal.value = true;
 };
@@ -505,7 +532,10 @@ const exportToExcel = async () => {
 };
 const fetchAnuncios = async () => {
   try {
-    const response = await api.get("/anuncios/anuncio");
+    const response =
+      authStore.usuario.tipoUsuario === "admin"
+        ? await api.get("/anuncios/anuncio")
+        : await api.get(`/anuncios/anuncioCoach/${authStore.usuario.id}`);
     anuncios.value = response.data.reverse();
   } catch (error) {
     console.error("Error al obtener anuncios:", error);

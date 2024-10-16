@@ -1,18 +1,18 @@
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 import connection from "../db.js";
 import fs from "fs-extra";
-import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import path from "path";
+import { v4 as uuidv4 } from "uuid";
 
 // Obtener el directorio actual en módulos ES
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Carpeta donde se guardarán las imágenes
-const UPLOAD_DIR = path.join(__dirname, '../uploads/modulos');
+const UPLOAD_DIR = path.join(__dirname, "../uploads/modulos");
 // Carpeta donde se guardarán los videos
-const VIDEO_UPLOAD_DIR = path.join(__dirname, '../uploads/modulos/videos');
+const VIDEO_UPLOAD_DIR = path.join(__dirname, "../uploads/modulos/videos");
 
 // Crear carpeta si no existe
 fs.ensureDirSync(VIDEO_UPLOAD_DIR);
@@ -20,12 +20,16 @@ fs.ensureDirSync(VIDEO_UPLOAD_DIR);
 // Crear carpeta si no existe
 fs.ensureDirSync(UPLOAD_DIR);
 
-
 export const listaModulosHabilitados = async (req, res) => {
   const idCurso = req.params.idCurso;
   const idUsuario = req.query.idUsuario; // Cambia a req.query para acceder a idUsuario
 
-  console.log("ID del curso recibido:", idCurso, "ID del usuario recibido:", idUsuario);
+  console.log(
+    "ID del curso recibido:",
+    idCurso,
+    "ID del usuario recibido:",
+    idUsuario
+  );
 
   // Validar que el idCurso sea un número válido
   if (isNaN(idCurso)) {
@@ -43,7 +47,9 @@ export const listaModulosHabilitados = async (req, res) => {
 
     // Verificar si el curso tiene módulos
     if (totalModulos === 0) {
-      return res.status(404).json({ mensaje: "No se encontraron módulos para este curso" });
+      return res
+        .status(404)
+        .json({ mensaje: "No se encontraron módulos para este curso" });
     }
 
     // Obtener el progresoPago (porcentaje) del detalle_inscripcion
@@ -54,7 +60,12 @@ export const listaModulosHabilitados = async (req, res) => {
 
     // Verificar si se encontró el detalle de inscripción
     if (detalleInscripcion.length === 0) {
-      return res.status(404).json({ mensaje: "No se encontró detalle de inscripción para este curso y usuario" });
+      return res
+        .status(404)
+        .json({
+          mensaje:
+            "No se encontró detalle de inscripción para este curso y usuario",
+        });
     }
 
     const progresoPago = detalleInscripcion[0]?.progresoPago || 0;
@@ -70,11 +81,33 @@ export const listaModulosHabilitados = async (req, res) => {
 
     // Verificar si hay resultados
     if (modulos.length === 0) {
-      return res.status(404).json({ mensaje: "No se encontraron módulos habilitados para este curso" });
+      return res
+        .status(404)
+        .json({
+          mensaje: "No se encontraron módulos habilitados para este curso",
+        });
     }
-    console.log(modulos)
+    let preguntas = null;
+
+    // Si el progresoPago es mayor o igual a 80, obtener las preguntas del curso
+    if (progresoPago >= 80) {
+      const [preguntasCurso] = await connection.query(
+        "SELECT idPregunta, pregunta, opcionesRespuesta FROM pregunta_respuesta WHERE idCurso = ? AND estado = 1",
+        [idCurso]
+      );
+
+      // Si hay preguntas, asignarlas, si no, mantener preguntas como null
+      if (preguntasCurso.length > 0) {
+        preguntas = preguntasCurso;
+      }
+    }
+    console.log(modulos);
     // Responder con los módulos encontrados
-    res.json(modulos);
+    // Responder con los módulos y las preguntas (si aplica)
+    res.json({
+      modulos,
+      preguntas: preguntas,
+    });
   } catch (error) {
     console.error("Error al obtener los módulos:", error);
     return res.status(500).json({
@@ -87,7 +120,6 @@ export const listaModulosHabilitados = async (req, res) => {
 export const listaModulos = async (req, res) => {
   const idCurso = req.params.idCurso;
   console.log("ID del curso recibido:", idCurso); // Agrega esta línea
-
 
   // Validar que el idCurso sea un número válido
   if (isNaN(idCurso)) {
@@ -102,7 +134,9 @@ export const listaModulos = async (req, res) => {
 
     // Verificar si hay resultados
     if (result.length === 0) {
-      return res.status(404).json({ mensaje: "No se encontraron módulos para este curso" });
+      return res
+        .status(404)
+        .json({ mensaje: "No se encontraron módulos para este curso" });
     }
 
     // Responder con los módulos encontrados
@@ -114,7 +148,6 @@ export const listaModulos = async (req, res) => {
     });
   }
 };
-
 
 // Obtener un módulo por ID
 export const obtenerModulo = async (req, res) => {
@@ -140,13 +173,14 @@ export const obtenerModulo = async (req, res) => {
 
 // Agregar un nuevo módulo
 export const agregarModulo = async (req, res) => {
-  
   const { idCurso, nombre, descripcion, idUsuario } = req.body;
   try {
     if (!req.files || !req.files.imagen) {
-      return res.status(400).json({ mensaje: "Por favor debe subir una imagen" });
+      return res
+        .status(400)
+        .json({ mensaje: "Por favor debe subir una imagen" });
     }
-   
+
     // Subir imagen
     const fileImagen = req.files.imagen;
     const extImagen = path.extname(fileImagen.name);
@@ -157,7 +191,7 @@ export const agregarModulo = async (req, res) => {
 
     // Subir video (si existe)
     let videoUrl = req.files.videoIntroURL;
-    console.log(videoUrl)
+    console.log(videoUrl);
     if (req.files && req.files.videoIntroURL) {
       const fileVideo = req.files.videoIntroURL;
       const extVideo = path.extname(fileVideo.name);
@@ -219,7 +253,7 @@ export const editarModulo = async (req, res) => {
       // Eliminar la imagen anterior del servidor
       const oldImagenPath = path.join(UPLOAD_DIR, path.basename(oldImagenUrl));
       if (fs.existsSync(oldImagenPath)) {
-        fs.removeSync(oldImagenPath);  // Eliminar el archivo del servidor
+        fs.removeSync(oldImagenPath); // Eliminar el archivo del servidor
       }
     }
 
@@ -233,9 +267,12 @@ export const editarModulo = async (req, res) => {
       video = `http://localhost:3000/uploads/modulos/videos/${fileNameVideo}`;
 
       // Eliminar el video anterior del servidor
-      const oldVideoPath = path.join(VIDEO_UPLOAD_DIR, path.basename(oldVideoUrl));
+      const oldVideoPath = path.join(
+        VIDEO_UPLOAD_DIR,
+        path.basename(oldVideoUrl)
+      );
       if (fs.existsSync(oldVideoPath)) {
-        fs.removeSync(oldVideoPath);  // Eliminar el archivo del servidor
+        fs.removeSync(oldVideoPath); // Eliminar el archivo del servidor
       }
     }
 
@@ -261,7 +298,6 @@ export const editarModulo = async (req, res) => {
     res.json({
       mensaje: "Módulo actualizado correctamente",
     });
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -269,8 +305,6 @@ export const editarModulo = async (req, res) => {
     });
   }
 };
-
-
 
 // Eliminar un módulo por ID
 export const eliminarModulo = async (req, res) => {

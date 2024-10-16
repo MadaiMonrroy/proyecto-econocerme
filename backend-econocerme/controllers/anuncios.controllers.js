@@ -39,7 +39,8 @@ export const listaAnunciosCoach = async (req, res) => {
 
     // Selecciona los anuncios que tienen estado 1 o 2
     const [result] = await connection.query(
-      "SELECT id, titulo, miniatura, descripcion, fecha_inicio, fecha_fin, tipo, estado FROM anuncio WHERE (estado = 1 OR estado = 2) AND idUsuario = ?"
+      "SELECT id, titulo, miniatura, descripcion, fecha_inicio, fecha_fin, tipo, estado FROM anuncio WHERE (estado = 1 OR estado = 2) AND idUsuario = ?",
+      [idUsuario]
     );
     
     res.json(result);

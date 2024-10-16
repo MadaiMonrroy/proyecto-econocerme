@@ -7,8 +7,7 @@ router.use(expressFileUpload());
 
 
 router.get('/anuncio', listaAnuncios)
-router.get('/anuncioCoach', listaAnunciosCoach)
-
+router.get('/anuncioCoach/:idUsuario', listaAnunciosCoach)
 router.get('/obtenerAnuncio/:id', obtenerAnuncio)
 router.put('/editarAnuncio/:id', editarAnuncio)
 router.patch('/editarAnuncio/:id', editarAnuncio)

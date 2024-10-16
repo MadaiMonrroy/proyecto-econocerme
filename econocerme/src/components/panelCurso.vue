@@ -35,8 +35,8 @@
               :class="[
                 'flex items-center cursor-pointer rounded transition-colors duration-300 p-3',
                 leccion.idLeccion === selectedLeccion
-                  ? 'bg-gradient-to-r from-purple-500 to-purple-900'
-                  : 'hover:bg-gradient-to-r from-purple-500 to-purple-900',
+                  ? 'bg-gradient-to-r from-custom-pink to-custom-purple dark:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink rounded-xl'
+                  : 'hover:bg-gradient-to-r from-custom-pink to-custom-purple dark:hover:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink rounded-xl',
               ]"
             >
               <i class="pi pi-youtube mr-3 pt-1" style="font-size: 1.4rem"></i>
@@ -46,6 +46,17 @@
             </div>
           </li>
         </ul>
+      </div>
+      <div
+        v-if="preguntas && preguntas.length > 0"
+        class="absolute bottom-0 left-0 w-full p-4"
+      >
+        <button
+          @click="handleEvaluacionClick"
+          class="w-full p-3 bg-gradient-to-r from-custom-pink to-custom-purple text-white font-semibold rounded-xl"
+        >
+          Evaluación
+        </button>
       </div>
     </nav>
 
@@ -101,6 +112,7 @@ export default {
     const route = useRoute();
     const selectedLeccion = ref(null);
     const idCurso = route.params.id;
+    const preguntas = ref([]);
 
     const selectedMenu = ref(null);
     const isSidebarCollapsed = ref(false);
@@ -116,18 +128,26 @@ export default {
       if (idCurso) {
         await cargarModulos(idCurso);
       }
-
-      window.addEventListener("popstate", handlePopState);
     });
 
     const cargarModulos = async (idCurso) => {
       const idUsuario = authStore.usuario.id;
       try {
-        const response = await api.get(`/modulos/listaModulosHabilitados/${idCurso}`, {
-      params: { idUsuario } // Incluye idUsuario como un parámetro de consulta
-    });
-        
-        menuOptions.value = response.data;
+        const response = await api.get(
+          `/modulos/listaModulosHabilitados/${idCurso}`,
+          {
+            params: { idUsuario }, // Incluye idUsuario como un parámetro de consulta
+          }
+        );
+        console.log(response.data.preguntas);
+        // Dentro de la función cargarModulos
+        if (response.data.preguntas && response.data.preguntas.length > 0) {
+          preguntas.value = response.data.preguntas; // Guardar las preguntas
+        } else {
+          preguntas.value = [];
+        }
+        console.log("Preguntas:", preguntas.value);
+        menuOptions.value = response.data.modulos;
 
         if (menuOptions.value.length > 0) {
           selectedMenu.value = menuOptions.value[0].idModulo;
@@ -176,7 +196,7 @@ export default {
 
     const handleSelectChange = async (event) => {
       const selectedModuloId = event.value;
-      
+
       if (selectedModuloId) {
         await cargarLecciones(selectedModuloId);
         // Verifica si la lección "Introducción" está presente
@@ -192,16 +212,23 @@ export default {
         }
       }
     };
+    const handleEvaluacionClick = () => {
+      router.push(`/panelEstudiante/evaluaciones/${idCurso}`);
+    };
 
     const handleLeccionClick = (leccion) => {
       selectedLeccion.value = leccion.idLeccion;
       // Si la lección es 'Introducción', redirige a la ruta correspondiente
-  if (leccion.idLeccion === "introduccion") {
-    router.replace(`/panelEstudiante/panelCurso/${idCurso}/modulo/${selectedMenu.value}`);
-  } else {
-    // Redirige normalmente si es otra lección
-    router.push(`/panelEstudiante/panelCurso/${idCurso}/leccion/${leccion.idLeccion}`);
-  }
+      if (leccion.idLeccion === "introduccion") {
+        router.replace(
+          `/panelEstudiante/panelCurso/${idCurso}/modulo/${selectedMenu.value}`
+        );
+      } else {
+        // Redirige normalmente si es otra lección
+        router.push(
+          `/panelEstudiante/panelCurso/${idCurso}/leccion/${leccion.idLeccion}`
+        );
+      }
     };
 
     return {
@@ -214,6 +241,8 @@ export default {
       handleLeccionClick,
       cargarModulos,
       lecciones,
+      preguntas,
+      handleEvaluacionClick,
       selectedLeccion,
     };
   },

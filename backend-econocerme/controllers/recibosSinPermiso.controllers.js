@@ -20,6 +20,58 @@ export const obtenerReciboPago = async (req, res) => {
   }
 };
 
+
+export const detallesCertificado = async (req, res) => {
+  const idUsuario = req.params.idUsuario;
+  const idCurso = req.query.idCurso; // Obteniendo idCuotaPago desde los query params
+
+  console.log(idUsuario,idCurso)
+  // Construir la consulta SQL
+  const query = `
+    WITH NotaMaxima AS (
+      SELECT 
+        e.idCurso,
+        e.idUsuario,
+        MAX(e.notaFinal) AS notaMaxima,
+        MAX(e.fechaCreacion) AS fechaEvaluacion -- Obtener la fecha de la última evaluación
+      FROM evaluacion e
+      WHERE e.idUsuario = ? AND e.idCurso = ?
+      GROUP BY e.idCurso, e.idUsuario
+    )
+    SELECT 
+      CONCAT(u.nombres, ' ', u.primerApellido, ' ', u.segundoApellido) AS nombreCompletoUsuario,
+      c.titulo AS tituloCurso,
+      c.duracion AS duracionCurso,
+      nm.notaMaxima,
+      nm.fechaEvaluacion,
+      CONCAT(uC.nombres, ' ', uC.primerApellido, ' ', uC.segundoApellido) AS nombreCompletoCreador
+    FROM NotaMaxima nm
+    JOIN curso c ON nm.idCurso = c.idCurso
+    JOIN usuario u ON nm.idUsuario = u.id
+    JOIN usuario uC ON c.idUsuario = uC.id
+    WHERE nm.notaMaxima = (SELECT MAX(notaFinal) 
+                            FROM evaluacion 
+                            WHERE idUsuario = ? AND idCurso = ?) -- Asegura que la nota máxima es 100
+    LIMIT 1; -- Limita el resultado a una sola fila
+  `;
+
+  try {
+    const [rows] = await connection.query(query, [idUsuario, idCurso, idUsuario, idCurso]);
+    console.log("Resultado de la consulta:", rows);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "No se encontraron detalles del curso." });
+    }
+
+    return res.status(200).json(rows[0]); // Devuelve solo el primer resultado
+  } catch (error) {
+    console.error("Error al obtener los detalles del curso:", error.message);
+    return res.status(500).send("Error al obtener los detalles del curso.");
+  }
+};
+
+
+
 export const detalleInscripcionPago = async (req, res) => {
   const idInscripcion = req.params.idInscripcion;
   const idCuotaPago = req.query.idCuotaPago; // Obteniendo idCuotaPago desde los query params
@@ -81,5 +133,3 @@ export const detalleInscripcionPago = async (req, res) => {
     return res.status(500).send("Error al obtener el detalle de inscripción.");
   }
 };
-
-

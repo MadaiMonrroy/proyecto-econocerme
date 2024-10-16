@@ -251,7 +251,12 @@ const actualizarAnuncio = async () => {
       detail: "Anuncio actualizado correctamente",
       life: 1000,
     });
-    router.push("/panelControl/anuncios");
+    if(authStore.usuario.tipoUsuario === "admin"){
+      router.push("/panelControl/anuncios");
+    }else
+    if(authStore.usuario.tipoUsuario === "coach") {
+      router.push("/panelCoaches/anuncios");
+    }
   } catch (error) {
     toast.add({
       severity: "error",
@@ -294,7 +299,12 @@ const agregarAnuncio = async () => {
       detail: "Anuncio agregado correctamente",
       life: 1000,
     });
-    router.push("/panelControl/anuncios");
+    if(authStore.usuario.tipoUsuario === "admin"){
+      router.push("/panelControl/anuncios");
+    }else
+    if(authStore.usuario.tipoUsuario === "coach") {
+      router.push("/panelCoaches/anuncios");
+    }
   } catch (error) {
     toast.add({
       severity: "error",
@@ -326,7 +336,12 @@ function convertirFechaAMysql(fecha) {
   return `${anio}-${mes}-${dia}`; // Regresar al formato yyyy-mm-dd
 }
 const cancelarEdicion = () => {
-  router.push("/panelControl/anuncios");
+  if(authStore.usuario.tipoUsuario === "admin"){
+    router.push("/panelControl/anuncios");
+  }else
+    if(authStore.usuario.tipoUsuario === "coach") {
+      router.push("/panelCoaches/anuncios");
+    }
 };
 const validarCampos = () => {
   if (

@@ -126,10 +126,12 @@
           'ml-16': isSidebarCollapsed,
           'ml-[240px]': !isSidebarCollapsed,
         }"
-        class="w-full  min-h-screen sm:w-[calc(100%-240px)] md:w-[calc(100%-240px)] lg:w-[calc(100%-240px)] xl:w-[calc(100%-240px)]   "
+        class="w-full  min-h-screen sm:w-[calc(100%-240px)] md:w-[calc(100%-240px)] lg:w-[calc(100%-240px)] xl:w-[calc(100%-240px)] "
         >
-        <p>Usuario: {{ authStore.usuario.email }}</p>
-        <router-view></router-view>
+<div class="pt-7 pr-2 pl-2">
+  <router-view></router-view>
+
+</div>
       </main>
     </div>
   </div>
@@ -240,7 +242,7 @@ export default {
         key: "reportes",
         label: "Reportes",
         icon: "pi pi-file-pdf",
-        route: "/panelControl/anuncios",
+        route: "/panelControl/reportes",
       },
 
     ]);

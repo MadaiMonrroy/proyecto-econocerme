@@ -40,8 +40,12 @@ import reciboPago from "@/views/adm.inscripciones/reciboPago.vue";
 import preInscripciones from "@/views/adm.inscripciones/preInscripciones.vue";
 import verMas from "@/views/est.cursos/verMas.vue";
 import formCompletarInscripcion from "@/views/adm.inscripciones/formCompletarInscripcion.vue";
-import mainCoach from "@/views/coach.inscritos/main.vue"
+import mainCoach from "@/views/coach.inscritos/main.vue";
 import formEditCoach from "@/views/adm.usuarios/formEditCoach.vue";
+import reportes from "@/views/adm.reportes/reportes.vue";
+import evaluaciones from "@/views/est.cursos/evaluaciones.vue";
+import certificadoPdf from "@/views/est.cursos/certificadoPdf.vue";
+import vistaPreviaCertificado from "@/views/est.cursos/vistaPreviaCertificado.vue";
 const routes = [
   { path: "/", component: LoginForm },
   { path: "/Registro", component: RegistroForm },
@@ -69,7 +73,10 @@ const routes = [
       { path: "preInscripciones", component: preInscripciones },
       { path: "formInscripcion", component: formInscripcion },
       { path: "formInscripcion/:idInscripcion", component: formInscripcion },
-      { path: "formCompletarInscripcion/:idInscripcion", component: formCompletarInscripcion },
+      {
+        path: "formCompletarInscripcion/:idInscripcion",
+        component: formCompletarInscripcion,
+      },
       { path: "evaluacion/:idCurso", component: evaluacion },
       { path: "vistaPrevia/:idCurso", component: vistaPrevia },
       { path: "cuotas/:idInscripcion", component: cuotas },
@@ -77,9 +84,11 @@ const routes = [
         path: "detalleInscripcion/:idInscripcion",
         component: detalleInscripcion,
       },
+      { path: "reportes", component: reportes },
     ],
   },
   { path: "/generarPdf/:idInscripcion", component: reciboPago },
+  { path: "/generarCertificado/:idUsuario", component: certificadoPdf },
 
   {
     path: "/panelEstudiante",
@@ -90,7 +99,9 @@ const routes = [
       { path: "verMasCurso/:idCurso", component: verMas },
       { path: "misCursos", component: misCursos },
       { path: "formEdit", component: formEdit },
+      { path: "vistaPreviaCertificado/:idUsuario", component: vistaPreviaCertificado },
       { path: "certificaciones", component: certificaciones },
+      { path: "evaluaciones/:idCurso", component: evaluaciones },
       {
         path: "panelCurso/:id",
         component: panelCurso,
