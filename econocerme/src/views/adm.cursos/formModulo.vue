@@ -32,6 +32,7 @@
         <CustomFileInput
           id="imagen"
           label=""
+          ref="fileInputRef"
           :valueimg="modulo.imagen"
           @change="onFileChange"
         />
@@ -162,6 +163,7 @@ const authStore = useAuthStore();
 const toast = useToast();
 const idUsuario = authStore.usuario.id;
 const router = useRouter();
+const fileInputRef = ref(null);
 
 const props = defineProps({
   cursoId: {
@@ -169,6 +171,7 @@ const props = defineProps({
     required: true,
   },
 });
+const emit = defineEmits(['moduloGuardado']);
 
 const modulo = ref({
   nombre: "",
@@ -262,7 +265,22 @@ const uploadEvent = async (uploadCallback) => {
     });
   }
 };
+// Función para restablecer el formulario
+const resetForm = () => {
+  modulo.value = {
+    nombre: "",
+    descripcion: "",
+    imagen: null,
+    videoIntroURL: null,
+  };
+  selectedFile = null; // Restablecer el archivo seleccionado
+  totalSize.value = 0; // Reiniciar el tamaño total
+  progress.value = 0; // Reiniciar el progreso
+  isUploading.value = true; // Reiniciar estado de carga
+  fileInputRef.value.clearImage(); // Llama al método para limpiar la imagen
 
+
+};
 // Formatear el tamaño del archivo
 const formatSize = (bytes) => {
   const k = 1024;
@@ -307,11 +325,15 @@ const submitForm = async () => {
       detail: "Módulo agregado correctamente",
       life: 3000,
     });
-
+    // Emitir el evento al componente padre
+    emit("moduloGuardado"); // Cambiado aquí
+    // Emitir el segundo evento para redirigir a la pestaña 0
+    emit("cambiarTab", 0); // Cambia a la pestaña 0
     setTimeout(() => {
       console.log("Módulo agregado:", response.data);
     }, 3000);
-    window.location.href = window.location.href;
+    // Restablecer los campos del formulario
+    resetForm();
   } catch (error) {
     console.error("Error al agregar el módulo:", error);
     toast.add({

@@ -153,7 +153,8 @@
       required: true,
     },
   });
-  
+  const emit = defineEmits(['leccionGuardado']);
+
   const leccion = ref({
     tituloSeccion: "",
     descripcion: "",
@@ -283,8 +284,12 @@
       life: 3000,
     });
     setTimeout(() => {
-        
+
     }, 3000);
+    // Emitir el evento al componente padre
+    emit("leccionGuardado"); // Cambiado aquí
+    // Emitir el segundo evento para redirigir a la pestaña 0
+    emit("cambiarTab", 0); // Cambia a la pestaña 0
     } catch (error) {
       console.error("Error al agregar la lección:", error);
       toast.add({
@@ -294,7 +299,7 @@
         life: 3000,
       });
     }
-    window.location.href = window.location.href;
+    // window.location.href = window.location.href;
 
   };
   </script>

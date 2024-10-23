@@ -4,7 +4,6 @@ import path from "path";
 import fs from "fs-extra";
 export const ingresarEvaluacion = async (req, res) => {
   const { idUsuario, idCurso, respuestas } = req.body; // Obtener los datos del cuerpo de la solicitud
-  console.log(idUsuario, idCurso, respuestas);
   const conn = await connection.getConnection(); // Obtener la conexión a la base de datos
   try {
     await conn.beginTransaction(); // Iniciar la transacción
@@ -190,6 +189,132 @@ export const agregarPreguntas = async (req, res) => {
       .json({ mensaje: "Ocurrió un error al agregar las preguntas" });
   } finally {
     conn.release();
+  }
+};
+export const verificarIntentos = async (req, res) => {
+  const { cursoId } = req.params;
+  const { idUsuario } = req.query; // Obtenemos el idUsuario desde query params
+  console.log(cursoId, idUsuario);
+
+  try {
+    // Consultar todas las evaluaciones del usuario en el curso
+    const [evaluaciones] = await connection.query(
+      `SELECT notaFinal 
+       FROM evaluacion 
+       WHERE idCurso = ? AND idUsuario = ?`,
+      [cursoId, idUsuario]
+    );
+
+    // Verificar el número de intentos y el estado de habilitación
+    const intentos = evaluaciones.length; // Número de intentos realizados
+    const intentosDisponibles = 3 - intentos; // Calcular intentos disponibles
+
+
+    if (intentos > 3) {
+      return res.status(200).json({
+        estado: "no habilitado",
+        mensaje: `Ha agotado el número máximo de intentos. No puede acceder al certificado. Su nota más alta fue de: ${Math.max(...evaluaciones.map(e => e.notaFinal))}.`
+      });
+    }
+
+    // Obtener la nota máxima
+    const notas = evaluaciones.map(e => e.notaFinal);
+    const notaMaxima = Math.max(...notas);
+
+    if (intentos <= 3) {
+      if (notaMaxima >= 70) {
+        return res.status(200).json({
+          estado: "habilitadoCert",
+          mensaje: `Aprobado. Su nota más alta es: ${notaMaxima}. Puede acceder al certificado.`
+        });
+      } else {
+        const mensaje = intentos > 0 
+          ? `Tiene ${intentosDisponibles} intentos disponibles. Aún puede presentar la evaluación. Su nota más alta fue de: ${notaMaxima}.`
+          : `Tiene ${intentosDisponibles} intentos disponibles. Aún puede presentar la evaluación.`;
+          
+        return res.status(200).json({
+          estado: "habilitado",
+          mensaje
+        });
+      }
+    }
+
+  } catch (error) {
+    console.error("Error en la consulta:", error);
+    res.status(500).json({ mensaje: "Ocurrió un error al verificar las evaluaciones" });
+  }
+};
+
+
+
+// Obtener preguntas y respuestas de un curso
+export const obtenerPreguntasParaEstudiante = async (req, res) => {
+  const { cursoId } = req.params;
+  const { idUsuario } = req.query; // Obtenemos el idUsuario desde query params
+  console.log(cursoId, idUsuario)
+  try {
+    // Consultar todas las evaluaciones del usuario en el curso
+    const [evaluaciones] = await connection.query(
+      `SELECT notaFinal 
+       FROM evaluacion 
+       WHERE idCurso = ? AND idUsuario = ?`,
+      [cursoId, idUsuario]
+    );
+
+    // Verificar el número de intentos
+    if (evaluaciones.length >= 3) {
+      const notas = evaluaciones.map(e => e.notaFinal);
+      const notaMaxima = Math.max(...notas);
+
+      if (notaMaxima >= 70) {
+        return res.status(403).json({
+          mensaje: `Alcanzó el límite de intentos. Su nota de aprobación más alta es: ${notaMaxima}.`
+        });
+      } else {
+        return res.status(403).json({
+          mensaje: `Alcanzó el límite de intentos. Su nota más alta fue de: ${notaMaxima}. No puede acceder al certificado. Comuníquese con la administración.`
+        });
+      }
+    }
+
+    // Si no ha superado el límite de intentos, obtener las preguntas del curso
+    const [preguntas] = await connection.query(
+      `SELECT idPregunta, pregunta, opcionesRespuesta, respuestaCorrecta 
+       FROM pregunta_respuesta 
+       WHERE idCurso = ? AND estado = 1`,
+      [cursoId]
+    );
+
+    const preguntasFormateadas = preguntas.map((pregunta) => {
+      let opciones = [];
+
+      if (typeof pregunta.opcionesRespuesta === "string") {
+        try {
+          opciones = JSON.parse(pregunta.opcionesRespuesta);
+        } catch (error) {
+          console.error(
+            `Error al analizar opcionesRespuesta: ${pregunta.opcionesRespuesta}`
+          );
+          opciones = pregunta.opcionesRespuesta
+            .split(",")
+            .map((op) => op.trim());
+        }
+      } else {
+        opciones = pregunta.opcionesRespuesta;
+      }
+
+      return {
+        idPregunta: pregunta.idPregunta,
+        text: pregunta.pregunta,
+        options: opciones,
+        correctAnswer: opciones.indexOf(pregunta.respuestaCorrecta),
+      };
+    });
+
+    res.json(preguntasFormateadas);
+  } catch (error) {
+    console.error("Error en la consulta:", error);
+    res.status(500).json({ mensaje: "Ocurrió un error al obtener las preguntas" });
   }
 };
 

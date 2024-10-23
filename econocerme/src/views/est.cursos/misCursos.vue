@@ -1,126 +1,142 @@
 <template>
   <div class="card">
     <Fieldset legend="MIS CURSOS">
-      <div  v-if="cursos.length > 0">
-
-    <DataView :value="cursos" :layout="layout">
-      <!-- Header -->
-      <template #header>
-        <div class="flex justify-end">
-          <SelectButton v-model="layout" :options="options" :allowEmpty="false">
-            <template #option="{ option }">
-              <i :class="[option === 'list' ? 'pi pi-bars' : 'pi pi-table']" />
-            </template>
-          </SelectButton>
-        </div>
-      </template>
-
-      <!-- List View -->
-      <template #list="slotProps">
-        <div class="flex flex-col">
-          <div v-for="(curso, index) in slotProps.items" :key="index">
-            <div
-              class="flex flex-col sm:flex-row sm:items-center p-6 gap-4"
-              :class="{
-                'border-t border-surface-200 dark:border-surface-700':
-                  index !== 0,
-              }"
-            >
-              <div class="md:w-40 relative">
-                <Image
-                  class="block xl:block mx-auto rounded w-full "
-                  :src="curso.miniatura"
-                  alt="Imagen del curso"
-                />
-              </div>
-              <div
-                class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6"
+      <div v-if="cursos.length > 0">
+        <DataView :value="cursos" :layout="layout">
+          <!-- Header -->
+          <template #header>
+            <div class="flex justify-end">
+              <SelectButton
+                v-model="layout"
+                :options="options"
+                :allowEmpty="false"
               >
+                <template #option="{ option }">
+                  <i
+                    :class="[option === 'list' ? 'pi pi-bars' : 'pi pi-table']"
+                  />
+                </template>
+              </SelectButton>
+            </div>
+          </template>
+
+          <!-- List View -->
+          <template #list="slotProps">
+            <div class="flex flex-col">
+              <div v-for="(curso, index) in slotProps.items" :key="index">
                 <div
-                  class="flex flex-row md:flex-col justify-between items-start gap-2"
+                  class="flex flex-col sm:flex-row sm:items-center p-6 gap-4"
+                  :class="{
+                    'border-t border-surface-200 dark:border-surface-700':
+                      index !== 0,
+                  }"
                 >
-                  <div>
-                    <div class="text-lg font-medium mt-2">
-                      {{ curso.titulo }}
-                    </div>
-                    <p class="text-gray-700 mb-4">{{ curso.descripcion }}</p>
-                    <p class="text-sm text-gray-500 mb-4">
-                      Duración: {{ curso.duracion }} horas
-                    </p>
-                  </div>
-                </div>
-                <div class="flex flex-col md:items-end gap-8">
-                  
-                  <div class="flex flex-row-reverse md:flex-row gap-2">
-                    <Button
-                      icon="pi pi-external-link"
-                      label="Acceder al curso"
-                      severity="help" raised
-                      class="flex-auto md:flex-initial whitespace-nowrap"
-                      @click="accederCurso(curso.idCurso)"
+                  <div class="md:w-40 relative">
+                    <Image
+                      class="block xl:block mx-auto rounded w-full"
+                      :src="curso.miniatura"
+                      alt="Imagen del curso"
                     />
                   </div>
+                  <div
+                    class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6"
+                  >
+                    <div
+                      class="flex flex-row md:flex-col justify-between items-start gap-2"
+                    >
+                      <div>
+                        <div class="text-lg font-medium mt-2">
+                          {{ curso.titulo }}
+                        </div>
+                        <p class="text-gray-700 mb-4">
+                          {{ curso.descripcion }}
+                        </p>
+
+                        <p class="text-sm text-gray-500 mb-4">
+                          Duración: {{ curso.duracion }} horas
+                        </p>
+                      </div>
+                    </div>
+                    <div class="flex flex-col md:items-end gap-8">
+                      <div class="flex flex-row-reverse md:flex-row gap-2">
+                        <Button
+                          icon="pi pi-external-link"
+                          label="Acceder al curso"
+                          severity="help"
+                          raised
+                          class="flex-auto md:flex-initial whitespace-nowrap"
+                          @click="accederCurso(curso.idCurso)"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </template>
+          </template>
 
-      <!-- Grid View -->
-      <template #grid="slotProps">
-        <div class="grid grid-cols-12 gap-4">
-          <div
-            v-for="(curso, index) in slotProps.items"
-            :key="index"
-            class="col-span-12 sm:col-span-6 md:col-span-4 xl:col-span-3 p-2"
-          >
-            <div
-              class="p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex flex-col h-full"
-            >
-              <div class="bg-surface-50 flex justify-center rounded p-4 h-48">
-                <img
-                  class="rounded w-full h-full object-cover"
-                  :src="curso.miniatura"
-                  alt="Imagen del curso"
-                  style="max-width: 300px"
-                />
-              </div>
-              <div class="pt-6 flex flex-col justify-between flex-grow">
-                <div>
-                  <div class="text-lg font-medium mt-1">{{ curso.titulo }}</div>
-                  <ScrollPanel style="width: 100%; height: 100px">
-
-                  <p class="text-gray-700 mb-4">{{ curso.descripcion }}</p>
-                </ScrollPanel>
-
-                  <p class="text-sm text-gray-500 mb-4 pt-3">
-                    Duración: {{ curso.duracion }} horas
-                  </p>
-                </div>
-                <div class="flex flex-col gap-6 mt-6">
-                  
-                  <Button
-                    icon="pi pi-external-link"
-                    label="Acceder al curso"
-                    class="flex-auto whitespace-nowrap"
-                    severity="help" raised
-                    @click="accederCurso(curso.idCurso)"
-                  />
+          <!-- Grid View -->
+          <template #grid="slotProps">
+            <div class="grid grid-cols-12 gap-4">
+              <div
+                v-for="(curso, index) in slotProps.items"
+                :key="index"
+                class="col-span-12 sm:col-span-6 md:col-span-4 xl:col-span-3 p-2"
+              >
+                <div
+                  class="p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex flex-col h-full"
+                >
+                  <div
+                    class="bg-surface-50 flex justify-center rounded p-4 h-48"
+                  >
+                    <img
+                      class="rounded w-full h-full object-cover"
+                      :src="curso.miniatura"
+                      alt="Imagen del curso"
+                      style="max-width: 300px"
+                    />
+                  </div>
+                  <div class="pt-6 flex flex-col justify-between flex-grow">
+                    <div>
+                      <Tag class="text-sm -ml-2 mb-1 mt-3" severity="info">
+                        {{ curso.especialidad }}
+                      </Tag>
+                      <div class="text-lg font-medium mt-1">
+                        {{ curso.titulo }}
+                      </div>
+                      <ScrollPanel style="width: 100%; height: 100px">
+                        <p class="text-gray-700 mb-4">
+                          {{ curso.descripcion }}
+                        </p>
+                      </ScrollPanel>
+                      
+                      <p class="text-sm text-gray-500 mb-4 pt-3">
+                        Duración: {{ curso.duracion }} horas
+                      </p>
+                    </div>
+                    <div class="flex flex-col gap-6 mt-6">
+                      <Button
+                        icon="pi pi-external-link"
+                        label="Acceder al curso"
+                        class="flex-auto whitespace-nowrap"
+                        severity="help"
+                        raised
+                        @click="accederCurso(curso.idCurso)"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </template>
-    </DataView>
+          </template>
+        </DataView>
       </div>
       <!-- Mensaje cuando no hay cursos -->
-      <Message v-else>No estás inscrito en ningún curso todavía. Explora nuestra oferta de cursos y únete a uno que te interese.</Message>
+      <Message v-else
+        >No estás inscrito en ningún curso todavía. Explora nuestra oferta de
+        cursos y únete a uno que te interese.</Message
+      >
     </Fieldset>
-
-
-
   </div>
 </template>
 

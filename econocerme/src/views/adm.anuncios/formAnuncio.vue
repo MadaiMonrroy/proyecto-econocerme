@@ -154,7 +154,7 @@ const onFileChange = (event) => {
 };
 const validarTitulo = (event) => {
   // Expresión regular para permitir solo letras y espacios
-  const regex = /^[A-Za-z\s]*$/;
+  const regex = /^[A-Za-záéíóúÁÉÍÓÚüÜñÑ\s¿?!¡#:%]*$/;
 
   // Si el valor ingresado no coincide con la expresión regular
   if (!regex.test(event.target.value)) {

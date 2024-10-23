@@ -10,7 +10,9 @@
         >
           <a :href="href" v-bind="props.action" @click="navigate">
             <span :class="[item.icon, 'text-color']" />
-            <span class="text-black dark:text-white font-semibold">{{ item.label }}</span>
+            <span class="text-black dark:text-white font-semibold">{{
+              item.label
+            }}</span>
           </a>
         </router-link>
         <a v-else :href="item.url" :target="item.target" v-bind="props.action">
@@ -27,10 +29,12 @@
           <i class="pi pi-arrow-left mr-2 pb-6"></i>
           Volver
         </button>
-        <div class="flex items-center ">
+        <div class="flex items-center">
           <div class="flex items-center">
             <img :src="curso.miniatura" alt="Logo" class="w-28 h-28" />
-            <h1 class="pl-5 w-3/6 text-2xl font-bold"><strong>Curso:</strong>  {{ curso.titulo }}</h1>
+            <h1 class="pl-5 w-3/6 text-2xl font-bold">
+              <strong>Curso:</strong> {{ curso.titulo }}
+            </h1>
             <Divider layout="vertical" class="h-28" />
             <!-- Descripción del curso -->
             <p class="m-4">{{ curso.descripcion }}</p>
@@ -116,10 +120,15 @@
           </TabList>
           <TabPanels>
             <TabPanel value="0">
-              <listaModulos :cursoId="cursoId" />
+              <listaModulos ref="listaModulosRef" :cursoId="cursoId" />
             </TabPanel>
             <TabPanel value="1">
-              <formModulo :cursoId="cursoId" />
+              <formModulo
+                :cursoId="cursoId"
+                @moduloGuardado="actualizarModulos"
+                @cambiarTab="redirigirTab" 
+
+              />
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -153,6 +162,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     const value = ref("0");
+    const listaModulosRef = ref(null);
 
     const curso = ref({});
     const modulos = ref([]);
@@ -177,6 +187,10 @@ export default {
       videoURL: "",
       contenidoExtra: "",
     });
+
+    const redirigirTab = (tabIndex) => {
+  value.value = tabIndex.toString(); // Cambiar el valor de la pestaña
+};
     const activeModuloIndex = ref(null);
     const volverACursos = () => {
       router.push(`/panelControl/cursos`);
@@ -216,6 +230,17 @@ export default {
         }
       }
     };
+    const actualizarModulos = () => {
+      console.log(listaModulosRef.value); // Verifica que esto no sea null
+      if (
+        listaModulosRef.value &&
+        typeof listaModulosRef.value.fetchData === "function"
+      ) {
+        listaModulosRef.value.fetchData();
+      } else {
+        console.error("fetchData no es una función en listaModulosRef");
+      }
+    };
 
     onMounted(() => {
       cargarCurso();
@@ -229,9 +254,13 @@ export default {
       cursoId,
       moduloForm,
       pruebavista,
+      listaModulosRef,
+      actualizarModulos,
       value,
       home,
       items,
+      redirigirTab,
+
       volverACursos,
     };
   },

@@ -107,13 +107,17 @@
 
             <Column header="Foto de Perfil" class="px-6 py-4">
               <template #body="rowData">
+                <div
+                class="relative h-16 w-16  rounded-full overflow-hidden shadow-2xl my-4"
+              >
                 <Image
                   v-if="rowData.data.fotoPerfil"
                   :src="rowData.data.fotoPerfil"
                   alt="Foto de Perfil"
-                  class="h-16 w-20 object-cover rounded-full"
+                  class="object-cover object-center h-full w-full"
                   preview
                 />
+              </div>
               </template>
             </Column>
             <Column
@@ -515,7 +519,6 @@ const selectedUsuario = ref({
   estado: 2, // Por defecto inactivo
   idUsuario: idUsuario,
 });
-const previewFotoPerfil = ref("");
 let usuarioToDelete = ref(null); // Usuario a eliminar
 
 const formatDate = (dateString) => {
@@ -528,19 +531,17 @@ const formatDate = (dateString) => {
 };
 const showUserDetails = (user) => {
   selectedUser.value = user;
-  user.fechaNacimiento = formatDate(selectedUser.value.fechaNacimiento);
+  user.fechaNacimiento = new Date(selectedUser.value.fechaNacimiento);
   showUserDetailsModal.value = true;
 };
 
 const closeUserDetailsModal = () => {
   showUserDetailsModal.value = false;
-  selectedUser.value = null;
 };
 
 const fetchData = async () => {
   try {
     const response = await api.get(`/usuarios/usuario/${idUsuario}`);
-    console.log(response);
     usuarios.value = response.data
       .filter((usuario) => usuario.tipoUsuario === "coach")
       .reverse(); // Invertir el arreglo
@@ -565,7 +566,6 @@ const openAddModal = () => {
     estado: 1,
     idUsuario: idUsuario,
   };
-  previewFotoPerfil.value = "";
   isModalOpen.value = true;
 };
 
@@ -578,23 +578,11 @@ const handleFileUpload = (event) => {
 const openEditModal = (usuario) => {
   isEditMode.value = true;
   selectedUsuario.value = { ...usuario };
-  selectedUsuario.value.fechaNacimiento = formatDate(usuario.fechaNacimiento);
+  selectedUsuario.value.fechaNacimiento = new Date(usuario.fechaNacimiento);
   selectedUsuario.value.idUsuario = idUsuario;
-  console.log(selectedUsuario.value.id);
   isModalOpen.value = true;
 };
-const formatToDateInput = (dateString) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Meses desde 0
-  const year = date.getUTCFullYear();
-  return `${year}-${month}-${day}`;
-};
-function convertirFechaAMysql(fecha) {
-  const d = new Date(fecha);
-  return d.toISOString().split("T")[0]; // Formato YYYY-MM-DD
-}
+
 const closeModal = () => {
   isModalOpen.value = false;
 };
@@ -643,7 +631,19 @@ const usuariosConNumeracion = computed(() => {
       expanded: false,
     }));
 });
+function convertirFechaAMysql(fecha) {
+  console.log(fecha)
+  if (!(fecha instanceof Date)) {
+    return fecha; // Si ya es una cadena, regresa como está
+  }
 
+  // Formatear la fecha a dd-mm-yyyy antes de dividir
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript son de 0 a 11
+  const anio = fecha.getFullYear();
+  
+  return `${anio}-${mes}-${dia}`; // Regresar al formato yyyy-mm-dd
+}
 const addUsuario = async () => {
   if (!validarCampos()) return;
 
@@ -704,20 +704,7 @@ const addUsuario = async () => {
     });
   }
 };
-const searchTerm = ref("");
 
-const filteredUsuarios = computed(() => {
-  return usuarios.value.filter((usuario) => {
-    const fullName = `${usuario.nombres} ${usuario.primerApellido} ${usuario.segundoApellido}`;
-    const email = usuario.email.toLowerCase();
-    const search = searchTerm.value.toLowerCase();
-    return (
-      fullName.toLowerCase().includes(search) ||
-      email.includes(search) ||
-      usuario.estado.toString().includes(search) // Si quieres buscar también por estado
-    );
-  });
-});
 const nombreCompleto = () => {
   const nombress = selectedUsuario.value.nombres;
   const primerApellidos = selectedUsuario.value.primerApellido;
@@ -824,15 +811,11 @@ const validarCampos = () => {
   }
   return true;
 };
-function formatFecha(fecha) {
-  // Separar la fecha por los guiones
-  const [dia, mes, anio] = fecha.split('-');
-  // Retornar la fecha en formato YYYY-MM-DD
-  return `${anio}-${mes}-${dia}`;
-}
+
 
 const updateUsuario = async () => {
   if (!validarCamposAct()) return;
+
   closeModal();
   const formData = new FormData();
   formData.append("nombres", selectedUsuario.value.nombres);
@@ -841,7 +824,7 @@ const updateUsuario = async () => {
   formData.append("email", selectedUsuario.value.email);
   formData.append(
     "fechaNacimiento",
-    formatFecha(selectedUsuario.value.fechaNacimiento)
+    convertirFechaAMysql(selectedUsuario.value.fechaNacimiento)
   );
   formData.append("estado", selectedUsuario.value.estado);
   formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
@@ -855,7 +838,6 @@ const updateUsuario = async () => {
   ) {
     selectedUsuario.value.fotoPerfil = null;
   }
-  console.log(selectedUsuario.value.fotoPerfil);
 
   if (selectedFile) {
     formData.append("fotoPerfil", selectedFile);

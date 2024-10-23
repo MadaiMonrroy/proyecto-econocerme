@@ -1,6 +1,6 @@
 <template>
   <div class="p-4">
-    <Card>
+    <Card class="">
       <template #title>
         <i class="pi pi-file-plus mr-2"></i>
         Reportes
@@ -53,7 +53,7 @@
           </TabList>
           <TabPanels>
             <TabPanel value="0">
-              <p>sdfsdf</p>
+              <reportInscripcionesCurso/>
             </TabPanel>
             <TabPanel value="1">
               <p>sdfsdf</p>
@@ -78,7 +78,9 @@ import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/axiosConfig.js";
+import reportInscripcionesCurso from "./reportInscripcionesCurso.vue";
 export default {
+  components: { reportInscripcionesCurso },
   data() {
     return {
       value: "0",

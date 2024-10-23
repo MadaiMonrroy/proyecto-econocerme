@@ -60,7 +60,7 @@ export const cursosLibresporUsuario = async (req, res) => {
         SELECT DI.idCurso
         FROM detalle_inscripcion DI
         JOIN inscripcion I ON DI.idInscripcion = I.idInscripcion
-        WHERE I.idUsuario = ?
+        WHERE I.idUsuario = ? AND (I.estado = 1 OR I.estado = 2)
         ) AND C.estado = 1
       `,
       [usuarioId]

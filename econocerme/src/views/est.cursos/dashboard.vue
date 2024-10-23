@@ -24,7 +24,7 @@
       >
         <template #item="slotProps">
           <div
-            class="card !bg-gradient-to-tr from-[rgba(191, 90, 242, 0.5)] to-[rgba(191, 90, 242, 0.2)] min-h-[180px] sm:min-h-[200px] lg:min-h-[240px] min-w-[320px] sm:min-w-[640px] md:min-w-[800px] lg:min-w-[1000px] xl:min-w-[1200px] 2xl:min-w-[1400px] md:max-h-[200px] !border-0 !rounded-full m-2 p-4 flex flex-col md:flex-row items-center justify-center"
+            class=" !bg-transparent border-4 dark:border-2  border-violet-200 dark:border-violet-900 min-h-[180px] sm:min-h-[200px] lg:min-h-[240px] min-w-[320px] sm:min-w-[640px] md:min-w-[800px] lg:min-w-[1000px] xl:min-w-[1200px] 2xl:min-w-[1400px] md:max-h-[200px]  !rounded-full m-2 p-4 flex flex-col md:flex-row items-center justify-center"
           >
             
             <!-- Imagen a la izquierda, ajustable para pantallas pequeñas -->
@@ -45,9 +45,9 @@
             >
               <!-- Título centrado -->
               <div
-                class="mb-2 font-bold text-xl md:text-2xl font-serif text-center md:text-left"
+                class="mb-2 font-bold text-xl md:text-2xl font-serif text-center md:text-left uppercase"
               >
-                {{ slotProps.data.titulo }}
+                {{ slotProps.data.tipo }}
               </div>
 
               <!-- Descripción alineada a la izquierda -->
@@ -55,12 +55,25 @@
                 class="hidden md:block w-auto md:w-auto md:ml-6 flex flex-col justify-center"
               >
                 <div
-                  class="bg-violet-50 dark:bg-violet-900 p-3 items-center justify-center rounded-lg shadow-sm w-fit"
+                  class="bg-violet-200 dark:bg-violet-900 p-3 items-center justify-center rounded-lg shadow-sm w-[700px]"
                 >
-                  <div
-                    v-html="slotProps.data.descripcion"
-                    class="text-sm text-left"
-                  ></div>
+                <Editor
+                v-model="slotProps.data.descripcion"
+                editorStyle="auto"
+                :headerTemplate="null"
+                readonly
+                :toolbar="false"
+              >
+                <template v-slot:toolbar>
+                  <span class="ql-formats">
+                    <span
+                      class="text-violet-500 justify-items-center font-semibold font-sans"
+                      >{{ slotProps.data.titulo }}</span
+                    >
+                  </span>
+                </template>
+              </Editor>
+
                 </div>
               </div>
             </div>
@@ -150,9 +163,13 @@
                   </div>
                 </div>
                 <div class="pt-6 flex flex-col justify-between flex-grow">
+                  <Tag class="!text-xs -mt-3 mb-1  text-right" severity="info">
+                    {{ slotProps.data.especialidad }}
+                  </Tag>
                   <div class="text-lg font-medium mt-1 uppercase h-16">
                     {{ slotProps.data.titulo }}
                   </div>
+                 
                   <div class="text-sm text-gray-500 mb-4 pt-6">
                     Duración: {{ slotProps.data.duracion }} horas
                   </div>

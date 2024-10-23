@@ -128,7 +128,16 @@ const triggerFileInput = () => {
     $refs.fileInput.click();
   }
 };
-
+const clearImage = () => {
+  fileName.value = '';
+  imagePreview.value = '';
+  errorMessage.value = '';
+  loading.value = false;
+  emit('update:modelValue', null); // Emitiendo el valor nulo
+};
+defineExpose({
+  clearImage,
+});
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {

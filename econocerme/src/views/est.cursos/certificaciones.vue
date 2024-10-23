@@ -26,6 +26,9 @@
                   </div>
                   <div class="pt-6 flex flex-col justify-between flex-grow">
                     <div>
+                      <Tag class="text-lg font-medium -mt-2 mb-3" severity="info">
+                        {{ curso.especialidad }}
+                      </Tag>
                       <div class="text-lg font-medium mt-1">
                         {{ curso.titulo }}
                       </div>
@@ -49,8 +52,7 @@
       </div>
       <!-- Mensaje cuando no hay cursos -->
       <Message v-else
-        >No estás inscrito en ningún curso todavía. Explora nuestra oferta de
-        cursos y únete a uno que te interese.</Message
+        >No tienes ningun certificado disponible.</Message
       >
     </Fieldset>
   </div>
@@ -71,7 +73,7 @@ const router = useRouter();
 
 const obtenerCursos = async () => {
   try {
-    const response = await api.get(`/misCursos/obtenerMisCursos/${usuario}`);
+    const response = await api.get(`/misCursos/obtenerMisCertificados/${usuario}`);
     cursos.value = response.data;
     console.log(cursos.value);
   } catch (err) {

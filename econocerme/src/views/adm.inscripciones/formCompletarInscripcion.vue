@@ -17,41 +17,18 @@
             <!-- Selector de usuario -->
             <div>
               <label for="usuarioId" class="block text-sm font-medium mb-2"
-                >Seleccionar Usuario</label
+                >Usuario</label
               >
               <InputText
-                v-model="usuarioCompleto"
-                placeholder="Nombre Completo"
-                class="w-full"
-                readonly
+                v-model="inscripcion.fullName"
+                class="w-full "
+                readonly=""
               />
-              <Select
-                v-model="inscripcion.usuarioId"
-                :options="usuarios"
-                filter
-                optionLabel="fullName"
-                placeholder="Seleccionar Usuario"
-                class="w-full"
-                readonly
-              >
-                <template #value="slotProps">
-                  <div v-if="slotProps.value" class="flex items-center">
-                    <div>{{ slotProps.value.fullName }}</div>
-                  </div>
-                  <span v-else>
-                    {{ slotProps.placeholder }}
-                  </span>
-                </template>
-                <template #option="slotProps">
-                  <div class="flex items-center">
-                    <div>{{ slotProps.option.fullName }}</div>
-                  </div>
-                </template>
-              </Select>
+              
             </div>
             <div>
               <label for="cursoId" class="block text-sm font-medium mb-2"
-                >Seleccionar Curso</label
+                >Curso(s)</label
               >
               <MultiSelect
                 v-model="inscripcion.cursoId"
@@ -63,6 +40,7 @@
                 class="w-full"
                 emptyMessage="No hay cursos disponibles (El usuario ya se encuentra registrado en todos los cursos)"
                 emptyFilterMessage="No se encontró el curso"
+                :disabled="true"
               >
                 <template #option="slotProps">
                   <div class="flex items-center">
@@ -302,6 +280,8 @@ const inscripcion = reactive({
   cantidadCuotas: 1,
 });
 
+
+
 const cuotas = ref([1, 2, 3, 4]);
 
 const metodosPago = [
@@ -327,25 +307,9 @@ const calcularMontoTotal = computed(() => {
   }, 0);
 });
 
-// Propiedad computada para obtener el nombre completo de los usuarios
-const usuariosConNombreCompleto = computed(() =>
-  usuarios.map((usuario) => ({
-    ...usuario,
-    fullName: `${usuario.nombres} ${usuario.primerApellido} ${usuario.segundoApellido}`,
-  }))
-);
 
 
-const obtenerCursosDisponibles = async (usuarioId) => {
-  try {
-    console.log(usuarioId.id);
-    const response = await api.get(`/cursos/disponibles/${usuarioId.id}`);
-    console.log(response.data);
-    cursos.splice(0, cursos.length, ...response.data);
-  } catch (error) {
-    console.error("Error al obtener cursos disponibles:", error);
-  }
-};
+
 
 const calcularFechas = (cantidadCuotas) => {
   const hoy = new Date();
@@ -403,18 +367,7 @@ watchEffect(() => {
   inscripcion.montoTotal = montoTotal.value;
 });
 
-watch(
-  () => inscripcion.usuarioId,
-  (nuevoUsuarioId) => {
-    if (nuevoUsuarioId) {
-      obtenerCursosDisponibles(nuevoUsuarioId);
-      inscripcion.cursoId = [];
-    } else {
-      cursos.splice(0, cursos.length);
-      inscripcion.cursoId = [];
-    }
-  }
-);
+
 
 // Observa los cambios en el montoTotal y actualiza las cuotas
 watch(
@@ -444,10 +397,12 @@ const agregarAFormInscripcion = async () => {
     alert("Por favor selecciona un método de pago.");
     return;
   }
+  const { idInscripcion } = route.params;
 
   try {
     const payload = {
-      idUsuario: inscripcion.usuarioId.id,
+      idUsuario: inscripcion.usuarioId.idUsuario,
+      idInscripcion: idInscripcion,
       idCurso: inscripcion.cursoId,
       observacion: inscripcion.observacion,
       cantidadCuotas: inscripcion.cantidadCuotas,
@@ -456,17 +411,15 @@ const agregarAFormInscripcion = async () => {
       metodoPago: selectedCuota.metodoPago,
       idUsuarioModificacion: authStore.usuario.id,
     };
-    console.log(JSON.stringify(payload, null, 2));
-
+    console.log(payload)
     const response = await api.post(
-      "/inscripciones/agregarInscripcion",
+      "/inscripciones/completarInscripcion",
       payload
     );
-
+    console.log(response.data)
     if (response.data) {
       const idInscripcion = response.data.idInscripcion; // Recibe el idInscripcion de la respuesta
       const idCuotaPago = response.data.idCuotaPago; // Recibe el idCuotaPago de la respuesta
-      console.log(idInscripcion, idCuotaPago, "datos traidos del backend");
       toast.add({
         severity: "success",
         summary: "Inscripción Exitosa",
@@ -497,7 +450,7 @@ const cargarInscripcion = async (idInscripcion) => {
     const response = await api.get(
       `/inscripciones/obtenerInscripcion/${idInscripcion}`
     );
-
+    console.log(response)
     // Asumimos que response.data tiene los atributos del usuario directamente
     const { idUsuario, nombres, primerApellido, segundoApellido, email } =
       response.data;
@@ -509,21 +462,26 @@ const cargarInscripcion = async (idInscripcion) => {
       primerApellido,
       segundoApellido,
       email,
+      fullName: `${nombres} ${primerApellido} ${segundoApellido}`, // Añade esta línea
     };
 
-    usuarios.splice(0, usuarios.length, ...usuariosConNombreCompleto.value);
-    // Limpiar y agregar el usuario al array
+    // Limpia el array de usuarios y agrega el usuario al array
     usuarios.splice(0, usuarios.length, usuarioData);
-    console.log(usuarios);
+    
+    // Asigna el nombre completo al campo correspondiente en inscripcion
+    inscripcion.fullName = usuarioData.fullName; // Asigna el nombre completo aquí
 
     // Asumiendo que la respuesta también tiene un campo de cursos que es un array
     const cursosData = response.data.cursos; // Ajusta esto según la estructura exacta de tu respuesta
     cursos.splice(0, cursos.length, ...cursosData);
-    
+    inscripcion.cursoId = cursosData.map(curso => curso); // Asegúrate de que inscripcion.cursoId sea un array
+    inscripcion.usuarioId = usuarioData
+    console.log(inscripcion.usuarioId)
   } catch (error) {
     console.error(error);
   }
 };
+
 
 const actualizarInscripcion = async () => {
   try {

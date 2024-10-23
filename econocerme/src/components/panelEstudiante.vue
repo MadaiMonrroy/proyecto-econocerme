@@ -22,8 +22,7 @@
             label="Dashboard"
             @click="goToDashboard"
             icon="pi pi pi-home "
-            iconClass="!text-lg " 
-
+            iconClass="!text-lg "
             outlined=""
           >
           </Button>
@@ -37,7 +36,7 @@
             label="Mi Aprendizaje"
             @click="goToCursos"
             icon="pi pi pi-book "
-            iconClass="!text-lg " 
+            iconClass="!text-lg "
             outlined=""
           >
           </Button>
@@ -51,8 +50,7 @@
             label="Certificaciones"
             @click="goToCertificaciones"
             icon="pi pi-id-card"
-            iconClass="!text-lg " 
-
+            iconClass="!text-lg "
             outlined=""
           >
           </Button>
@@ -111,7 +109,6 @@ import { useAuthStore } from "@/stores/authStore";
 import carrito from "./carrito.vue";
 import api from "@/axiosConfig.js";
 
-
 export default {
   components: { ThemeSwitcher, Menu },
   name: "PanelControl",
@@ -166,7 +163,8 @@ export default {
       {
         label: "Cerrar sesión",
         icon: "pi pi-power-off",
-        command: async () => { // Cambia a async
+        command: async () => {
+          // Cambia a async
           guardarCarrito();
           authStore.logout();
           router.push("/");
@@ -174,30 +172,36 @@ export default {
       },
     ]);
     const guardarCarrito = async () => {
-  const userId = authStore.usuario?.id;
-  const carritoLocal = localStorage.getItem(`carrito_${userId}`);
-  let carritoData = [];
+      const userId = authStore.usuario?.id;
+      const carritoLocal = localStorage.getItem(`carrito_${userId}`);
+      let carritoData = [];
 
-  if (carritoLocal) {
-    // Extraer solo los ids de los cursos
-    carritoData = JSON.parse(carritoLocal).map(item => item.idCurso);
-  }
+      if (carritoLocal) {
+        // Extraer solo los ids de los cursos
+        carritoData = JSON.parse(carritoLocal).map((item) => item.idCurso);
+      }
+      // Verificar si el carrito está vacío en el localStorage y en general
+      if (!carritoLocal || carritoData.length === 0) {
+        carritoData = []; // Mandar array vacío si el carrito está vacío
+      }
 
-  if (userId && carritoData.length > 0) {
-    const dataToSend = {
-      idUsuario: userId,
-      idCurso: carritoData, // Aquí ya tienes solo los IDs, sin los nombres de las claves
+      if (userId) {
+        const dataToSend = {
+          idUsuario: userId,
+          idCurso: carritoData, // Aquí ya tienes solo los IDs, sin los nombres de las claves
+        };
+
+        try {
+          const response = await api.post(
+            "/carritos/agregarProductoCarrito",
+            dataToSend
+          );
+          console.log("Carrito guardado exitosamente:", response.data);
+        } catch (error) {
+          console.error("Error al guardar el carrito:", error);
+        }
+      }
     };
-
-    try {
-      const response = await api.post("/carritos/agregarProductoCarrito", dataToSend);
-      console.log("Carrito guardado exitosamente:", response.data);
-    } catch (error) {
-      console.error("Error al guardar el carrito:", error);
-    }
-  }
-};
-
 
     const toggle = (event) => {
       menu.value.toggle(event);

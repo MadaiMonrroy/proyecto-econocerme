@@ -24,8 +24,6 @@ export const detalleInscripcionPago = async (req, res) => {
   const idInscripcion = req.params.idInscripcion;
   const idCuotaPago = req.query.idCuotaPago; // Obteniendo idCuotaPago desde los query params
 
-  console.log("yo soy el idCuotapago", idCuotaPago);
-  console.log("Resultado de la consulta:", idInscripcion); // Depura los resultados de la consulta
 
   // Construir la consulta SQL
   let query = `
@@ -36,6 +34,7 @@ export const detalleInscripcionPago = async (req, res) => {
                 cp.fechaVencimiento,
                 cp.fechaPagoCuota,
                 cp.metodoPago,
+                cp.montoMora,
                 cp.estadoCuota AS estadoCuota,
                 COUNT(cp.idCuotaPago) OVER (PARTITION BY p.idInscripcion) AS cantidadCuotas,
                 p.idInscripcion
@@ -49,10 +48,11 @@ export const detalleInscripcionPago = async (req, res) => {
             i.fechaInscripcion,
             CONCAT(u.nombres, ' ', u.primerApellido, ' ', u.segundoApellido) AS nombreCompleto,
             c.titulo AS curso,
-            c.precio AS precioCurso,
+            di.precioCurso AS precioCurso,
             cu.cantidadCuotas,
             cu.fechaPagoCuota,
             cu.metodoPago,
+            cu.montoMora,
             cu.estadoCuota,
             cu.fechaVencimiento AS fechaVencimientoCuota
         FROM cuotas cu
@@ -152,7 +152,6 @@ const generarScreenshot = async (url) => {
 
 export const generarPdf = async (req, res) => {
   const { idInscripcion, idCuotaPago } = req.body; // Recibir la URL desde el cuerpo de la solicitud
-  console.log("estos datos estan llegando", idInscripcion, idCuotaPago);
   try {
     // Inicializar Puppeteer
     const browser = await puppeteer.launch({
@@ -169,10 +168,10 @@ export const generarPdf = async (req, res) => {
       format: "A4",
       printBackground: true,
       margin: {
-        top: "20mm",
-        right: "20mm",
-        bottom: "20mm",
-        left: "20mm",
+        top: "10mm",
+        right: "10mm",
+        bottom: "10mm",
+        left: "10mm",
       },
       displayHeaderFooter: true,
       headerTemplate: "<div></div>",

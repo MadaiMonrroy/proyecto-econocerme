@@ -12,8 +12,9 @@ import misCursos from './routes/misCursos.routes.js';
 import rutasEvaluaciones from './routes/evaluaciones.routes.js'
 import rutasCuotas from './routes/cuotas.routes.js';
 import rutasRecibos from './routes/recibos.routes.js';
-import rutasRecibosSinPermiso from './routes/recibosSinPermiso.routes.js'
-import rutasCarritos from './routes/carritos.routes.js'
+import rutasRecibosSinPermiso from './routes/recibosSinPermiso.routes.js';
+import rutasCarritos from './routes/carritos.routes.js';
+import rutasReportes from './routes/reportes.routes.js';
 
 import morgan from 'morgan';
 import { fileURLToPath } from 'url';
@@ -66,6 +67,8 @@ app.use('/api/cuotas', verificarToken, rutasCuotas); // Protege esta ruta
 app.use('/api/recibos', verificarToken,rutasRecibos); // Protege esta ruta
 app.use('/api/recibosSinPermiso', rutasRecibosSinPermiso);
 app.use('/api/carritos', rutasCarritos);
+app.use('/api/reportes', verificarToken,rutasReportes); // Protege esta ruta
+
 // app.use('/usuarios', usuariosRoutes);
 
 

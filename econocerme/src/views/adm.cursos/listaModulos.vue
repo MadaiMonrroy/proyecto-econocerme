@@ -425,6 +425,17 @@ import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "vue-router";
 import { useConfirm } from "primevue/useconfirm";
 
+
+const props = defineProps({
+  cursoId: {
+    type: String,
+    required: true,
+  },
+  isActive: { // Prop para indicar si es la pestaña activa
+      type: Boolean,
+      default: false,
+    },
+});
 const modulos = ref([]);
 const layout = ref("grid");
 const options = ref(["list", "grid"]);
@@ -603,17 +614,21 @@ const submitForm = async () => {
   }
 };
 
-const props = defineProps({
-  cursoId: {
-    type: String,
-    required: true,
-  },
-});
 
-onMounted(async () => {
-  const response = await api.get(`/modulos/modulo/${props.cursoId}`);
-  modulos.value = response.data;
-});
+
+const fetchData = async () => {
+  try {
+    const response = await api.get(`/modulos/modulo/${props.cursoId}`);
+    modulos.value = response.data.reverse();
+  }
+  catch (error) {
+    console.error(error);
+  }
+}
+defineExpose({ fetchData });
+
+// Se llama a fetchData cuando el componente se monta
+onMounted(fetchData);
 
 const guardarCambios = async () => {
   try {
@@ -653,7 +668,7 @@ const deleteModulo = async (idModulo) => {
 const eliminarModulo = (idModulo) => {
   confirm.require({
     group: "headless",
-    message: "¿Estás seguro de que deseas eliminar este curso?",
+    message: "¿Estás seguro de que deseas eliminar este Modulo?",
     header: "Confirmación",
     icon: "pi-exclamation-triangle",
     accept: () => deleteModulo(idModulo), // Llama a eliminarAnuncio solo si el usuario acepta

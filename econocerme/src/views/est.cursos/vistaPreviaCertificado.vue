@@ -101,7 +101,7 @@
 
       <!-- Botón Imprimir -->
       <Button
-        class="absolute -bottom-[30px] -right-[750px] bg-green-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-green-600 transition"
+        class="absolute -bottom-[10px] -right-[750px] bg-green-500 text-white font-semibold py-2 px-4 rounded shadow hover:bg-green-600 transition"
         @click="printCertificate"
         label="Imprimir"
         icon="pi pi-print"

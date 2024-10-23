@@ -1,5 +1,40 @@
 import connection from "../db.js";
 
+export const obtenerMisCertificados = async (req, res) => {
+  const { idUsuario } = req.params;
+
+  try {
+    // Consulta SQL para obtener los cursos a los que está inscrito el usuario
+    const [result] = await connection.query(
+      `
+        SELECT c.idCurso, c.titulo, c.miniatura, c.especialidad, c.descripcion, c.duracion, c.precio, c.estado, c.fechaCreacion, c.ultimaActualizacion
+        FROM curso c
+        JOIN detalle_inscripcion di ON c.idCurso = di.idCurso
+        JOIN inscripcion i ON di.idInscripcion = i.idInscripcion
+        JOIN evaluacion e ON c.idCurso = e.idCurso
+        WHERE i.idUsuario = ? 
+        AND i.estado = 1 
+        AND c.estado = 1 
+        AND e.idUsuario = ? 
+        AND e.notaFinal > 70
+      `,
+      [idUsuario, idUsuario]
+    );
+
+    if (result.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No se encontraron cursos aprobados para este usuario." });
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error en el servidor." });
+  }
+};
+
+
 export const obtenerMisCursos = async (req, res) => {
   const { idUsuario } = req.params;
 
@@ -42,8 +77,7 @@ WHERE c.estado = 1
     SELECT di.idCurso
     FROM detalle_inscripcion di
     JOIN inscripcion i ON di.idInscripcion = i.idInscripcion
-    WHERE i.idUsuario = ?
-      AND i.estado = 1
+    WHERE i.idUsuario = ? AND (i.estado=1 OR i.estado = 2)
   )
   `,
       [idUsuario]
@@ -146,12 +180,14 @@ export const obtenerCursoCompleto = async (req, res) => {
           experiencia: curso[0].experiencia,
         }),
       },
-      modulos: modulos1.map(modulo => ({
+      modulos: modulos1.map((modulo) => ({
         nombreModulo: modulo.nombreModulo,
-        lecciones: (modulo.lecciones ? modulo.lecciones.split(',').map(leccion => leccion.trim()) : [])
-      }))
+        lecciones: modulo.lecciones
+          ? modulo.lecciones.split(",").map((leccion) => leccion.trim())
+          : [],
+      })),
     };
-    console.log(resultado,"Sdfsd");
+    console.log(resultado, "Sdfsd");
     return res.status(200).json(resultado);
   } catch (error) {
     console.error(error);

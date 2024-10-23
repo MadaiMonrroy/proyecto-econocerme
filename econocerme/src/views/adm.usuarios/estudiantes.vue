@@ -66,150 +66,151 @@
       <!-- <Column header="#" sortable class="px-6 py-4"> </Column>-->
 
       <Divider />
-      
-        <div class="card dark:border-violet-500 dark:shadow-2xl dark:shadow-violet-950 shadow-2xl ">
-          <DataTable
-            :value="usuariosConNumeracion"
-            :rows="5"
-            paginator
-            :rowsPerPageOptions="[5, 10, 25]"
-            :globalFilter="globalFilter"
-            :globalFilterFields="[
-              'nombres',
-              'primerApellido',
-              'segundoApellido',
-              'email',
-              'fechaNacimiento',
-            ]"
-            :sortOrder="-1"
-            class="p-datatable-striped"
-          >
-            <template #paginatorstart>
-              <Button
-                type="button"
-                icon="pi pi-refresh"
-                text
-                @click="reloadPage"
-              />
-            </template>
-            <template #paginatorend>
-              <Button
-                type="button"
-                icon="pi pi-download"
-                text
-                @click="exportToExcel"
-              />
-            </template>
-            <template #body="rowData">
-              {{ getRowIndex(rowData) }}
-            </template>
-            <Column field="index" header="#" sortable class="px-6 py-4" />
 
-            <Column header="Foto de Perfil" class="px-6 py-4">
-              <template #body="rowData">
+      <div
+        class="card dark:border-violet-500 dark:shadow-2xl dark:shadow-violet-950 shadow-2xl"
+      >
+        <DataTable
+          :value="usuariosConNumeracion"
+          :rows="5"
+          paginator
+          :rowsPerPageOptions="[5, 10, 25]"
+          :globalFilter="globalFilter"
+          :globalFilterFields="[
+            'nombres',
+            'primerApellido',
+            'segundoApellido',
+            'email',
+            'fechaNacimiento',
+          ]"
+          :sortOrder="-1"
+          class="p-datatable-striped"
+        >
+          <template #paginatorstart>
+            <Button
+              type="button"
+              icon="pi pi-refresh"
+              text
+              @click="reloadPage"
+            />
+          </template>
+          <template #paginatorend>
+            <Button
+              type="button"
+              icon="pi pi-download"
+              text
+              @click="exportToExcel"
+            />
+          </template>
+          <template #body="rowData">
+            {{ getRowIndex(rowData) }}
+          </template>
+          <Column field="index" header="#" sortable class="px-6 py-4" />
+
+          <Column header="Foto de Perfil" class="px-6 py-4">
+            <template #body="rowData">
+              <div
+                class="relative h-16 w-16  rounded-full overflow-hidden shadow-2xl my-4"
+              >
                 <Image
                   v-if="rowData.data.fotoPerfil"
                   :src="rowData.data.fotoPerfil"
                   alt="Foto de Perfil"
-                  class="h-16 w-20 object-cover rounded-full"
+                  class="object-cover object-center h-full w-full"
                   preview
                 />
-              </template>
-            </Column>
-            <Column
-              field="nombres"
-              header="Nombres"
-              sortable
-              class="px-6 py-4"
-            />
-            <Column
-              field="primerApellido"
-              header="Primer Apellido"
-              sortable
-              class="px-6 py-4"
-            />
-            <Column
-              field="segundoApellido"
-              header="Segundo Apellido"
-              sortable
-              class="px-6 py-4"
-            />
-            <Column field="estado" header="Estado" class="px-6 py-4">
-              <template #body="rowData">
-                <Tag
-                  v-if="rowData.data.estado === 1"
-                  value="Activo"
-                  severity="success"
-                  class="px-2 py-1"
-                />
-                <Tag
-                  v-else-if="rowData.data.estado === 2"
-                  value="Inactivo"
-                  severity="warn"
-                  class="px-2 py-1"
-                />
-                <Tag
-                  v-else
-                  value="Desconocido"
-                  severity="warning"
-                  class="px-2 py-1"
-                />
-              </template>
-            </Column>
-            <Column field="email" header="Email" class="px-6 py-4" />
+              </div>
+            </template>
+          </Column>
+          <Column field="nombres" header="Nombres" sortable class="px-6 py-4" />
+          <Column
+            field="primerApellido"
+            header="Primer Apellido"
+            sortable
+            class="px-6 py-4"
+          />
+          <Column
+            field="segundoApellido"
+            header="Segundo Apellido"
+            sortable
+            class="px-6 py-4"
+          />
+          <Column field="estado" header="Estado" class="px-6 py-4">
+            <template #body="rowData">
+              <Tag
+                v-if="rowData.data.estado === 1"
+                value="Activo"
+                severity="success"
+                class="px-2 py-1"
+              />
+              <Tag
+                v-else-if="rowData.data.estado === 2"
+                value="Inactivo"
+                severity="warn"
+                class="px-2 py-1"
+              />
+              <Tag
+                v-else
+                value="Desconocido"
+                severity="warning"
+                class="px-2 py-1"
+              />
+            </template>
+          </Column>
+          <Column field="email" header="Email" class="px-6 py-4" />
 
-            <Column
-              field="fechaNacimiento"
-              header="Fecha de Nacimiento"
-              sortable
-              class="px-6 py-4"
-            >
-              <template #body="rowData">
-                {{ formatDate(rowData.data.fechaNacimiento) }}
-              </template>
-            </Column>
+          <Column
+            field="fechaNacimiento"
+            header="Fecha de Nacimiento"
+            sortable
+            class="px-6 py-4"
+          >
+            <template #body="rowData">
+              {{ formatDate(rowData.data.fechaNacimiento) }}
+            </template>
+          </Column>
 
-            <Column header="Acciones" class="px-6 py-4">
-              <template #body="rowData">
-                <div class="flex items-center space-x-2">
-                  <Button
-                    icon="pi pi-eye"
-                    class="p-button-rounded p-button-secondary"
-                    raised
-                    @click="showUserDetails(rowData.data)"
-                    v-tooltip.left="{
-                      value: 'Ver',
-                      showDelay: 0,
-                      hideDelay: 100,
-                    }"
-                  />
-                  <Button
-                    icon="pi pi-user-edit"
-                    class="p-button-rounded p-button-info"
-                    raised
-                    @click="openEditModal(rowData.data)"
-                    v-tooltip.top="{
-                      value: 'Editar',
-                      showDelay: 0,
-                      hideDelay: 100,
-                    }"
-                  />
-                  <Button
-                    icon="pi pi-user-minus"
-                    class="p-button-rounded p-button-danger"
-                    raised
-                    @click="eliminarUsuario(rowData.data.id)"
-                    v-tooltip.right="{
-                      value: 'Eliminar',
-                      showDelay: 0,
-                      hideDelay: 100,
-                    }"
-                  />
-                </div>
-              </template>
-            </Column>
-          </DataTable>
-        </div>
+          <Column header="Acciones" class="px-6 py-4">
+            <template #body="rowData">
+              <div class="flex items-center space-x-2">
+                <Button
+                  icon="pi pi-eye"
+                  class="p-button-rounded p-button-secondary"
+                  raised
+                  @click="showUserDetails(rowData.data)"
+                  v-tooltip.left="{
+                    value: 'Ver',
+                    showDelay: 0,
+                    hideDelay: 100,
+                  }"
+                />
+                <Button
+                  icon="pi pi-user-edit"
+                  class="p-button-rounded p-button-info"
+                  raised
+                  @click="openEditModal(rowData.data)"
+                  v-tooltip.top="{
+                    value: 'Editar',
+                    showDelay: 0,
+                    hideDelay: 100,
+                  }"
+                />
+                <Button
+                  icon="pi pi-user-minus"
+                  class="p-button-rounded p-button-danger"
+                  raised
+                  @click="eliminarUsuario(rowData.data.id)"
+                  v-tooltip.right="{
+                    value: 'Eliminar',
+                    showDelay: 0,
+                    hideDelay: 100,
+                  }"
+                />
+              </div>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
     </div>
     <!-- Modal para Confirmar Eliminación -->
     <Dialog
@@ -515,7 +516,6 @@ const selectedUsuario = ref({
   estado: 2, // Por defecto inactivo
   idUsuario: idUsuario,
 });
-const previewFotoPerfil = ref("");
 let usuarioToDelete = ref(null); // Usuario a eliminar
 
 const formatDate = (dateString) => {
@@ -528,19 +528,17 @@ const formatDate = (dateString) => {
 };
 const showUserDetails = (user) => {
   selectedUser.value = user;
-  user.fechaNacimiento = formatDate(selectedUser.value.fechaNacimiento);
+  user.fechaNacimiento = new Date(selectedUser.value.fechaNacimiento);
   showUserDetailsModal.value = true;
 };
 
 const closeUserDetailsModal = () => {
   showUserDetailsModal.value = false;
-  selectedUser.value = null;
 };
 
 const fetchData = async () => {
   try {
     const response = await api.get(`/usuarios/usuario/${idUsuario}`);
-    console.log(response);
     usuarios.value = response.data
       .filter((usuario) => usuario.tipoUsuario === "usuario")
       .reverse(); // Invertir el arreglo
@@ -565,7 +563,6 @@ const openAddModal = () => {
     estado: 1,
     idUsuario: idUsuario,
   };
-  previewFotoPerfil.value = "";
   isModalOpen.value = true;
 };
 
@@ -578,23 +575,11 @@ const handleFileUpload = (event) => {
 const openEditModal = (usuario) => {
   isEditMode.value = true;
   selectedUsuario.value = { ...usuario };
-  selectedUsuario.value.fechaNacimiento = formatDate(usuario.fechaNacimiento);
+  selectedUsuario.value.fechaNacimiento = new Date(usuario.fechaNacimiento);
   selectedUsuario.value.idUsuario = idUsuario;
-  console.log("sdfksl;dk;lskldfk",formatDate(usuario.fechaNacimiento));
   isModalOpen.value = true;
 };
-const formatToDateInput = (dateString) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Meses desde 0
-  const year = date.getUTCFullYear();
-  return `${year}-${month}-${day}`;
-};
-function convertirFechaAMysql(fecha) {
-  const d = new Date(fecha);
-  return d.toISOString().split("T")[0]; // Formato YYYY-MM-DD
-}
+
 const closeModal = () => {
   isModalOpen.value = false;
 };
@@ -643,7 +628,19 @@ const usuariosConNumeracion = computed(() => {
       expanded: false,
     }));
 });
+function convertirFechaAMysql(fecha) {
+  console.log(fecha);
+  if (!(fecha instanceof Date)) {
+    return fecha; // Si ya es una cadena, regresa como está
+  }
 
+  // Formatear la fecha a dd-mm-yyyy antes de dividir
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0"); // Los meses en JavaScript son de 0 a 11
+  const anio = fecha.getFullYear();
+
+  return `${anio}-${mes}-${dia}`; // Regresar al formato yyyy-mm-dd
+}
 const addUsuario = async () => {
   if (!validarCampos()) return;
 
@@ -704,20 +701,7 @@ const addUsuario = async () => {
     });
   }
 };
-const searchTerm = ref("");
 
-const filteredUsuarios = computed(() => {
-  return usuarios.value.filter((usuario) => {
-    const fullName = `${usuario.nombres} ${usuario.primerApellido} ${usuario.segundoApellido}`;
-    const email = usuario.email.toLowerCase();
-    const search = searchTerm.value.toLowerCase();
-    return (
-      fullName.toLowerCase().includes(search) ||
-      email.includes(search) ||
-      usuario.estado.toString().includes(search) // Si quieres buscar también por estado
-    );
-  });
-});
 const nombreCompleto = () => {
   const nombress = selectedUsuario.value.nombres;
   const primerApellidos = selectedUsuario.value.primerApellido;
@@ -824,12 +808,6 @@ const validarCampos = () => {
   }
   return true;
 };
-function formatFecha(fecha) {
-  // Separar la fecha por los guiones
-  const [dia, mes, anio] = fecha.split('-');
-  // Retornar la fecha en formato YYYY-MM-DD
-  return `${anio}-${mes}-${dia}`;
-}
 
 const updateUsuario = async () => {
   if (!validarCamposAct()) return;
@@ -842,7 +820,7 @@ const updateUsuario = async () => {
   formData.append("email", selectedUsuario.value.email);
   formData.append(
     "fechaNacimiento",
-    formatFecha(selectedUsuario.value.fechaNacimiento)
+    convertirFechaAMysql(selectedUsuario.value.fechaNacimiento)
   );
   formData.append("estado", selectedUsuario.value.estado);
   formData.append("tipoUsuario", selectedUsuario.value.tipoUsuario);
@@ -856,7 +834,6 @@ const updateUsuario = async () => {
   ) {
     selectedUsuario.value.fotoPerfil = null;
   }
-  console.log(selectedUsuario.value.fotoPerfil);
 
   if (selectedFile) {
     formData.append("fotoPerfil", selectedFile);

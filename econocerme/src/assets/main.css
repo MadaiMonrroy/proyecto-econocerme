@@ -42,7 +42,13 @@ html {
 .p-dark h2 {
   color: var(--text-color); 
 } 
+.p-dark .chartjs-grid {
+  border-color: rgba(255, 255, 255, 0.1); /* Dark mode grid color */
+}
 
+body:not(.p-dark) .chartjs-grid {
+  border-color: rgba(0, 0, 0, 0.1); /* Light mode grid color */
+}
 /* Estilos para botones en modo oscuro */
 /* .p-dark header button {
   color: var(--text-color) !important; /* Cambia el color del texto de los botones a blanco 

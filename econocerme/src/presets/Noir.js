@@ -103,7 +103,7 @@ const Noir = definePreset(Aura, {
           0: "#f7f1ff",
           50: "{slate.50}",
           100: "{slate.100}",
-          200: "#b3a0ff",
+          200: "#d1c9ff",
           300: "{slate.300}",
           400: "{slate.400}",
           500: "{slate.500}",

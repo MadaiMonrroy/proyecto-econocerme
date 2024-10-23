@@ -53,12 +53,84 @@
       >
         <button
           @click="handleEvaluacionClick"
-          class="w-full p-3 bg-gradient-to-r from-custom-pink to-custom-purple text-white font-semibold rounded-xl"
+          class="w-full p-3 bg-gradient-to-r from-custom-pink to-custom-purple text-black dark:text-white dark:bg-gradient-to-r dark:from-dark-purple dark:to-dark-pink font-semibold rounded-xl"
         >
-          Evaluación
+          <i class="pi pi-check-square pr-3"></i> Iniciar Evaluación
         </button>
       </div>
     </nav>
+
+    <Dialog
+      v-model:visible="mostrarDialog"
+      :header="dialogHeader"
+      modal
+      :class="{
+        'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white':
+          estadoEvaluacion === 'habilitadoCert',
+        'bg-gradient-to-r from-red-500 to-red-700 text-white':
+          estadoEvaluacion === 'no habilitado',
+        'bg-gradient-to-r from-green-400 to-green-600 text-white':
+          estadoEvaluacion === 'habilitado',
+      }"
+      style="max-width: 600px; width: 90%"
+    >
+      <div class="p-4 relative">
+        <p class="text-xl">{{ dialogMensaje }}</p>
+        <p
+          v-if="estadoEvaluacion === 'habilitadoCert'"
+          class="mt-4 text-lg font-semibold font-mono"
+        >
+          🎉 <strong>¡Felicidades! Puedes acceder a tu certificado.</strong> 🎉
+        </p>
+        <p
+          v-else-if="estadoEvaluacion === 'no habilitado'"
+          class="mt-4 text-lg font-semibold"
+        >
+          ❌
+          <strong
+            >Has agotado todos tus intentos.</strong
+          >
+        </p>
+        <p
+          v-else-if="estadoEvaluacion === 'habilitado'"
+          class="mt-4 text-lg font-semibold"
+        >
+          ✅ Estás listo para comenzar la evaluación. Recuerda que debes <strong>terminar la evaluación </strong> si decides
+          <strong> empezar.</strong> ¡Buena suerte!
+        </p>
+        <!-- Agregar un contenedor para el confeti -->
+        <div
+          id="confettiContainer"
+          class="absolute inset-0 z-10 pointer-events-none"
+        ></div>
+      </div>
+
+      <template #footer>
+        <Button
+          v-if="estadoEvaluacion === 'habilitadoCert'"
+          severity="success"
+          @click="accederCertificado"
+        >
+          Ver Certificado
+        </Button>
+
+        <Button
+          v-if="estadoEvaluacion === 'habilitado'"
+          severity="info"
+          @click="aceptarEvaluacion"
+        >
+          Empezar Evaluación
+        </Button>
+
+        <Button
+          v-if="estadoEvaluacion === 'habilitado'"
+          @click="cancelarEvaluacion"
+          severity="secondary"
+        >
+          Cancelar
+        </Button>
+      </template>
+    </Dialog>
 
     <button
       @click="toggleSidebar"
@@ -100,6 +172,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import Select from "primevue/select";
 import api from "@/axiosConfig.js";
+import confetti from "canvas-confetti";
 
 export default {
   name: "SidebarOnlyView",
@@ -113,12 +186,16 @@ export default {
     const selectedLeccion = ref(null);
     const idCurso = route.params.id;
     const preguntas = ref([]);
+    const idUsuario = authStore.usuario.id;
 
     const selectedMenu = ref(null);
     const isSidebarCollapsed = ref(false);
     const lecciones = ref([]);
     const menuOptions = ref([]);
-
+    const mostrarDialog = ref(false);
+    const dialogHeader = ref("");
+    const dialogMensaje = ref("");
+    const estadoEvaluacion = ref("");
     onMounted(async () => {
       authStore.loadUser();
       if (!authStore.isAuthenticated) {
@@ -212,10 +289,61 @@ export default {
         }
       }
     };
-    const handleEvaluacionClick = () => {
-      router.push(`/panelEstudiante/evaluaciones/${idCurso}`);
+    const handleEvaluacionClick = async () => {
+      try {
+        const response = await api.get(
+          `/evaluaciones/verificarIntentos/${idCurso}?idUsuario=${idUsuario}`
+        );
+        console.log(response);
+        const { estado, mensaje } = response.data;
+        estadoEvaluacion.value = estado;
+        dialogMensaje.value = mensaje;
+        console.log("Dialog abierto"); // Verificación
+
+        switch (estado) {
+          case "habilitadoCert":
+            dialogHeader.value = "Certificado Disponible";
+            mostrarConfetti(); // Llama a la función para mostrar confeti
+
+            break;
+          case "no habilitado":
+            dialogHeader.value = "Intentos Agotados";
+            break;
+          case "habilitado":
+            dialogHeader.value = "Evaluación Disponible";
+            break;
+        }
+
+        mostrarDialog.value = true;
+      } catch (error) {
+        console.error("Error al verificar intentos:", error);
+      }
+    };
+    // Nueva función para manejar el confeti
+    const mostrarConfetti = () => {
+      confetti.create(document.getElementById("confettiContainer"), {
+        resize: true,
+        useWorker: true,
+      })({ particleCount: 150, spread: 250 });
     };
 
+    const accederCertificado = () => {
+      router.push(`/panelEstudiante/vistaPreviaCertificado/${idUsuario}?idCurso=${idCurso}`);
+      cerrarDialog();
+    };
+
+    const aceptarEvaluacion = () => {
+      router.push(`/panelEstudiante/evaluaciones/${idCurso}`);
+      cerrarDialog();
+    };
+
+    const cancelarEvaluacion = () => {
+      cerrarDialog();
+    };
+
+    const cerrarDialog = () => {
+      mostrarDialog.value = false;
+    };
     const handleLeccionClick = (leccion) => {
       selectedLeccion.value = leccion.idLeccion;
       // Si la lección es 'Introducción', redirige a la ruta correspondiente
@@ -243,6 +371,14 @@ export default {
       lecciones,
       preguntas,
       handleEvaluacionClick,
+      mostrarDialog,
+      dialogHeader,
+      dialogMensaje,
+      estadoEvaluacion,
+      cerrarDialog,
+      aceptarEvaluacion,
+      accederCertificado,
+      cancelarEvaluacion,
       selectedLeccion,
     };
   },

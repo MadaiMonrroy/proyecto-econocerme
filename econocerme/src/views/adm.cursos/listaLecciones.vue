@@ -58,7 +58,6 @@
                       controls
                       class="w-[770px] h-[375px] object-contain rounded-md shadow-lg"
                       controlsList="nodownload"
-                      poster="/src/assets/fondo.jpg"
                       playsinline
                       loop
                     >
@@ -224,7 +223,7 @@ export default {
           const response = await api.get(
             `/lecciones/leccion/${props.idModulo}`
           );
-          lecciones.value = response.data;
+          lecciones.value = response.data.reverse();
           console.log(lecciones.value);
         } catch (error) {
           console.error("Error al obtener los módulos:", error);
@@ -261,7 +260,7 @@ export default {
     const eliminarLeccion = (idLeccion) => {
       confirm.require({
         group: "headless",
-        message: "¿Estás seguro de que deseas eliminar este curso?",
+        message: "¿Estás seguro de que deseas eliminar esta lección?",
         header: "Confirmación",
         icon: "pi-exclamation-triangle",
         accept: () => deleteLeccion(idLeccion), // Llama a eliminarAnuncio solo si el usuario acepta
@@ -327,6 +326,7 @@ export default {
       cerrarDialog,
       guardarCambios,
       eliminarLeccion,
+      obtenerLecciones,
       leccionSeleccionado,
     };
   },

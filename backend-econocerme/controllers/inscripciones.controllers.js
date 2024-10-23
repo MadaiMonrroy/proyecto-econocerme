@@ -341,13 +341,16 @@ export const agregarPreinscripcion = async (req, res) => {
 
 export const completarInscripcion = async (req, res) => {
   const {
+    idUsuario,
     idInscripcion,
     montoTotal,
+    idCurso,
+    observacion,
     cantidadCuotas,
     metodoPago,
+    montoCuota,
     idUsuarioModificacion,
   } = req.body;
-
   const conn = await connection.getConnection();
   try {
     await conn.beginTransaction();
@@ -385,24 +388,29 @@ export const completarInscripcion = async (req, res) => {
       fechaVencimiento.setMonth(fechaVencimiento.getMonth() + 1);
     }
 
-    // Actualizar estado de inscripcion a 1 y fechaInscripcion
+    // Actualizar estado de inscripcion a 1, fechaInscripcion y observacion
     await conn.execute(
-      `UPDATE inscripcion SET estado = 1, fechaInscripcion = CURRENT_TIMESTAMP WHERE idInscripcion = ?`,
-      [idInscripcion]
+      `UPDATE inscripcion SET estado = 1, fechaInscripcion = CURRENT_TIMESTAMP, observacion = ? WHERE idInscripcion = ?`,
+      [observacion, idInscripcion] // Agregamos el valor de observacion
     );
+    // Calcular y actualizar progresoPago en detalle_inscripcion (similar a agregarInscripcion)
+    const progresoPago = 100 / cantidadCuotas;
 
-    // Calcular y actualizar progresoPago en detalle_inscripcion (inicialmente es el 100/cantidad de cuotas)
-    const progresoPago = 100 / idCurso.length;
-    await conn.execute(
-      `UPDATE detalle_inscripcion SET progresoPago = ? WHERE idInscripcion = ?`,
-      [progresoPago, idInscripcion]
-    );
+    // Actualizar el progresoPago en la tabla detalle_inscripcion para cada curso
+    for (const curso of idCurso) {
+      await conn.execute(
+        `UPDATE detalle_inscripcion
+         SET progresoPago = ?
+         WHERE idInscripcion = ? AND idCurso = ?`,
+        [progresoPago, idInscripcion, curso.idCurso]
+      );
+    }
 
     await conn.commit();
 
     res.status(200).json({
       mensaje: "Inscripción completada correctamente",
-      idPago: idPago,
+      idInscripcion: idInscripcion,
       idCuotaPago: idCuotaPagoConEstadoCuota1,
     });
   } catch (error) {
@@ -456,9 +464,9 @@ export const editarInscripcion = async (req, res) => {
   }
 };
 
-export const eliminarInscripcion = async (req, res) => {
-  const idInscripcion = req.params.id;
-
+export const eliminarPreInscripcion = async (req, res) => {
+  const idInscripcion = req.params.idInscripcion;
+  console.log("yo soy id inscricp" , idInscripcion)
   try {
     // Actualizar el estado del curso a inactivo (estado = 0)
     const [result] = await connection.query(

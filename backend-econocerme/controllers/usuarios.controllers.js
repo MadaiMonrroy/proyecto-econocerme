@@ -395,7 +395,7 @@ export const editarUsuario = async (req, res) => {
     tipoUsuario,
     idUsuario,
   } = req.body;
-
+  console.log(req.body)
   try {
     const [oldFotPerfil] = await connection.query(
       "SELECT fotoPerfil FROM usuario WHERE id = ?",

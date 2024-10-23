@@ -79,10 +79,13 @@
           </TabList>
           <TabPanels>
             <TabPanel value="0">
-              <listaLecciones :idModulo="idModulo" />
+              <listaLecciones ref="listaLeccionesRef" :idModulo="idModulo" />
             </TabPanel>
             <TabPanel value="1">
-              <formLeccion :idModulo="idModulo" />
+              <formLeccion :idModulo="idModulo" 
+              @leccionGuardado="actualizarLecciones"
+                @cambiarTab="redirigirTab" 
+                />
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -116,6 +119,7 @@ export default {
     const route = useRoute();
     const router = useRouter();
     const value = ref("0");
+    const listaLeccionesRef = ref(null);
 
     const modulo = ref({});
     const modulos = ref([]);
@@ -155,7 +159,19 @@ export default {
       router.push(`/panelCoaches/modulos/${cursoId}`);
     }
     };
-
+    const redirigirTab = (tabIndex) => {
+  value.value = tabIndex.toString(); // Cambiar el valor de la pestaña
+};
+    const actualizarLecciones = () => {
+      if (
+        listaLeccionesRef.value &&
+        typeof listaLeccionesRef.value.obtenerLecciones === "function"
+      ) {
+        listaLeccionesRef.value.obtenerLecciones();
+      } else {
+        console.error("obtenerLecciones no es una función en listaLeccionesRef");
+      }
+    };
     const cargarModulo = async () => {
       try {
         const response = await api.get(`/modulos/obtenerModulo/${idModulo}`);
@@ -208,6 +224,9 @@ export default {
       value,
       home,
       items,
+      actualizarLecciones,
+      listaLeccionesRef,
+      redirigirTab,
       volverAModulos,
     };
   },

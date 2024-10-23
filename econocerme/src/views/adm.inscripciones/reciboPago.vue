@@ -1,22 +1,39 @@
 <template>
   <div class="min-h-screen p-4 !bg-white">
-    <h2 class="text-2xl font-semibold mb-4 text-center">
-      RECIBO DE INSCRIPCIÓN - PAGO {{ data[0]?.numeroCuota }} /
-      {{ data[0]?.cantidadCuotas }}
-    </h2>
+    <!-- Encabezado con logo y rótulo -->
+    <div class="relative flex items-center mb-6">
+      <!-- Logo a la izquierda -->
+      <div class="w-72 h-48">
+        <img src="@/assets/logoec.png" alt="Logo" class="w-full h-auto" />
+        <p class="text-center">Av.Avaroa y C. Max Bascope #1618</p>
+        <p class="text-center">Celular: 71757910</p>
+      </div>
+      <!-- Rótulo centrado -->
+      <div class="absolute left-1/2 transform -translate-x-1/2  translate-y-16 text-center">
+        <!-- Título del recibo -->
+        <h2 class="text-xl font-semibold mb-0 text-center ">
+          RECIBO DE INSCRIPCIÓN - PAGO {{ data[0]?.numeroCuota }} / {{ data[0]?.cantidadCuotas }}
+        </h2>
+        
+      </div>
+    </div>
 
-    <label class="font-semibold text-right">Nombre Completo:</label>
-    <label class="p-2 text-right">{{ data[0]?.nombreCompleto }}</label
-    ><br />
-    <label class="font-semibold text-right">Fecha de Vencimiento:</label>
-    <label class="p-2 text-right">{{
-      formatDate(data[0]?.fechaVencimientoCuota)
-    }}</label
-    ><br />
-    <label class="pt-8 font-semibold text-right">Fecha de Pago:</label>
-    <label class="p-2 text-right">{{
-      formatDate(data[0]?.fechaPagoCuota)
-    }}</label>
+    <!-- Número de recibo -->
+    <div class="flex justify-end -mb-5 -mt-5">
+      <h4 class=" text-xl"> N° de Recibo: <strong> {{ idCuot }}-{{ idInscr }}</strong></h4>
+    </div>
+
+    <!-- Datos del cliente -->
+    <div class="mb-4">
+      <label class="font-semibold">Nombre Completo:</label>
+      <span class="p-2">{{ data[0]?.nombreCompleto }}</span
+      ><br />
+      <label class="font-semibold">Fecha de Vencimiento:</label>
+      <span class="p-2">{{ formatDate(data[0]?.fechaVencimientoCuota) }}</span
+      ><br />
+      <label class="font-semibold">Fecha de Pago:</label>
+      <span class="p-2">{{ formatDate(data[0]?.fechaPagoCuota) }}</span>
+    </div>
 
     <!-- Contenedor para la tabla con overflow -->
     <div class="pt-4 overflow-x-auto">
@@ -58,9 +75,6 @@
             :key="row.idCuotaPago"
             class="whitespace-nowrap"
           >
-            <!-- <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-center w-5">
-              {{ index + 1 }} 
-            </td> -->
             <td
               class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-center w-5"
             >
@@ -110,7 +124,27 @@
           </tr>
           <tr>
             <td class="px-2 py-2 font-semibold text-right" colspan="4">
-              MONTO POR CUOTA Bs.
+              MONTO / CUOTA Bs.
+            </td>
+            <td
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right"
+            >
+              {{ calculateMontoCuotaTotal() }}
+            </td>
+          </tr>
+          <tr>
+            <td class="px-2 py-2 font-semibold text-right" colspan="4">
+              MONTO / MORA Bs.
+            </td>
+            <td
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right"
+            >
+              {{ data[0]?.montoMora }}
+            </td>
+          </tr>
+          <tr>
+            <td class="px-2 py-2 font-semibold text-right" colspan="4">
+              TOTAL A PAGAR Bs.
             </td>
             <td
               class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right"
@@ -126,10 +160,9 @@
     <div class="pt-4">
       <label class="p-2 text-left font-semibold"
         >Son: {{ montoCuotaLiteral }}</label
-      >
-      <br />
+      ><br />
       <label class="p-2 font-semibold text-right">Método de pago:</label>
-      <label class="p-2 text-left uppercase">{{ data[0]?.metodoPago }}</label>
+      <span class="p-2 text-left uppercase">{{ data[0]?.metodoPago }}</span>
     </div>
   </div>
 </template>
@@ -138,37 +171,89 @@
 import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import api from "@/axiosConfig.js";
+const route = useRoute();
 
+const idInscr = route.params.idInscripcion;
+const idCuot = route.query.idCuotaPago;
 // Datos reactivos para la tabla
 const data = ref([]);
 const montoCuotaLiteral = ref(""); // Guardar el monto en palabras
-const unidadesESP = ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
-const decenasESP = ['', 'DIEZ', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
-const especialesESP = ['ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
-const centenasESP = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+const unidadesESP = [
+  "",
+  "UNO",
+  "DOS",
+  "TRES",
+  "CUATRO",
+  "CINCO",
+  "SEIS",
+  "SIETE",
+  "OCHO",
+  "NUEVE",
+];
+const decenasESP = [
+  "",
+  "DIEZ",
+  "VEINTE",
+  "TREINTA",
+  "CUARENTA",
+  "CINCUENTA",
+  "SESENTA",
+  "SETENTA",
+  "OCHENTA",
+  "NOVENTA",
+];
+const especialesESP = [
+  "ONCE",
+  "DOCE",
+  "TRECE",
+  "CATORCE",
+  "QUINCE",
+  "DIECISEIS",
+  "DIECISIETE",
+  "DIECIOCHO",
+  "DIECINUEVE",
+];
+const centenasESP = [
+  "",
+  "CIENTO",
+  "DOSCIENTOS",
+  "TRESCIENTOS",
+  "CUATROCIENTOS",
+  "QUINIENTOS",
+  "SEISCIENTOS",
+  "SETECIENTOS",
+  "OCHOCIENTOS",
+  "NOVECIENTOS",
+];
 
 // Función para convertir un número a letras con estilo español correcto
 function numeroALetras(num) {
+  if (num === 0) return "CERO";
+  if (num === 100) return "CIEN";
 
-  if (num === 0) return 'CERO';
-  if (num === 100) return 'CIEN';
-
-  let letras = '';
+  let letras = "";
 
   if (num >= 1000) {
     if (num === 1000) {
-      letras = 'MIL ';
+      letras = "MIL ";
     } else if (num < 2000) {
-      letras = 'MIL ' + numeroALetras(num % 1000);
+      letras = "MIL " + numeroALetras(num % 1000);
     } else {
-      letras = unidadesESP[Math.floor(num / 1000)] + ' MIL ' + numeroALetras(num % 1000);
+      letras =
+        unidadesESP[Math.floor(num / 1000)] +
+        " MIL " +
+        numeroALetras(num % 1000);
     }
   } else if (num >= 100) {
-    letras = centenasESP[Math.floor(num / 100)] + (num % 100 === 0 ? '' : ' ' + numeroALetras(num % 100));
+    letras =
+      centenasESP[Math.floor(num / 100)] +
+      (num % 100 === 0 ? "" : " " + numeroALetras(num % 100));
   } else if (num === 10) {
     letras = decenasESP[1]; // Manejo específico para el número 10
   } else if (num >= 20) {
-    letras = decenasESP[Math.floor(num / 10)] + (num % 10 > 0 ? ' Y ' + unidadesESP[num % 10] : '');
+    letras =
+      decenasESP[Math.floor(num / 10)] +
+      (num % 10 > 0 ? " Y " + unidadesESP[num % 10] : "");
   } else if (num >= 11 && num <= 19) {
     letras = especialesESP[num - 11];
   } else {
@@ -194,10 +279,6 @@ function convertirMontoCuota(monto) {
 
   return `${letrasEnteros} ${letrasCentavos} BOLIVIANOS`;
 }
-
-
-
-
 
 // Función para formatear fechas
 function formatDate(date) {
@@ -243,13 +324,22 @@ async function fetchData(idInscripcion, idCuotaPago) {
 function calculateMontoCuota() {
   const totalPrecio = parseFloat(calculateTotalIncreasedPrice());
   const cantidadCuotas = data.value[0]?.cantidadCuotas;
+  const montoMora = parseFloat(data.value[0]?.montoMora) || 0; // Asegurarse de que montoMora sea un número
+  const totalaPagar = totalPrecio / cantidadCuotas + montoMora;
+
+  console.log(totalaPagar);
+  // Asegurarse de que no sea cero para evitar división por cero
+  return cantidadCuotas > 0 ? totalaPagar.toFixed(2) : "0.00";
+}
+function calculateMontoCuotaTotal() {
+  const totalPrecio = parseFloat(calculateTotalIncreasedPrice());
+  const cantidadCuotas = data.value[0]?.cantidadCuotas;
 
   // Asegurarse de que no sea cero para evitar división por cero
   return cantidadCuotas > 0
     ? (totalPrecio / cantidadCuotas).toFixed(2)
     : "0.00";
 }
-
 // Método para calcular el 5% y el precio incrementado
 function calculateValues() {
   data.value = data.value.map((row) => {
@@ -289,6 +379,7 @@ onMounted(() => {
   const route = useRoute();
   const idInscripcion = route.params.idInscripcion;
   const idCuotaPago = route.query.idCuotaPago;
+
   // Llamar a la función de obtención de datos
   fetchData(idInscripcion, idCuotaPago);
 });

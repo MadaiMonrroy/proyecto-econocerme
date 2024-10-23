@@ -6,65 +6,115 @@
     </h2>
 
     <label class="font-semibold text-right">Nombre Completo:</label>
-    <label class="p-2 text-right">{{ data[0]?.nombreCompleto }}</label><br />
+    <label class="p-2 text-right">{{ data[0]?.nombreCompleto }}</label
+    ><br />
     <label class="font-semibold text-right">Fecha de Vencimiento:</label>
-    <label class="p-2 text-right">{{ formatDate(data[0]?.fechaVencimientoCuota) }}</label><br />
+    <label class="p-2 text-right">{{
+      formatDate(data[0]?.fechaVencimientoCuota)
+    }}</label
+    ><br />
     <label class="pt-8 font-semibold text-right">Fecha de Pago:</label>
-    <label class="p-2 text-right">{{ formatDate(data[0]?.fechaPagoCuota) }}</label>
+    <label class="p-2 text-right">{{
+      formatDate(data[0]?.fechaPagoCuota)
+    }}</label>
 
     <!-- Contenedor para la tabla con overflow -->
     <div class="pt-4 overflow-x-auto">
       <table class="min-w-full pt-8 !border-0">
         <thead>
-          <tr class="whitespace-nowrap bg-violet-200 dark:text-violet-50 dark:bg-violet-950">
-            <th class="border border-violet-950 dark:border-violet-50 px-2 py-4 w-5 text-center">CANT.</th>
-            <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-48 text-left">CURSOS(S)</th>
-            <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right">PRECIO</th>
-            <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right">CARGO ADICIONAL</th>
-            <th class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right">SUB TOTAL</th>
+          <tr
+            class="whitespace-nowrap bg-violet-200 dark:text-violet-50 dark:bg-violet-950"
+          >
+            <th
+              class="border border-violet-950 dark:border-violet-50 px-2 py-4 w-5 text-center"
+            >
+              CANT.
+            </th>
+            <th
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-48 text-left"
+            >
+              CURSOS(S)
+            </th>
+            <th
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right"
+            >
+              PRECIO
+            </th>
+            <th
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right"
+            >
+              CARGO ADICIONAL
+            </th>
+            <th
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-32 text-right"
+            >
+              SUB TOTAL
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(row) in data" :key="row.idCuotaPago" class="whitespace-nowrap">
+          <tr
+            v-for="row in data"
+            :key="row.idCuotaPago"
+            class="whitespace-nowrap"
+          >
             <!-- <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-center w-5">
               {{ index + 1 }} 
             </td> -->
-            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-center w-5">
+            <td
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-center w-5"
+            >
               1
             </td>
-            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-48">{{ row.curso }}</td>
-            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32">
+            <td
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 w-48"
+            >
+              {{ row.curso }}
+            </td>
+            <td
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32"
+            >
               {{ formatCurrency(row.precioCurso) }}
             </td>
-            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32">
+            <td
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32"
+            >
               {{ calculateFivePercent(row) }}
             </td>
-            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32">
+            <td
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right w-32"
+            >
               {{ calculateIncreasedPrice(row) }}
             </td>
           </tr>
           <!-- Fila para Totales -->
           <tr>
-            <td class=" px-2 py-2 font-semibold text-right" colspan="4">
+            <td class="px-2 py-2 font-semibold text-right" colspan="4">
               TOTAL Bs.
             </td>
-            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right">
+            <td
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right"
+            >
               {{ calculateTotalIncreasedPrice() }}
             </td>
           </tr>
           <tr>
-            <td class=" px-2 py-2 font-semibold text-right" colspan="4">
+            <td class="px-2 py-2 font-semibold text-right" colspan="4">
               CANTIDAD DE CUOTAS:
             </td>
-            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right">
+            <td
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right"
+            >
               {{ data[0]?.cantidadCuotas }}
             </td>
           </tr>
           <tr>
-            <td class=" px-2 py-2 font-semibold text-right" colspan="4">
-              MONTO POR CUOTA Bs.
+            <td class="px-2 py-2 font-semibold text-right" colspan="4">
+              TOTAL A PAGAR Bs.
             </td>
-            <td class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right">
+            <td
+              class="border border-violet-950 dark:border-violet-50 px-2 py-2 text-right"
+            >
               {{ calculateMontoCuota() }}
             </td>
           </tr>
@@ -74,25 +124,24 @@
 
     <!-- Datos adicionales al pie de la tabla -->
     <div class="pt-4">
-      <label class="p-2 text-left font-semibold">Son: {{ montoCuotaLiteral }}</label> <br>
+      <label class="p-2 text-left font-semibold"
+        >Son: {{ montoCuotaLiteral }}</label
+      >
+      <br />
       <label class="p-2 font-semibold text-right">Método de pago:</label>
       <label class="p-2 text-left uppercase">{{ data[0]?.metodoPago }}</label>
-      <Button @click="generatePdf" severity="help">Generar Recibo</Button>
-
+      <!-- Botón alineado a la derecha -->
+      <div class="flex justify-end mt-4">
+        <Button @click="generatePdf" severity="help" class="w-96">Generar Recibo</Button>
+      </div>
     </div>
-
   </div>
 </template>
 
-
-
-
-
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import api from "@/axiosConfig.js";
-import { useRouter } from "vue-router";
 
 // Datos reactivos para la tabla
 const data = ref([]);
@@ -102,36 +151,74 @@ const router = useRouter();
 
 function numeroALetras(num) {
   const unidades = [
-    '', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'
+    "",
+    "UNO",
+    "DOS",
+    "TRES",
+    "CUATRO",
+    "CINCO",
+    "SEIS",
+    "SIETE",
+    "OCHO",
+    "NUEVE",
   ];
   const decenas = [
-    '', 'DIEZ', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'
+    "",
+    "DIEZ",
+    "VEINTE",
+    "TREINTA",
+    "CUARENTA",
+    "CINCUENTA",
+    "SESENTA",
+    "SETENTA",
+    "OCHENTA",
+    "NOVENTA",
   ];
   const especiales = [
-    'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'
+    "ONCE",
+    "DOCE",
+    "TRECE",
+    "CATORCE",
+    "QUINCE",
+    "DIECISEIS",
+    "DIECISIETE",
+    "DIECIOCHO",
+    "DIECINUEVE",
   ];
   const centenas = [
-    '', 'CIEN', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'
+    "",
+    "CIEN",
+    "DOSCIENTOS",
+    "TRESCIENTOS",
+    "CUATROCIENTOS",
+    "QUINIENTOS",
+    "SEISCIENTOS",
+    "SETECIENTOS",
+    "OCHOCIENTOS",
+    "NOVECIENTOS",
   ];
 
-  if (num === 0) return 'CERO';
-  if (num === 100) return 'CIEN';
+  if (num === 0) return "CERO";
+  if (num === 100) return "CIEN";
 
-  let letras = '';
+  let letras = "";
 
   // Para manejar números hasta 10,000
   if (num >= 1000) {
     if (num === 1000) {
-      letras = 'MIL ';
+      letras = "MIL ";
     } else if (num < 2000) {
-      letras = 'MIL ' + numeroALetras(num % 1000);
+      letras = "MIL " + numeroALetras(num % 1000);
     } else {
-      letras = unidades[Math.floor(num / 1000)] + ' MIL ' + numeroALetras(num % 1000);
+      letras =
+        unidades[Math.floor(num / 1000)] + " MIL " + numeroALetras(num % 1000);
     }
   } else if (num >= 100) {
-    letras = centenas[Math.floor(num / 100)] + ' ' + numeroALetras(num % 100);
+    letras = centenas[Math.floor(num / 100)] + " " + numeroALetras(num % 100);
   } else if (num >= 20) {
-    letras = decenas[Math.floor(num / 10)] + (num % 10 > 0 ? ' Y ' + unidades[num % 10] : '');
+    letras =
+      decenas[Math.floor(num / 10)] +
+      (num % 10 > 0 ? " Y " + unidades[num % 10] : "");
   } else if (num >= 11 && num <= 19) {
     letras = especiales[num - 11];
   } else {
@@ -158,17 +245,18 @@ async function generatePdf() {
 
     const response = await api.post("/recibos/generarPdf", {
       idInscripcion,
-      idCuotaPago
+      idCuotaPago,
     });
+    router.push("/panelControl/inscripciones");
 
     if (response.data.url) {
       window.open(response.data.url);
     } else {
-      throw new Error('No se pudo generar el PDF.');
+      throw new Error("No se pudo generar el PDF.");
     }
   } catch (error) {
-    console.error('Error generando el PDF:', error);
-    alert('Hubo un problema al generar el PDF. Intenta nuevamente.');
+    console.error("Error generando el PDF:", error);
+    alert("Hubo un problema al generar el PDF. Intenta nuevamente.");
   }
 }
 
@@ -176,13 +264,12 @@ async function generatePdf() {
 function convertirMontoCuota(monto) {
   const enteros = Math.floor(monto);
   const centavos = Math.round((monto - enteros) * 100);
-  
+
   const letrasEnteros = numeroALetras(enteros);
   const letrasCentavos = centavos > 0 ? `${centavos}/100` : "00/100";
 
   return `${letrasEnteros} ${letrasCentavos} BOLIVIANOS`;
 }
-
 
 // Función para formatear fechas
 function formatDate(date) {
@@ -207,9 +294,6 @@ function convertMontoCuotaToWords() {
   return montoEnPalabras.toUpperCase(); // Convertir a mayúsculas
 }
 
-
-
-
 // Función para obtener los datos
 async function fetchData(idInscripcion, idCuotaPago) {
   try {
@@ -219,8 +303,7 @@ async function fetchData(idInscripcion, idCuotaPago) {
     // Asignar datos al valor reactivo
     data.value = response.data;
     calculateValues();
-    montoCuotaLiteral.value = convertMontoCuotaToWords(); 
-
+    montoCuotaLiteral.value = convertMontoCuotaToWords();
   } catch (error) {
     console.error("Error al obtener los detalles de inscripción:", error);
   }

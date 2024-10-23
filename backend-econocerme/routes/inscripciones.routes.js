@@ -3,10 +3,11 @@ import {
   listaInscripciones,
   obtenerInscripcion,
   agregarInscripcion,
-  eliminarInscripcion,
+  eliminarPreInscripcion,
   editarInscripcion,
   agregarPreinscripcion,
   listaPreInscripciones,
+  completarInscripcion,
 } from "../controllers/inscripciones.controllers.js";
 const router = Router();
 
@@ -15,8 +16,10 @@ router.get("/preInscripcion", listaPreInscripciones);
 router.get("/obtenerInscripcion/:id", obtenerInscripcion);
 router.post("/agregarInscripcion", agregarInscripcion);
 router.post("/agregarPreInscripcion", agregarPreinscripcion);
+router.post("/completarInscripcion", completarInscripcion);
+
 router.put("/editarInscripcion/:id", editarInscripcion);
 router.patch("/editarInscripcion/:id", editarInscripcion);
-router.delete("/eliminarInscripcion/:id", eliminarInscripcion);
+router.delete("/eliminarPreInscripcion/:idInscripcion", eliminarPreInscripcion);
 
 export default router;

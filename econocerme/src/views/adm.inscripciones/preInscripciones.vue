@@ -128,7 +128,7 @@
                 <Button
                   icon="pi pi-trash"
                   class="p-button-rounded p-button-danger"
-                  @click="eliminarInscripcionId(slotProps.data.idInscripcion)"
+                  @click="confirmarEliminacion(slotProps.data.idInscripcion)"
                   v-tooltip.top="{
                     value: 'Eliminar PreInscripcion',
                     showDelay: 0,
@@ -141,32 +141,42 @@
         </DataTable>
       </div>
       <DynamicDialog />
-      <!-- Dialogo dinámico -->
-
-      <!-- Modal para Confirmar Eliminación -->
-      <Dialog
-        v-model:visible="isConfirmModalOpen"
-        header="Confirmar Eliminación"
-        modal
-        class="w-full max-w-sm"
-      >
-        <div class="p-4">
-          <p>¿Estás seguro de que deseas eliminar esta inscripción?</p>
-          <div class="mt-4 flex justify-end space-x-4">
+      <ConfirmDialog group="headless">
+      <template #container="{ message, acceptCallback, rejectCallback }">
+        <div
+          class="flex flex-col items-center p-8 bg-surface-0 dark:bg-surface-900 rounded-3xl"
+        >
+          <div
+            class="rounded-full bg-primary text-primary-contrast inline-flex justify-center items-center h-24 w-24 -mt-20"
+          >
+            <i
+              class="pi pi-exclamation-triangle !text-violet-950"
+              style="color: dimgray; font-size: 3rem"
+            ></i>
+          </div>
+          <span class="font-bold text-2xl block mb-2 mt-6">{{
+            message.header
+          }}</span>
+          <p class="mb-0">{{ message.message }}</p>
+          <div class="flex items-center gap-2 mt-6">
             <Button
-              class="text-white px-4 py-2 rounded-md"
-              severity="danger"
-              @click="eliminarInscripcion"
-              >Eliminar</Button
-            >
+              label="Eliminar"
+              severity="help"
+              raised
+              @click="acceptCallback"
+            ></Button>
             <Button
-              class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
-              @click="closeConfirmModal"
-              >Cancelar</Button
-            >
+              label="Cancelar"
+              raised
+              severity="primary"
+              outlined
+              @click="rejectCallback"
+            ></Button>
           </div>
         </div>
-      </Dialog>
+      </template>
+    </ConfirmDialog>
+      
     </div>
   </div>
 </template>
@@ -179,6 +189,8 @@ import { useDialog } from "primevue/usedialog";
 import api from "@/axiosConfig.js";
 import cursosLista from "./cursosLista.vue"; // Asegúrate de importar el componente correctamente
 import ExcelJS from "exceljs";
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
 
 const authStore = useAuthStore();
 const inscripciones = ref([]);
@@ -186,6 +198,8 @@ const router = useRouter();
 const isConfirmModalOpen = ref(false);
 let inscripcionToDelete = ref(null);
 const globalFilter = ref(""); // Variable para almacenar el valor del buscador global
+const confirm = useConfirm();
+const toast = useToast();
 
 const openAddView = () => {
   router.push("/panelControl/formInscripcion");
@@ -200,15 +214,26 @@ const completarInscripcion = (inscripcion) => {
     path: `/panelControl/formCompletarInscripcion/${inscripcion.idInscripcion}` // Enviamos el pagoId como parámetro de consulta
   });
 };
+const confirmarEliminacion = async (id) => {
+  confirm.require({
+    group: "headless",
+    message: "¿Estás seguro de que deseas eliminar esta Pre Inscripción?",
+    header: "Confirmación",
+    icon: "pi-exclamation-triangle",
+    accept: () => eliminarPreInscripcion(id), // Llama a eliminarAnuncio solo si el usuario acepta
 
-const closeConfirmModal = () => {
-  isConfirmModalOpen.value = false;
+    reject: () => {
+      // toast.add({
+      //   severity: "warn",
+      //   summary: "Cancelled",
+      //   detail: "Eliminación cancelada",
+      //   life: 3000,
+      // });
+    },
+  });
 };
 
-const eliminarInscripcionId = (id) => {
-  inscripcionToDelete.value = id;
-  isConfirmModalOpen.value = true;
-};
+
 
 const exportToExcel = async () => {
   const workbook = new ExcelJS.Workbook();
@@ -236,20 +261,20 @@ const exportToExcel = async () => {
   saveAs(new Blob([buffer]), "usuarios.xlsx");
 };
 
-const eliminarInscripcion = async (idInscripcion) => {
+const eliminarPreInscripcion = async (idInscripcion) => {
   try {
     await api.delete(
-      `/inscripciones/eliminarInscripcion/${inscripcionToDelete.value}`
+      `/inscripciones/eliminarPreInscripcion/${idInscripcion}`
     );
     fetchData();
 
-    closeConfirmModal();
     toast.add({
       severity: "success",
       summary: "Inscripción Eliminada",
       detail: "La inscripción ha sido eliminada con éxito.",
       life: 3000,
     });
+
   } catch (error) {
     console.error(error);
     toast.add({
