@@ -1,6 +1,6 @@
 <template>
   <div class="pt-5">
-  <div class="p-8 max-w-4xl mx-auto rounded-3xl shadow-2xl dark:shadow-lg dark:shadow-violet-950">
+  <div class="p-8 max-w-4xl mx-auto rounded-3xl shadow-2xl min-w-full">
     <!-- Formulario de preguntas -->
     <div
       v-for="(question, index) in questions"
@@ -34,7 +34,7 @@
         :key="optIndex"
         class="flex items-center mb-4"
       >
-        <i class="pi pi-circle mr-3"></i>
+        <i class="pi pi-circle-fill mr-3"></i>
 
         <InputText
           v-model="question.options[optIndex]"
@@ -85,7 +85,7 @@
       severity="success"
       class="ml-4 bg-green-500 text-white px-6 py-3 rounded-md shadow hover:bg-green-600 transition-colors"
     >
-      <i class="pi pi-save mr-2"></i> Guardar Examen
+      <i class="pi pi-save mr-2"></i> Guardar Evaluación
     </Button>
   </div>
 </div>

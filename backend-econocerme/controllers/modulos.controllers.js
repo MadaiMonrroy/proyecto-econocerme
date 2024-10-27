@@ -223,9 +223,9 @@ export const agregarModulo = async (req, res) => {
 export const editarModulo = async (req, res) => {
   const idModulo = req.params.id;
   const { nombre, descripcion, idUsuario } = req.body;
-
-  let imagen = req.body.imagen;
-  let video = req.body.videoIntroURL; // Aquí capturamos la URL del video
+  
+  let imagen;
+  let video;
 
   try {
     // Obtener los datos actuales del módulo antes de actualizar
@@ -241,7 +241,7 @@ export const editarModulo = async (req, res) => {
     const oldVideoUrl = oldModulo[0].videoIntroURL;
     const oldImagenUrl = oldModulo[0].imagen;
 
-    // Si se sube una nueva imagen, eliminar la anterior y guardar la nueva
+    // Si se sube una nueva imagen, manejar la actualización
     if (req.files && req.files.imagen) {
       const fileImagen = req.files.imagen;
       const extImagen = path.extname(fileImagen.name);
@@ -253,13 +253,15 @@ export const editarModulo = async (req, res) => {
       // Eliminar la imagen anterior del servidor
       const oldImagenPath = path.join(UPLOAD_DIR, path.basename(oldImagenUrl));
       if (fs.existsSync(oldImagenPath)) {
-        fs.removeSync(oldImagenPath); // Eliminar el archivo del servidor
+        fs.unlinkSync(oldImagenPath); // Eliminar el archivo del servidor
       }
+    } else {
+      imagen = oldImagenUrl; // Mantener la imagen anterior si no se sube una nueva
     }
 
-    // Si se sube un nuevo video, eliminar el anterior y guardar el nuevo
-    if (req.files && req.files.video) {
-      const fileVideo = req.files.video;
+    // Si se sube un nuevo video, manejar la actualización
+    if (req.files && req.files.videoIntroURL) {
+      const fileVideo = req.files.videoIntroURL;
       const extVideo = path.extname(fileVideo.name);
       const fileNameVideo = `${uuidv4()}${extVideo}`;
       const filePathVideo = path.join(VIDEO_UPLOAD_DIR, fileNameVideo);
@@ -267,13 +269,12 @@ export const editarModulo = async (req, res) => {
       video = `http://localhost:3000/uploads/modulos/videos/${fileNameVideo}`;
 
       // Eliminar el video anterior del servidor
-      const oldVideoPath = path.join(
-        VIDEO_UPLOAD_DIR,
-        path.basename(oldVideoUrl)
-      );
+      const oldVideoPath = path.join(VIDEO_UPLOAD_DIR, path.basename(oldVideoUrl));
       if (fs.existsSync(oldVideoPath)) {
-        fs.removeSync(oldVideoPath); // Eliminar el archivo del servidor
+        fs.unlinkSync(oldVideoPath); // Eliminar el archivo del servidor
       }
+    } else {
+      video = oldVideoUrl; // Mantener el video anterior si no se sube uno nuevo
     }
 
     // Actualizar el módulo en la base de datos
@@ -305,6 +306,7 @@ export const editarModulo = async (req, res) => {
     });
   }
 };
+
 
 // Eliminar un módulo por ID
 export const eliminarModulo = async (req, res) => {

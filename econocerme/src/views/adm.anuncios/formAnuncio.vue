@@ -1,12 +1,12 @@
 <template>
-  <div class="flex justify-center items-center p-2">
+  <div class="flex justify-center items-center">
     <div
-      class="card p-2  mx-auto bg-white bg-opacity-40 shadow-md rounded-lg space-y-4"
+      class="card min-w-full max-w-4xl mx-auto bg-white bg-opacity-40 shadow-md rounded-lg space-y-4"
     >
-      <h2 class="text-2xl font-semibold mb-6">
+      <h2 class="text-2xl font-semibold mb-6 text-center">
         {{ anuncio.id ? "Editar Anuncio" : "Agregar Nuevo Anuncio" }}
       </h2>
-      <form :style="{ width: '50vw' }"
+      <form
         @submit.prevent="anuncio.id ? actualizarAnuncio() : agregarAnuncio()"
       >
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -49,8 +49,9 @@
                   :minDate="hoy"
                   showIcon
                   fluid
+                  placeholder="Elija una fecha de inicio"
                   :showOnFocus="false"
-                  class="block w-full text-sm border-gray-300 text-slate-950 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  class="w-full border-gray-300 rounded-md shadow-sm py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   required
                 />
               </div>
@@ -64,8 +65,9 @@
                   :minDate="hoy"
                   showIcon
                   fluid
+                  placeholder="Elija una fecha de finalización"
                   :showOnFocus="false"
-                  class="block w-full from-neutral-950 text-sm text-slate-950 border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  class="w-full from-neutral-950 text-sm text-slate-950 border-gray-300 rounded-md shadow-sm py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   required
                 />
               </div>
@@ -86,13 +88,27 @@
           </div>
         </div>
         <div>
-          <label for="descripcion">Descripción</label>
+          <label for="descripcion">Descripción (máximo {{ maxChars }} caracteres)</label>
           <Editor
             v-model="anuncio.descripcion"
-            editorStyle="height: 120px "
-            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
-            placeholder="Ingrese descripción"
+            :editorStyle="{
+              height: '120px',
+              minHeight: '150px',
+              maxHeight: '300px',
+            }"
+            class="mt-1 min-w-full min-h-full border border-gray-300 rounded-md shadow-sm"
+            @input="limitarDescripcion"
+            @text-change="verificarDescripcion"
           />
+          <div class="text-sm text-gray-500">
+            {{ anuncio.descripcion.length }} / {{ maxChars }} caracteres
+          </div>
+          <div
+            v-if="anuncio.descripcion.length > maxChars"
+            class="text-red-500"
+          >
+            No se permiten más de {{ maxChars }} caracteres.
+          </div>
         </div>
         <!-- Botones de acción -->
         <div class="flex justify-end space-x-4 mt-6">
@@ -100,7 +116,7 @@
             type="submit"
             severity="help"
             raised
-            class="inline-block px-6 py-3 w-36 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 "
+            class="inline-block px-6 py-3 w-36 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {{ anuncio.id ? "Guardar" : "Agregar" }}
           </Button>
@@ -148,6 +164,26 @@ const anuncio = reactive({
 // Obtener la fecha de hoy
 const hoy = new Date();
 let selectedFile = null;
+// Límite de caracteres permitido
+const maxChars = 700;
+const esDescripcionValida = ref(true); // Nueva propiedad para validar la descripción
+
+// Función para limitar la descripción al máximo de caracteres
+const limitarDescripcion = () => {
+  if (anuncio.descripcion.length > maxChars) {
+    anuncio.descripcion = anuncio.descripcion.slice(0, maxChars);
+    esDescripcionValida.value = false; // Descripción no válida
+  } else {
+    esDescripcionValida.value = true; // Descripción válida
+  }
+};
+const verificarDescripcion = () => {
+  if (anuncio.descripcion.length > maxChars) {
+    esDescripcionValida.value = false; // Descripción no válida
+  } else if (anuncio.descripcion.length < maxChars)  {
+    esDescripcionValida.value = true; // Descripción válida
+  }
+}
 
 const onFileChange = (event) => {
   selectedFile = event.target.files[0];
@@ -217,6 +253,16 @@ const cargarAnuncio = async (id) => {
 };
 
 const actualizarAnuncio = async () => {
+  if (!esDescripcionValida.value) { // Validación de la descripción
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "La descripción no puede tener más de 500 caracteres.",
+      life: 3000,
+    });
+    return;
+  }
+
   if (fechaFinInvalida.value) {
     toast.add({
       severity: "error",
@@ -251,10 +297,9 @@ const actualizarAnuncio = async () => {
       detail: "Anuncio actualizado correctamente",
       life: 1000,
     });
-    if(authStore.usuario.tipoUsuario === "admin"){
+    if (authStore.usuario.tipoUsuario === "admin") {
       router.push("/panelControl/anuncios");
-    }else
-    if(authStore.usuario.tipoUsuario === "coach") {
+    } else if (authStore.usuario.tipoUsuario === "coach") {
       router.push("/panelCoaches/anuncios");
     }
   } catch (error) {
@@ -269,6 +314,15 @@ const actualizarAnuncio = async () => {
 };
 
 const agregarAnuncio = async () => {
+  if (!esDescripcionValida.value) { // Validación de la descripción
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "La descripción no puede tener más de 500 caracteres.",
+      life: 3000,
+    });
+    return;
+  }
   if (fechaFinInvalida.value) {
     toast.add({
       severity: "error",
@@ -299,10 +353,9 @@ const agregarAnuncio = async () => {
       detail: "Anuncio agregado correctamente",
       life: 1000,
     });
-    if(authStore.usuario.tipoUsuario === "admin"){
+    if (authStore.usuario.tipoUsuario === "admin") {
       router.push("/panelControl/anuncios");
-    }else
-    if(authStore.usuario.tipoUsuario === "coach") {
+    } else if (authStore.usuario.tipoUsuario === "coach") {
       router.push("/panelCoaches/anuncios");
     }
   } catch (error) {
@@ -317,31 +370,30 @@ const agregarAnuncio = async () => {
 };
 const formatDate = (date) => {
   const fecha = new Date(date);
-  const dia = String(fecha.getDate()).padStart(2, '0');
-  const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript van de 0 a 11
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0"); // Los meses en JavaScript van de 0 a 11
   const anio = fecha.getFullYear();
   return `${dia}-${mes}-${anio}`;
 };
 function convertirFechaAMysql(fecha) {
-  console.log(fecha)
+  console.log(fecha);
   if (!(fecha instanceof Date)) {
     return fecha; // Si ya es una cadena, regresa como está
   }
 
   // Formatear la fecha a dd-mm-yyyy antes de dividir
-  const dia = String(fecha.getDate()).padStart(2, '0');
-  const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript son de 0 a 11
+  const dia = String(fecha.getDate()).padStart(2, "0");
+  const mes = String(fecha.getMonth() + 1).padStart(2, "0"); // Los meses en JavaScript son de 0 a 11
   const anio = fecha.getFullYear();
-  
+
   return `${anio}-${mes}-${dia}`; // Regresar al formato yyyy-mm-dd
 }
 const cancelarEdicion = () => {
-  if(authStore.usuario.tipoUsuario === "admin"){
+  if (authStore.usuario.tipoUsuario === "admin") {
     router.push("/panelControl/anuncios");
-  }else
-    if(authStore.usuario.tipoUsuario === "coach") {
-      router.push("/panelCoaches/anuncios");
-    }
+  } else if (authStore.usuario.tipoUsuario === "coach") {
+    router.push("/panelCoaches/anuncios");
+  }
 };
 const validarCampos = () => {
   if (
@@ -355,7 +407,8 @@ const validarCampos = () => {
     toast.add({
       severity: "error",
       summary: "Campos incompletos",
-      detail: "Por favor completa el formulario, todos los campos son requeridos!.",
+      detail:
+        "Por favor completa el formulario, todos los campos son requeridos!.",
       life: 3000,
     });
     return false;
@@ -375,7 +428,8 @@ const validarCamposAct = () => {
     toast.add({
       severity: "error",
       summary: "Campos incompletos",
-      detail: "Por favor completa el formulario, todos los campos son requeridos.",
+      detail:
+        "Por favor completa el formulario, todos los campos son requeridos.",
       life: 3000,
     });
     return false;

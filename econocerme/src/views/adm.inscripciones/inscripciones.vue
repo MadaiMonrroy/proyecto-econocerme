@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4">
+  <div class="">
     <div class="card">
       <h2 class="text-4xl mb-4 items-end text-shadow-3xl font-sans">
         INSCRIPCIONES

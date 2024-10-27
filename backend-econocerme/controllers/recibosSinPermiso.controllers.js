@@ -2,6 +2,10 @@ import puppeteer from "puppeteer";
 import connection from "../db.js";
 import path from "path";
 import fs from "fs-extra";
+import crypto from 'crypto'; // Importar la librería de encriptación
+
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef'; // Clave de 32 bytes
+const IV_LENGTH = 16;
 // Función para obtener el recibo de pago basado en el id de inscripción
 export const obtenerReciboPago = async (req, res) => {
   const { id } = req.params; // Obtener el ID de la inscripción de los parámetros
@@ -20,19 +24,25 @@ export const obtenerReciboPago = async (req, res) => {
   }
 };
 
+// Función para encriptar datos
+const encrypt = (text) => {
+  let iv = crypto.randomBytes(IV_LENGTH);
+  let cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+  let encrypted = cipher.update(text);
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  return iv.toString('hex') + ':' + encrypted.toString('hex');
+};
+
 export const detallesCertificado = async (req, res) => {
   const idUsuario = req.params.idUsuario;
-  const idCurso = req.query.idCurso; // Obteniendo idCuotaPago desde los query params
-
-  console.log(idUsuario, idCurso);
-  // Construir la consulta SQL
+  const idCurso = req.query.idCurso;
   const query = `
     WITH NotaMaxima AS (
       SELECT 
         e.idCurso,
         e.idUsuario,
         MAX(e.notaFinal) AS notaMaxima,
-        MAX(e.fechaCreacion) AS fechaEvaluacion -- Obtener la fecha de la última evaluación
+        MAX(e.fechaCreacion) AS fechaEvaluacion
       FROM evaluacion e
       WHERE e.idUsuario = ? AND e.idCurso = ?
       GROUP BY e.idCurso, e.idUsuario
@@ -50,31 +60,69 @@ export const detallesCertificado = async (req, res) => {
     JOIN usuario uC ON c.idUsuario = uC.id
     WHERE nm.notaMaxima = (SELECT MAX(notaFinal) 
                             FROM evaluacion 
-                            WHERE idUsuario = ? AND idCurso = ?) -- Asegura que la nota máxima es 100
-    LIMIT 1; -- Limita el resultado a una sola fila
+                            WHERE idUsuario = ? AND idCurso = ?)
+    LIMIT 1;
   `;
 
   try {
-    const [rows] = await connection.query(query, [
-      idUsuario,
-      idCurso,
-      idUsuario,
-      idCurso,
-    ]);
-    console.log("Resultado de la consulta:", rows);
+    const [rows] = await connection.query(query, [idUsuario, idCurso, idUsuario, idCurso]);
 
     if (rows.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No se encontraron detalles del curso." });
+      return res.status(404).json({ message: 'No se encontraron detalles del curso.' });
     }
 
-    return res.status(200).json(rows[0]); // Devuelve solo el primer resultado
+    const certificateData = rows[0];
+
+    // Preparamos los datos para encriptar
+    const dataToEncrypt = {
+      nombre: certificateData.nombreCompletoUsuario,
+      curso: certificateData.tituloCurso,
+      horas: certificateData.duracionCurso,
+      fecha: certificateData.fechaEvaluacion,
+    };
+
+    // Encriptamos los datos
+    const encryptedData = encrypt(JSON.stringify(dataToEncrypt));
+
+    // Retornamos los datos encriptados al frontend
+    return res.status(200).json({ ...certificateData, encryptedData });
   } catch (error) {
-    console.error("Error al obtener los detalles del curso:", error.message);
-    return res.status(500).send("Error al obtener los detalles del curso.");
+    console.error('Error al obtener los detalles del curso:', error.message);
+    return res.status(500).send('Error al obtener los detalles del curso.');
   }
 };
+
+
+// Función para desencriptar datos
+// Función para desencriptar datos
+const decrypt = (text) => {
+  let parts = text.split(':');
+  let iv = Buffer.from(parts.shift(), 'hex');
+  let encryptedText = Buffer.from(parts.join(':'), 'hex');
+  let decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+  let decrypted = decipher.update(encryptedText);
+  decrypted = Buffer.concat([decrypted, decipher.final()]);
+  return decrypted.toString();
+};
+
+// Endpoint para desencriptar los datos
+export const desencriptarDatos = (req, res) => {
+  const encryptedData  = req.params.encryptedData; // Obtener los datos encriptados de los parámetros de consulta
+  console.log(encryptedData)
+  if (!encryptedData) {
+    return res.status(400).json({ message: 'No se proporcionaron datos encriptados' });
+  }
+
+  try {
+    const decryptedData = decrypt(encryptedData); // Desencriptar los datos
+    res.status(200).json(JSON.parse(decryptedData)); // Enviar los datos desencriptados
+  } catch (error) {
+    console.error('Error al desencriptar los datos:', error.message);
+    return res.status(500).json({ message: 'Error al desencriptar los datos.' });
+  }
+};
+
+
 // Obtener todos los cursos
 export const listaCursos = async (req, res) => {
   try {

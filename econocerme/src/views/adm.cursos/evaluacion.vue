@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4">
+  <div class="">
     <Breadcrumb :home="home" :model="items" class="card h-14">
       <template #item="{ item, props }">
         <router-link

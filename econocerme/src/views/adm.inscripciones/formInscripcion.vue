@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-center items-center p-2">
-    <div class="card w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
+    <div class="card min-w-full max-w-4xl bg-white p-6 rounded-lg shadow-md">
       <h2 class="text-2xl font-semibold mb-6 text-center">
         {{
           inscripcion.idInscripcion
@@ -17,9 +17,9 @@
       >
         <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
           <!-- Lado izquierdo -->
-          <div class="space-y-4">
+          <div class="grid grid-cols-3 md:grid-cols-3 gap-6">
             <!-- Selector de usuario -->
-            <div>
+            <div class="col-span-1">
               <label for="usuarioId" class="block text-sm font-medium mb-2"
                 >Seleccionar Usuario</label
               >
@@ -46,7 +46,7 @@
                 </template>
               </Select>
             </div>
-            <div>
+            <div class="col-span-2">
               <label for="cursoId" class="block text-sm font-medium mb-2"
                 >Seleccionar Curso</label
               >
@@ -89,12 +89,12 @@
             </div>
 
             <!-- Selección de cantidad de cuotas -->
-            <div>
+            <div class="col-span-2 ">
               <label for="cantidadCuotas" class="block text-sm font-medium mb-2"
                 >Elige la Cantidad de Cuotas</label
               >
               <div
-                class="card grid grid-cols-[1fr_4px_1fr] gap-4 items-center p-4"
+                class="card grid grid-cols-[1fr_4px_1fr] gap-4 items-center p-4 dark:border-2 dark:border-violet-900"
               >
                 <div class="flex flex-col space-y-2 items-center">
                   <label for="cursoId" class="block text-sm font-medium mb-2"
@@ -115,7 +115,7 @@
                 />
 
                 <!-- Montos de cuotas -->
-                <div class="ml-4 flex flex-col space-y-2">
+                <div class=" ml-4 flex flex-col space-y-2">
                   <div
                     v-for="(cuota, index) in cuotasComponentes"
                     :key="index"
@@ -142,11 +142,10 @@
                     </Message>
                   </div>
                 </div>
+                
               </div>
-            </div>
-
-            <div>
-              <label for="montoTotal" class="block text-sm font-medium mb-2"
+              <div class="col-span-2">
+              <label for="montoTotal" class="block text-sm font-medium "
                 >Monto Total a Pagar</label
               >
               <InputNumber
@@ -154,13 +153,16 @@
                 :readonly="true"
                 mode="currency"
                 currency="BOB"
-                class="w-full"
+                class="w-full -mb-6"
                 locale="es-BO"
                 :formatter="formatPrice"
                 :unformatter="parsePrice"
                 placeholder="Monto total"
               />
             </div>
+            </div>
+
+            
             <!-- Campo de observación -->
             <div>
               <label for="observacion" class="block text-sm font-medium mb-2"
@@ -169,7 +171,7 @@
               <Textarea
                 v-model="inscripcion.observacion"
                 id="observacion"
-                class="block w-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                class="block w-full h-full text-sm border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 rows="4"
                 placeholder="Ingrese observación"
               />
@@ -177,7 +179,7 @@
           </div>
         </div>
 
-        <div class="mt-6 flex justify-end space-x-4">
+        <div class="col-span-3 pt-6 flex justify-end space-x-4 mt-6">
           <button
             type="button"
             class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"

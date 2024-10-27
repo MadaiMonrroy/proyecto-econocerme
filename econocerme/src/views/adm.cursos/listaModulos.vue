@@ -273,96 +273,101 @@
           <!-- Si el usuario ha presionado "Cambiar", mostrar FileUpload -->
           <div v-if="cambiandoVideo">
             <FileUpload
-              name="videoIntro"
-              @upload="onTemplatedUpload"
-              accept="video/*"
-              :maxFileSize="50000000"
-              :multiple="false"
-              @select="onSelectedFiles"
-              @progress="onProgress"
+          ref="fileUploadRef"
+          name="videoIntro"
+          @upload="onTemplatedUpload"
+          accept="video/*"
+          :maxFileSize="50000000"
+          :multiple="false"
+          :fileLimit="1"
+          @select="onSelectedFiles"
+          @progress="onProgress"
+        >
+          <template
+            #header="{ chooseCallback, uploadCallback, clearCallback, files }"
+          >
+            <div
+              class="flex flex-wrap justify-between items-center flex-1 gap-4"
             >
-              <template
-                #header="{
-                  chooseCallback,
-                  uploadCallback,
-                  clearCallback,
-                  files,
-                }"
+              <div class="flex gap-2">
+                <Button
+                  @click="chooseCallback()"
+                  icon="pi pi-video"
+                  rounded
+                  outlined
+                  severity="secondary"
+                ></Button>
+                <Button
+                  @click="uploadEvent(uploadCallback)"
+                  icon="pi pi-cloud-upload"
+                  rounded
+                  outlined
+                  severity="success"
+                  :disabled="!files || files.length === 0"
+                ></Button>
+                <Button
+                  @click="clearCallback()"
+                  icon="pi pi-times"
+                  rounded
+                  outlined
+                  severity="danger"
+                  :disabled="!files || files.length === 0"
+                ></Button>
+              </div>
+              <ProgressBar
+                :value="progress"
+                :showValue="false"
+                class="md:w-20rem h-1 w-full md:ml-auto"
               >
+                <span class="whitespace-nowrap">{{ totalSize }}B / 50Mb</span>
+              </ProgressBar>
+            </div>
+          </template>
+
+          <template #content="{ files, removeFileCallback }">
+            <div class="flex flex-col gap-8 pt-4" v-if="files.length > 0">
+              <h5 v-if="!isUploading">Completado</h5>
+              <h5 v-if="isUploading">pendiente</h5>
+              <div class="flex flex-wrap gap-4">
                 <div
-                  class="flex flex-wrap justify-between items-center flex-1 gap-4"
+                  v-for="(file, index) of files"
+                  :key="file.name + file.type + file.size"
+                  class="p-8 rounded-border flex flex-col border border-surface items-center gap-4"
                 >
-                  <div class="flex gap-2">
-                    <Button
-                      @click="chooseCallback()"
-                      icon="pi pi-video"
-                      rounded
-                      outlined
-                      severity="secondary"
-                    ></Button>
-                    <Button
-                      @click="uploadEvent(uploadCallback)"
-                      icon="pi pi-cloud-upload"
-                      rounded
-                      outlined
-                      severity="success"
-                      :disabled="!files || files.length === 0"
-                    ></Button>
-                    <Button
-                      @click="clearCallback()"
-                      icon="pi pi-times"
-                      rounded
-                      outlined
-                      severity="danger"
-                      :disabled="!files || files.length === 0"
-                    ></Button>
-                  </div>
-                  <ProgressBar
-                    :value="progress"
-                    :showValue="false"
-                    class="md:w-20rem h-1 w-full md:ml-auto"
+                  <span
+                    class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
+                    >{{ file.name }}</span
                   >
-                    <span class="whitespace-nowrap"
-                      >{{ totalSize }}B / 50Mb</span
-                    >
-                  </ProgressBar>
-                </div>
-              </template>
-
-              <template #content="{ files, removeFileCallback }">
-                <div v-if="files.length > 0">
-                  <h5>Pending</h5>
-                  <div
-                    v-for="(file, index) of files"
-                    :key="file.name + file.type + file.size"
-                  >
-                    <span>{{ file.name }}</span>
-                    <div>{{ formatSize(file.size) }}</div>
-                    <Badge value="Pending" severity="warn" />
-                    <Button
-                      icon="pi pi-times"
-                      @click="
-                        onRemoveTemplatingFile(file, removeFileCallback, index)
-                      "
-                      outlined
-                      rounded
-                      severity="danger"
-                    />
-                  </div>
-                </div>
-              </template>
-
-              <template #empty>
-                <div class="flex items-center justify-center flex-col">
-                  <i
-                    class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"
+                  <div>{{ formatSize(file.size) }}</div>
+                  <Badge
+                    :value="isUploading ? 'Pendiente' : 'Completado'"
+                    :severity="isUploading ? 'warn' : 'success'"
                   />
-                  <p class="mt-6 mb-0">
-                    Arrastre el archivo de video aquí para subir.
-                  </p>
+                  <Button
+                    icon="pi pi-times"
+                    @click="
+                      onRemoveTemplatingFile(file, removeFileCallback, index)
+                    "
+                    outlined
+                    rounded
+                    severity="danger"
+                  />
                 </div>
-              </template>
-            </FileUpload>
+              </div>
+            </div>
+          </template>
+
+          <template #empty>
+            <div class="flex items-center justify-center flex-col">
+              <i
+                class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"
+              />
+              <p class="mt-6 mb-0">
+                Arrastre el archivo de video aquí para subir.
+              </p>
+            </div>
+          </template>
+        </FileUpload>
           </div>
         </div>
 
@@ -443,7 +448,7 @@ const optionLabel = ref("");
 const router = useRouter();
 const confirm = useConfirm();
 const authStore = useAuthStore();
-
+const newVideo = null;
 const idUsuario = authStore.usuario.id;
 
 //esto hay que eliminar
@@ -459,7 +464,7 @@ const videoPreview = ref(null); // Nueva referencia para la vista previa del vid
 const cambiandoVideo = ref(false); // Nuevo estado para manejar el cambio de video
 let selectedFile = null;
 let selectedVideoFile = null;
-
+const videoIntroFile = ref(null);
 const totalSize = ref(0);
 const progress = ref(0);
 const isUploading = ref(false);
@@ -469,10 +474,11 @@ const isFormValid = computed(() => {
     modulo.value.nombre &&
     modulo.value.descripcion &&
     modulo.value.imagen &&
-    (!modulo.videoIntroURL || videoPreview.value) && // Asegura que haya un video
-    isUploading.value
+    (modulo.value.videoIntroURL ) && // Asegura que haya un video
+    !isUploading.value
   );
 });
+
 // Lógica para el botón "Cambiar video"
 const cambiarVideo = () => {
   cambiandoVideo.value = true;
@@ -524,12 +530,10 @@ const cerrarDialog = () => {
 // Manejo de archivos
 const onFileChange = (event) => {
   selectedFile = event.target.files[0];
-  modulo.value.imagen = selectedFile;
 };
 
 const onTemplatedUpload = () => {
-  isUploading.value = false; // Termina la subida
-  cambiandoVideo.value = false; // Restablece el estado
+  isUploading.value = false; // Termina la sub`ida
   toast.add({
     severity: "info",
     summary: "Éxito",
@@ -540,7 +544,7 @@ const onTemplatedUpload = () => {
 
 const onSelectedFiles = (event) => {
   if (event.files.length > 0) {
-    modulo.value.videoIntroURL = null; // Limpiamos la URL anterior, ya que estamos cambiando el video
+    videoIntroFile.value = event.files[0]; // Solo toma el primer archivo
     totalSize.value = event.files[0].size;
   }
 };
@@ -552,11 +556,32 @@ const onProgress = (event) => {
 };
 const uploadEvent = async (uploadCallback) => {
   isUploading.value = true; // Comienza la subida
-  // Aquí puedes inicializar la barra de progreso si es necesario
   progress.value = 0; // Reinicia el progreso a 0 antes de comenzar
 
   try {
-    //await uploadCallback(); // Llama a la función de carga
+    // Simula un proceso de carga
+    const interval = setInterval(() => {
+      if (progress.value < 100) {
+        progress.value += 10; // Incrementa el progreso
+        isUploading.value = true; // Termina la subida
+      } else {
+        clearInterval(interval);
+        isUploading.value = false; // Termina la subida
+        toast.add({
+          severity: "info",
+          summary: "Éxito",
+          detail: "Video cargado exitosamente",
+          life: 3000,
+        });
+      }
+    }, 500); // Incrementa cada medio segundo
+    progress.value = 0;
+    isUploading.value = true; // Termina la subida
+
+    // Simula la espera de la carga
+    await new Promise((resolve) => setTimeout(resolve, 5000)); // Espera 5 segundos
+    // Aquí puedes llamar a la función de carga si necesitas
+    // await uploadCallback();
   } catch (error) {
     console.error("Error durante la carga:", error);
     toast.add({
@@ -572,23 +597,27 @@ const onRemoveTemplatingFile = (file, removeFileCallback, index) => {
   totalSize.value -= file.size; // Resta el tamaño al eliminar
 };
 
-const submitForm = async () => {
+const guardarCambios = async () => {
   const formData = new FormData();
   formData.append("idModulo", modulo.value.idModulo);
   formData.append("nombre", modulo.value.nombre);
   formData.append("descripcion", modulo.value.descripcion);
 
   if (selectedFile) {
-    formData.append("imagen", selectedFile); // Si se ha cambiado la imagen
+    formData.append('imagen', selectedFile);
+  }
+  else {
+    formData.append('imagen', modulo.value.imagen);
   }
 
   // Video
-  if (!cambiandoVideo.value && modulo.value.videoIntroURL) {
-    formData.append("videoIntroURL", modulo.value.videoIntroURL); // Mantén el video actual si no se cambia
-  } else if (videoPreview.value) {
-    formData.append("videoIntro", selectedVideoFile); // Si se cambia, usa el nuevo archivo
+  if (videoIntroFile.value) {
+    console.log(videoIntroFile.value)
+    formData.append("videoIntroURL", videoIntroFile.value);  // Usa el nuevo archivo de video
+  } else if (modulo.value.videoIntroURL) {
+    formData.append("videoIntroURL", modulo.value.videoIntroURL);  // Mantén el video existente si no se cambia
   }
-
+  
   try {
     await api.put(`/modulos/editarModulo/${modulo.value.idModulo}`, formData, {
       headers: {
@@ -603,6 +632,7 @@ const submitForm = async () => {
       life: 3000,
     });
     cerrarDialog();
+    fetchData();
   } catch (error) {
     console.error("Error al actualizar el módulo:", error);
     toast.add({
@@ -630,14 +660,7 @@ defineExpose({ fetchData });
 // Se llama a fetchData cuando el componente se monta
 onMounted(fetchData);
 
-const guardarCambios = async () => {
-  try {
-    console.log("Cambios guardados:", modulo.value);
-    cerrarDialog();
-  } catch (error) {
-    console.error("Error al guardar los cambios:", error);
-  }
-};
+
 const deleteModulo = async (idModulo) => {
   try {
     await api.delete(`/modulos/eliminarModulo/${idModulo}`, {

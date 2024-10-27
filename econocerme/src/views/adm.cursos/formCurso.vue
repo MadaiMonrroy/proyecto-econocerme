@@ -1,7 +1,7 @@
 <template>
 
   <div class="flex justify-center items-center ">
-    <div class="card w-full max-w-4xl  p-6 rounded-lg shadow-2xl !border-none dark:shadow-inner dark:shadow-violet-900">
+    <div class="card min-w-full max-w-4xl  p-6 rounded-lg shadow-2xl !border-none dark:shadow-inner dark:shadow-violet-900">
 
       <h2 class="text-2xl font-semibold mb-6 text-center">{{ curso.idCurso ? 'Editar Curso' : 'Agregar Nuevo Curso' }}</h2>
       <form @submit.prevent="curso.idCurso ? actualizarCurso() : agregarCurso()">
@@ -19,8 +19,6 @@
                 @input="validarTitulo"
               />
             </div>
-
-
             <div>
               <label for="especialidad" class="block text-sm font-medium  mb-2">Especialidad</label>
               <Select

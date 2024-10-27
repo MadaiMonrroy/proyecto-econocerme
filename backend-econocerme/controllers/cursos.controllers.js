@@ -20,7 +20,7 @@ export const listaCursosCoach = async (req, res) => {
   const idUsuario = req.params.idUsuario;
   try {
     const [result] = await connection.query(
-      "SELECT idCurso, titulo, miniatura, especialidad, descripcion, duracion, precio, estado FROM curso WHERE (estado = 1 OR estado = 2) AND idUsuario = ?",
+      "SELECT idCurso, titulo, miniatura, especialidad, descripcion, duracion, precio, estado FROM curso WHERE (estado = 1 OR estado = 2) AND idCreador = ?",
       [idUsuario]
     );
     res.json(result);
@@ -136,7 +136,7 @@ export const agregarCurso = async (req, res) => {
 
     // Insertar el curso en la base de datos
     const [result] = await connection.query(
-      "INSERT INTO curso (titulo, miniatura, especialidad, descripcion, duracion, precio, estado, idUsuario) VALUES (?, ?, ?, ?, ?, ?,?, ?)",
+      "INSERT INTO curso (titulo, miniatura, especialidad, descripcion, duracion, precio, estado, idCreador) VALUES (?, ?, ?, ?, ?, ?,?, ?)",
       [
         titulo,
         imageUrl,

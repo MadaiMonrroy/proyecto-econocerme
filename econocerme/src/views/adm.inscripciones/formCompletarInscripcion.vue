@@ -492,7 +492,7 @@ const actualizarInscripcion = async () => {
 };
 
 const cancelarEdicion = () => {
-  router.push("/panelControl/inscripciones");
+  router.push("/panelControl/preInscripciones");
 };
 
 onMounted(() => {

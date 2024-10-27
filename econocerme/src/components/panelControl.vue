@@ -3,8 +3,7 @@
     :class="[
       'w-full min-h-screen bg-gradient-to-tl from-custom-purple to-custom-pink dark:bg-gradient-to-tl dark:from-dark-purple dark:to-dark-pink',
       { 'collapsed-sidebar': isSidebarCollapsed },
-      'sm:w-full md:w-full lg:w-full xl:w-full' // Aseguramos que ocupe el 100% en pantallas grandes
-
+      'sm:w-full md:w-full lg:w-full xl:w-full', // Aseguramos que ocupe el 100% en pantallas grandes
     ]"
   >
     <header
@@ -126,12 +125,11 @@
           'ml-16': isSidebarCollapsed,
           'ml-[240px]': !isSidebarCollapsed,
         }"
-        class="w-full  min-h-screen sm:w-[calc(100%-240px)] md:w-[calc(100%-240px)] lg:w-[calc(100%-240px)] xl:w-[calc(100%-240px)] "
-        >
-<div class="pt-7 pr-2 pl-2">
-  <router-view></router-view>
-
-</div>
+        class="w-full min-h-screen sm:w-[calc(100%-240px)] md:w-[calc(100%-240px)] lg:w-[calc(100%-240px)] xl:w-[calc(100%-240px)]"
+      >
+        <div class="pt-5">
+          <router-view></router-view>
+        </div>
       </main>
     </div>
   </div>
@@ -229,7 +227,10 @@ export default {
         icon: "pi pi-address-book",
         items: [
           { label: "Inscripciones", route: "/panelControl/inscripciones" },
-          { label: "Pre-Inscripciones", route: "/panelControl/preInscripciones" },
+          {
+            label: "Pre-Inscripciones",
+            route: "/panelControl/preInscripciones",
+          },
         ],
       },
       {
@@ -244,7 +245,6 @@ export default {
         icon: "pi pi-file-pdf",
         route: "/panelControl/reportes",
       },
-
     ]);
 
     const profileItems = ref([

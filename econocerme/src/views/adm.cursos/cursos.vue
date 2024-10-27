@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4">
+  <div class="">
     <div class=" ">
       <Breadcrumb
         :home="home"

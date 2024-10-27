@@ -39,7 +39,7 @@ export const listaAnunciosCoach = async (req, res) => {
 
     // Selecciona los anuncios que tienen estado 1 o 2
     const [result] = await connection.query(
-      "SELECT id, titulo, miniatura, descripcion, fecha_inicio, fecha_fin, tipo, estado FROM anuncio WHERE (estado = 1 OR estado = 2) AND idUsuario = ?",
+      "SELECT id, titulo, miniatura, descripcion, fecha_inicio, fecha_fin, tipo, estado FROM anuncio WHERE (estado = 1 OR estado = 2) AND idCreador = ?",
       [idUsuario]
     );
     
@@ -132,7 +132,7 @@ export const agregarAnuncio = async (req, res) => {
 
     // Insertar el nuevo anuncio en la base de datos
     const [result] = await connection.query(
-      "INSERT INTO anuncio (titulo, miniatura, descripcion, fecha_inicio, fecha_fin, tipo, idUsuario) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO anuncio (titulo, miniatura, descripcion, fecha_inicio, fecha_fin, tipo, idCreador) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [titulo, imageUrl, descripcion, fecha_inicio, fecha_fin, tipo, idUsuario]
     ); // Asumiendo que el estado inicial es 1
 
