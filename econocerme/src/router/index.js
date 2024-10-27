@@ -48,7 +48,7 @@ import certificadoPdf from "@/views/est.cursos/certificadoPdf.vue";
 import vistaPreviaCertificado from "@/views/est.cursos/vistaPreviaCertificado.vue";
 import reportInscripcionesCurso from "@/views/adm.reportes/reportInscripcionesCurso.vue";
 import vpReporteInscripcionesCurso from "@/views/adm.reportes/vpReporteInscripcionesCurso.vue";
-
+import listaInscritos from "@/views/coach.inscritos/listaInscritos.vue";
 const routes = [
   { path: "/", component: LoginForm },
   { path: "/Registro", component: RegistroForm },
@@ -124,6 +124,7 @@ const routes = [
       { path: "mainCoach", component: mainCoach },
       { path: "formEditCoach", component: formEditCoach },
       { path: "cursos", component: cursos },
+      { path: "listaInscritos", component: listaInscritos },
       { path: "modulos", component: listaCursos },
       { path: "lecciones/:idModulo", component: lecciones },
       { path: "modulos/:idCurso", component: modulos },

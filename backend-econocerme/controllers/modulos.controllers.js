@@ -306,8 +306,6 @@ export const editarModulo = async (req, res) => {
     });
   }
 };
-
-
 // Eliminar un módulo por ID
 export const eliminarModulo = async (req, res) => {
   const idModulo = req.params.id;

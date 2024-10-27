@@ -209,6 +209,12 @@ export default {
         route: "/panelCoaches/cursos",
       },
       {
+        key: "listaInscritos",
+        label: "Inscritos",
+        icon: "pi pi-eye",
+        route: "/panelCoaches/listaInscritos",
+      },
+      {
         key: "anuncios",
         label: "Anuncios",
         icon: "pi pi-megaphone",
@@ -220,6 +226,7 @@ export default {
         icon: "pi pi-file-pdf",
         route: "/panelCoaches/anuncios",
       },
+      
 
     ]);
 

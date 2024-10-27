@@ -114,7 +114,6 @@ export const listaInscripciones = async (req, res) => {
 };
 
 // Obtener un inscripcion por ID
-// Obtener un inscripcion por ID
 export const obtenerInscripcion = async (req, res) => {
   const idInscripcion = req.params.id;
   try {
@@ -424,49 +423,8 @@ export const completarInscripcion = async (req, res) => {
   }
 };
 
-export const editarInscripcion = async (req, res) => {
-  const idInscripcion = req.params.id;
-  const { idUsuario, idCurso, observacion } = req.body;
-  try {
-    // const [result] = await connection.query(
-    //   `UPDATE curso SET
-    //             titulo = ?,
-    //             miniatura = ?,
-    //             especialidad = ?,
-    //             descripcion = ?,
-    //             duracion = ?,
-    //             precio = ?
-    //         WHERE idCurso = ?`,
-    //   [
-    //     titulo,
-    //     miniatura,
-    //     especialidad,
-    //     descripcion,
-    //     duracion,
-    //     precio,
-    //     idCurso,
-    //   ]
-    // );
-    // if (result.affectedRows === 0) {
-    //   return res.status(404).json({
-    //     mensaje: "Curso no encontrado",
-    //   });
-    // }
-    console.log(idUsuario, idCurso, observacion);
-    res.json({
-      mensaje: "Inscripcion editada correctamente",
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      mensaje: "Ocurrió un error en el servidor",
-    });
-  }
-};
-
 export const eliminarPreInscripcion = async (req, res) => {
   const idInscripcion = req.params.idInscripcion;
-  console.log("yo soy id inscricp" , idInscripcion)
   try {
     // Actualizar el estado del curso a inactivo (estado = 0)
     const [result] = await connection.query(
@@ -490,3 +448,49 @@ export const eliminarPreInscripcion = async (req, res) => {
     });
   }
 };
+
+export const listaInscritosCoach = async (req, res) => {
+  const idCreador = req.params.idCreador;
+
+  try {
+    // Consulta que obtiene los detalles de los usuarios inscritos en los cursos del creador
+    const [result] = await connection.query(`
+      SELECT 
+        u.nombres, 
+        u.primerApellido, 
+        u.segundoApellido, 
+        u.email, 
+        u.fotoPerfil, 
+        u.fechaNacimiento, 
+        u.estado,
+        c.titulo, 
+        c.miniatura, 
+        c.especialidad
+      FROM usuario u
+      JOIN inscripcion i ON u.id = i.idUsuario
+      JOIN detalle_inscripcion di ON i.idInscripcion = di.idInscripcion
+      JOIN curso c ON di.idCurso = c.idCurso
+      WHERE c.idCreador = ? AND (c.estado = 1 OR c.estado = 2)
+    `, [idCreador]);
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        mensaje: "No se encontraron inscritos para los cursos del creador especificado",
+      });
+    }
+
+    res.json(result);
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      mensaje: "Ocurrió un error en el servidor",
+    });
+  }
+};
+
+
+
+
+
+
