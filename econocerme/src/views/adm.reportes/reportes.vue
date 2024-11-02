@@ -56,7 +56,7 @@
               <reportInscripcionesCurso/>
             </TabPanel>
             <TabPanel value="1">
-              <p>sdfsdf</p>
+              <reportePagos/>
             </TabPanel>
             <TabPanel value="2">
               <p>sdfsdf</p>
@@ -79,8 +79,10 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/axiosConfig.js";
 import reportInscripcionesCurso from "./reportInscripcionesCurso.vue";
+import reportePagos from "./reportePagos.vue";
 export default {
-  components: { reportInscripcionesCurso },
+  components: { reportInscripcionesCurso, reportePagos },
+
   data() {
     return {
       value: "0",

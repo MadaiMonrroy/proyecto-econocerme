@@ -73,10 +73,10 @@
                   rounded
                   outlined
                   severity="success"
-                  :disabled="!files || files.length === 0"
+                  :disabled="!files || files.length === 0 "
                 ></Button>
                 <Button
-                  @click="clearCallback()"
+                  @click="handleClear(clearCallback)"
                   icon="pi pi-times"
                   rounded
                   outlined
@@ -164,6 +164,7 @@ const toast = useToast();
 const idUsuario = authStore.usuario.id;
 const router = useRouter();
 const fileInputRef = ref(null);
+const fileUploadRef = ref(null);
 
 const props = defineProps({
   cursoId: {
@@ -267,6 +268,7 @@ const uploadEvent = async (uploadCallback) => {
 };
 // Función para restablecer el formulario
 const resetForm = () => {
+  
   modulo.value = {
     nombre: "",
     descripcion: "",
@@ -276,10 +278,13 @@ const resetForm = () => {
   selectedFile = null; // Restablecer el archivo seleccionado
   totalSize.value = 0; // Reiniciar el tamaño total
   progress.value = 0; // Reiniciar el progreso
-  isUploading.value = true; // Reiniciar estado de carga
+  isUploading.value = false; // Resetea el estado de carga
   fileInputRef.value.clearImage(); // Llama al método para limpiar la imagen
 
+    fileUploadRef.value.clear(); // Llama al método clear() para vaciar el FileUpload
 
+
+  fileInputRef.value.clearImage(); // Limpiar la imagen también si es necesario
 };
 // Formatear el tamaño del archivo
 const formatSize = (bytes) => {
@@ -292,9 +297,16 @@ const formatSize = (bytes) => {
 // Eliminar el archivo de la lista
 const onRemoveTemplatingFile = (file, removeFileCallback, index) => {
   removeFileCallback(index);
-  totalSize.value -= file.size; // Resta el tamaño al eliminar
+  totalSize.value = 0; // Reiniciar el tamaño total
+  progress.value = 0; // Reiniciar el progreso
+  isUploading.value = false; // Resetea el estado de carga  totalSize.value -= file.size; // Resta el tamaño al eliminar
 };
-
+const handleClear = (clearCallback) => {
+  clearCallback(); // Ejecuta el clearCallback original
+  progress.value = 0; // Reiniciar el progreso
+  totalSize.value = 0; // Resetea el tamaño total
+  isUploading.value = false; // Resetea el estado de carga
+};
 // Función para enviar el formulario
 const submitForm = async () => {
   const formData = new FormData();

@@ -3,26 +3,26 @@
     <!-- Cards Section -->
     <div class="p-4">
       <!-- Cards Section -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div class="dark:shadow-2xl dark:shadow-violet-950 rounded-2xl shadow-2xl">
           <Card class="h-full">
             <template #title>
-              <i class="pi pi-users  mr-2"></i>Usuarios Activos
+              <i class="pi pi-users  mr-2"></i>Estudiantes Activos
             </template>
             <template #content>
               <h2 class="text-2xl font-bold">150</h2>
-              <p>Participación reciente.</p>
+              <p>Número total de estudiantes.</p>
             </template>
           </Card>
         </div>
         <div class="dark:shadow-2xl dark:shadow-violet-950 rounded-2xl shadow-2xl">
           <Card class="h-full">
             <template #title>
-              <i class="pi pi-money-bill mr-2"></i>Ingresos Mensuales
+              <i class="pi pi-money-bill mr-2"></i>Ingresos del Mes
             </template>
             <template #content>
               <h2 class="text-2xl font-bold">$3,500</h2>
-              <p>Ingresos este mes.</p>
+              <p>Ingresos de este mes.</p>
             </template>
           </Card>
         </div>
@@ -37,13 +37,22 @@
         </div>
         <div class="dark:shadow-2xl dark:shadow-violet-950 rounded-2xl shadow-2xl">
           <Card class="h-full">
-            <template #title> <i class="pi pi-book mr-2"></i>Total de Cursos</template>
+            <template #title> <i class="pi pi-book mr-2"></i>Cursos Activos</template>
             <template #content>
               <h2 class="text-2xl font-bold">25</h2>
-              <p>Cursos activos.</p>
+              <p>Número de cursos activos.</p>
             </template>
           </Card>
         </div>
+        <div class="dark:shadow-2xl dark:shadow-violet-950 rounded-2xl shadow-2xl">
+          <Card class="h-full">
+            <template #title> <i class="pi pi-megaphone mr-2"></i>Anuncios Activos</template>
+            <template #content>
+              <h2 class="text-2xl font-bold">25</h2>
+              <p>Número de anuncios activos.</p>
+            </template>
+          </Card>
+        </div> 
       </div>
     </div>
     <div class="p-4">
@@ -246,10 +255,9 @@ const setChartOptions = () => {
 };
 const fetchCourses = async () => {
   try {
-    const response = await api.get("/recibosSinPermiso/listaCursos"); // Asegúrate de que esta URL sea correcta
-    console.log()
-    chartData.value = setChartData(response.data);
-    chartOptions.value = setChartOptions();
+    const response = await api.get("/reportes/resumenGeneralAdmin"); // Asegúrate de que esta URL sea correcta
+    console.log(response)
+
   } catch (error) {
     console.error("Error al cargar los cursos:", error);
   }

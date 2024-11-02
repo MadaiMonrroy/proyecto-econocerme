@@ -11,6 +11,7 @@
             selectionMode="range"
             class="mb-4 w-full"
             :manualInput="false"
+            :maxDate="new Date()"
             placeholder="Seleccione un rango de fechas"
           />
           <h3 class="text-lg font-semibold mb-2">Filtro por curso</h3>
@@ -50,7 +51,7 @@
 
     <!-- Gráfico -->
     <div
-      class="md:col-span-2 dark:shadow-2xl dark:shadow-violet-950 rounded-2xl shadow-2xl"
+      class="md:col-span-3 dark:shadow-2xl dark:shadow-violet-950 rounded-2xl shadow-2xl"
     >
       <Card class="md:col-span-2 p-4">
         <template #title>
@@ -70,7 +71,7 @@
     </div>
     <!-- Indicadores -->
 
-    <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="md:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4">
       <div
         class="dark:shadow-2xl dark:shadow-violet-950 rounded-2xl shadow-2xl"
       >
@@ -93,6 +94,19 @@
           </template>
           <template #content>
             <h4 class="text-md font-semibold">Nuevas inscripciones</h4>
+            <p class="text-2xl">{{ totalInscriptionsThisMonth }}</p>
+          </template>
+        </Card>
+      </div>
+      <div
+        class="dark:shadow-2xl dark:shadow-violet-950 rounded-2xl shadow-2xl"
+      >
+        <Card class="p-4">
+          <template #title>
+            <i class="pi pi-calendar mr-2"></i>Anterior Mes
+          </template>
+          <template #content>
+            <h4 class="text-md font-semibold">Inscripciones Pasadas</h4>
             <p class="text-2xl">{{ lastMonthInscriptions }}</p>
           </template>
         </Card>
@@ -102,11 +116,20 @@
       >
         <Card class="p-4">
           <template #title>
-            <i class="pi pi-chart-line mr-2"></i>Crecimiento Mensual (%)
+            <i
+              v-if="growthPercentage > 0"
+              class="pi pi-arrow-up text-green-500"
+            ></i>
+            <i
+              v-else-if="growthPercentage < 0"
+              class="pi pi-arrow-down text-red-500"
+            ></i>
+            <i v-else class="pi pi-exclamation-triangle text-yellow-600"></i>
+            Variación (%)
           </template>
           <template #content>
-            <h4 class="text-md font-semibold">Cambio mensual</h4>
-            <p class="text-2xl">{{ growthPercentage }}%</p>
+            <h4 class="text-md font-semibold">Cambio porcentual mensual</h4>
+            <p class="text-2xl">{{ Math.round(growthPercentage) }}%</p>
           </template>
         </Card>
       </div>
@@ -114,24 +137,45 @@
 
     <!-- Tabla Detallada -->
     <div
-      class="md:col-span-3 dark:shadow-2xl dark:shadow-violet-950 rounded-2xl shadow-2xl"
+      class="md:col-span-4 dark:shadow-2xl dark:shadow-violet-950 rounded-2xl shadow-2xl"
     >
       <Card class="p-4">
         <template #title>
-          <i class="pi pi-info-circle mr-2 mb-5"></i>Detalles Inscripciones por Curso
+          <i class="pi pi-info-circle mr-2 mb-5"></i>Detalles Inscripciones por
+          Curso
         </template>
         <template #content>
-
           <DataTable :value="detailedInscriptions" stripedRows class="w-full">
-            <Column field="index" header="#" class="px-6 py-4" :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }"/>
+            <Column
+              field="index"
+              header="#"
+              class="px-6 py-4"
+              :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }"
+            />
 
-            <Column field="titulo" header="Curso" :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }"/>
-            <Column field="totalInscripciones" header="Inscripciones" :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }"/>
-            <Column field="ingresoTotal" header="Ingreso Total" :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }" />
-            <Column field="nombreCompleto" header="Coach" :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }"/>
+            <Column
+              field="titulo"
+              header="Curso"
+              :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }"
+            />
+            <Column
+              field="totalInscripciones"
+              header="Inscripciones"
+              :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }"
+            />
+            <Column
+              field="ingresoTotal"
+              header="Ingreso Total"
+              :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }"
+            />
+            <Column
+              field="nombreCompleto"
+              header="Coach"
+              :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }"
+            />
             <Column
               field="promedioNotaFinal"
-              header="Promedio de Evaluaciones" 
+              header="Promedio de Evaluaciones"
               :headerStyle="{ backgroundColor: '#2e1065', color: 'white' }"
             />
           </DataTable>
@@ -164,6 +208,8 @@ const chartOptions = ref(null);
 const selectedCourses = ref([]);
 const totalInscriptions = ref(0);
 const lastMonthInscriptions = ref(0);
+const totalInscriptionsThisMonth = ref(0);
+
 const growthPercentage = ref(0);
 const detailedInscriptions = ref([]);
 const chartRef = ref(null);
@@ -190,6 +236,7 @@ const fetchCourses = async () => {
 const resetFields = () => {
   totalInscriptions.value = 0;
   lastMonthInscriptions.value = 0;
+  totalInscriptionsThisMonth.value = 0;
   growthPercentage.value = 0;
   detailedInscriptions.value = [];
   chartData.value.labels = [];
@@ -219,18 +266,18 @@ const generarReporte = async () => {
     endDate.setHours(23, 59, 59, 999);
 
     // Formatear las fechas a cadenas 'YYYY-MM-DD'
-    const formattedStartDate = startDate.toISOString().split('T')[0]; // 'YYYY-MM-DD'
-    const formattedEndDate = endDate.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+    const formattedStartDate = startDate.toISOString().split("T")[0]; // 'YYYY-MM-DD'
+    const formattedEndDate = endDate.toISOString().split("T")[0]; // 'YYYY-MM-DD'
 
     // Construir los parámetros para enviar al backend
     const params = {
-  startDate: formattedStartDate,
-  endDate: formattedEndDate,
-  courses: selectedCourses.value
-    .map((course) => course.idCurso.toString()) // Asegúrate de que cada ID sea una cadena
-    .join(','), // Une todos los IDs en una cadena separada por comas
-};
-    console.log(params)
+      startDate: formattedStartDate,
+      endDate: formattedEndDate,
+      courses: selectedCourses.value
+        .map((course) => course.idCurso.toString()) // Asegúrate de que cada ID sea una cadena
+        .join(","), // Une todos los IDs en una cadena separada por comas
+    };
+    console.log(params);
     const response = await api.post("/reportes/incripcionesCurso", params);
     if (response.data.url) {
       window.open(response.data.url);
@@ -261,6 +308,9 @@ const fetchUpdatedData = async () => {
     const startDate = new Date(dateRange.value[0]);
     const endDate = new Date(dateRange.value[1]);
     endDate.setHours(23, 59, 59, 999);
+    console.log(
+      selectedCourses.value.map((course) => course.idCurso).join(",")
+    );
 
     // Formatear las fechas a cadenas ISO
     const formattedStartDate = startDate.toISOString();
@@ -275,10 +325,11 @@ const fetchUpdatedData = async () => {
     const response = await api.get(
       `/recibosSinPermiso/detalleInscripcionCurso?${params}`
     );
-    console.log(response.data);
     // Asigna los nuevos datos a las variables reactivas
     totalInscriptions.value = response.data.totalInscriptions;
     lastMonthInscriptions.value = response.data.lastMonthInscriptions;
+    totalInscriptionsThisMonth.value = response.data.totalInscriptionsThisMonth;
+
     growthPercentage.value = response.data.growthPercentage;
     // Redondear el promedio de las evaluaciones a dos decimales
     detailedInscriptions.value = response.data.detailedInscriptions.map(
@@ -291,7 +342,9 @@ const fetchUpdatedData = async () => {
       })
     );
     // Asignar los datos y etiquetas obtenidos del backend a chartData
-    chartData.value.labels = response.data.chartOptions.map(label => label.length > 15 ? label.substring(0, 15) + '...' : label);
+    chartData.value.labels = response.data.chartOptions.map((label) =>
+      label.length > 15 ? label.substring(0, 10) + "..." : label
+    );
     chartData.value.datasets[0].data = response.data.chartData;
 
     // Colores para las barras del gráfico
@@ -387,6 +440,7 @@ const setChartOptions = () => {
         display: true,
         labels: {},
       },
+      
     },
     scales: {
       x: {
@@ -395,6 +449,8 @@ const setChartOptions = () => {
         },
         grid: {
           color: surfaceBorder,
+          borderWidth: 1,
+
         },
       },
       y: {
@@ -405,6 +461,8 @@ const setChartOptions = () => {
         },
         grid: {
           color: surfaceBorder,
+          borderWidth: 1,
+
         },
       },
     },

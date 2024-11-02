@@ -407,7 +407,6 @@ const metodosPago = [
 
 const estadosCuota = [
   { label: "Pagado", value: 1 },
-  { label: "Pendiente", value: 2 },
 ];
 
 const fetchData = async () => {

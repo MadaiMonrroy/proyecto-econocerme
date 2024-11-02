@@ -14,7 +14,7 @@
           <div class="relative">
             <div class="absolute top-0 right-0 space-x-2">
               <Button
-                @click="abrirDialog(leccion)"
+                @click="abrirDialog(leccion.idLeccion)"
                 severity="info"
                 icon="pi pi-pencil"
                 raised
@@ -32,21 +32,21 @@
               >
               </Button>
             </div>
+
             <div class="mt-0 pt-10">
-              <p><strong>Descripción:</strong></p>
-              <p v-html="leccion.descripcion" class="text-md"></p>
               <p>
-                <strong>Video URL:</strong>
+                <strong>Video:</strong>
                 <Button
-                  label="Ver Video"
-                  @click="visible = true"
+                  label="Ver video"
+                  @click="abrirDialogVideo(leccion)"
                   severity="help"
+                  icon="pi pi-eye"
                   text
                   link
                 />
 
                 <Dialog
-                  v-model:visible="visible"
+                  v-model:visible="visibleVideo"
                   modal
                   :header="leccion.tituloSeccion"
                   :style="{ width: '50rem' }"
@@ -67,89 +67,38 @@
                   </div>
                 </Dialog>
               </p>
+              <div class="pt-1">
+                <Editor
+                  v-model="leccion.descripcion"
+                  editorStyle="auto"
+                  :headerTemplate="null"
+                  readonly
+                  :toolbar="false"
+                >
+                  <template v-slot:toolbar>
+                    <span class="ql-formats">
+                      <span class="justify-items-center font-semibold font-sans "
+                        ><strong>Descripción:</strong></span
+                      >
+                    </span>
+                  </template>
+                </Editor>
+              </div>
+              <div class="flex justify-between">
               <p>
                 <strong>Fecha de Creación:</strong>
                 {{ new Date(leccion.fechaCreacion).toLocaleDateString() }}
               </p>
               <p>
                 <strong>Última Actualización:</strong>
-                {{ new Date(leccion.ultimaActualizacion).toLocaleDateString() }}
+                {{ leccion.ultimaActualizacion ? new Date(leccion.ultimaActualizacion).toLocaleDateString() : new Date(leccion.fechaCreacion).toLocaleDateString() }}
               </p>
+            </div>
             </div>
           </div>
         </AccordionContent>
       </AccordionPanel>
     </Accordion>
-
-    <!-- Dialog para editar el módulo -->
-    <Dialog modal header="Editar Módulo" :style="{ width: '30rem' }">
-      <div class="flex flex-col">
-        <div class="flex items-center gap-4 mb-4">
-          <label for="nombre" class="font-semibold w-24">Nombre</label>
-          <InputText
-            id="nombre"
-            v-model="leccionSeleccionado.nombre"
-            class="flex-auto"
-          />
-        </div>
-        <div class="flex items-center gap-4 mb-4">
-          <label for="descripcion" class="font-semibold w-24"
-            >Descripción</label
-          >
-          <InputText
-            id="descripcion"
-            v-model="leccionSeleccionado.descripcion"
-            class="flex-auto"
-          />
-        </div>
-
-        <!-- Sección para el video -->
-        <div class="flex items-center gap-4 mb-4">
-          <label for="videoURL" class="font-semibold w-24">Video Actual</label>
-          <div class="flex flex-col">
-            <video v-if="leccionSeleccionado.videoURL" controls class="w-full">
-              <source :src="leccionSeleccionado.videoURL" type="video/mp4" />
-              Tu navegador no soporta la etiqueta de video.
-            </video>
-            <InputFile
-              id="videoInput"
-              @change="onFileChange"
-              accept="video/*"
-              label="Cargar Nuevo Video"
-              class="mt-2"
-            />
-          </div>
-        </div>
-
-        <div class="flex items-center gap-4 mb-4">
-          <label for="estado" class="font-semibold w-24">Estado</label>
-          <InputText
-            id="estado"
-            v-model="leccionSeleccionado.estado"
-            class="flex-auto"
-          />
-        </div>
-        <div class="flex items-center gap-4 mb-4">
-          <label for="fechaCreacion" class="font-semibold w-24"
-            >Fecha Creación</label
-          >
-          <InputText
-            id="fechaCreacion"
-            v-model="leccionSeleccionado.fechaCreacion"
-            class="flex-auto"
-          />
-        </div>
-      </div>
-      <div class="flex justify-end gap-2">
-        <Button
-          type="button"
-          label="Cancelar"
-          severity="secondary"
-          @click="cerrarDialog"
-        ></Button>
-        <Button type="button" label="Guardar" @click="guardarCambios"></Button>
-      </div>
-    </Dialog>
   </div>
   <!-- Mensaje cuando no hay módulos -->
   <Message v-else>No hay lecciones disponibles.</Message>
@@ -189,148 +138,508 @@
       </div>
     </template>
   </ConfirmDialog>
+
+  <!-- Dialog para editar el módulo -->
+
+  <Dialog
+    v-model:visible="visible"
+    header="Editar Leccion"
+    :modal="true"
+    :closable="true"
+    :style="{ width: '50vw' }"
+    @hide="onHide"
+  >
+    <form @submit.prevent="guardarCambios" class="space-y-4">
+      <div>
+        <Divider align="left" type="solid">
+          <h1 class="font-semibold">Titulo de la Lección</h1>
+        </Divider>
+        <InputText
+          id="nombre"
+          v-model="dataLeccion.tituloSeccion"
+          required
+          placeholder="Ingrese el nombre del módulo"
+          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+        />
+      </div>
+
+      <div>
+        <Divider align="left" type="solid">
+          <h1 class="font-semibold">Descripción</h1>
+        </Divider>
+        <Editor
+          v-model="dataLeccion.descripcion"
+          editorStyle="height: 320px"
+          placeholder="Ingrese una descripción del módulo"
+          class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm"
+        />
+      </div>
+      <!-- Aquí está el bloque del video -->
+      <div>
+        <Divider align="left" type="solid">
+          <h1 class="font-semibold">Video de la lección</h1>
+        </Divider>
+
+        <!-- Si hay un video ya cargado y no estamos cambiándolo -->
+        <div v-if="videoInit && !cambiandoVideo">
+          <div class="relative w-full h-0 pb-[44.25%]">
+            <video
+              controls
+              class="absolute top-0 left-0 w-full h-full object-cover rounded-md shadow-lg"
+              controlsList="nodownload"
+              playsinline
+              loop
+              style="max-height: 300px"
+            >
+              <source :src="videoInit" type="video/mp4" />
+              Tu navegador no soporta la visualización de videos.
+            </video>
+          </div>
+          <!-- Botón para cambiar el video -->
+          <div class="flex justify-start">
+            <!-- Botón para cambiar el video -->
+            <Button
+              label="Elegir otro video"
+              @click="cambiarVideo"
+              severity="warning"
+              class="mt-2"
+              icon="pi pi-pencil"
+              rounded
+              outlined
+              raised
+            />
+          </div>
+        </div>
+
+        <!-- Si el usuario ha presionado "Cambiar", mostrar FileUpload -->
+        <div v-if="cambiandoVideo">
+          <FileUpload
+            ref="fileUploadRef"
+            name="videoIntro"
+            @upload="onTemplatedUpload"
+            accept="video/*"
+            :maxFileSize="50000000"
+            :multiple="false"
+            :fileLimit="1"
+            @select="onSelectedFiles"
+            @progress="onProgress"
+          >
+            <template
+              #header="{ chooseCallback, uploadCallback, clearCallback, files }"
+            >
+              <div
+                class="flex flex-wrap justify-between items-center flex-1 gap-4"
+              >
+                <div class="flex gap-2">
+                  <Button
+                    @click="chooseCallback()"
+                    icon="pi pi-video"
+                    rounded
+                    outlined
+                    severity="secondary"
+                  ></Button>
+                  <Button
+                    @click="uploadEvent(uploadCallback)"
+                    icon="pi pi-cloud-upload"
+                    rounded
+                    outlined
+                    severity="success"
+                    :disabled="!files || files.length === 0"
+                  ></Button>
+                  <Button
+                    @click="handleClear(clearCallback)"
+                    icon="pi pi-times"
+                    rounded
+                    outlined
+                    severity="danger"
+                    :disabled="!files || files.length === 0"
+                  ></Button>
+                </div>
+                <ProgressBar
+                  :value="progress"
+                  :showValue="false"
+                  class="md:w-20rem h-1 w-full md:ml-auto"
+                >
+                  <span class="whitespace-nowrap">{{ totalSize }}B / 50Mb</span>
+                </ProgressBar>
+              </div>
+            </template>
+
+            <template #content="{ files, removeFileCallback }">
+              <div class="flex flex-col gap-8 pt-4" v-if="files.length > 0">
+                <h5 v-if="fileUploaded">Completado</h5>
+                <h5 v-if="!fileUploaded">Pendiente</h5>
+                <div class="flex flex-wrap gap-4">
+                  <div
+                    v-for="(file, index) of files"
+                    :key="file.name + file.type + file.size"
+                    class="p-8 rounded-border flex flex-col border border-surface items-center gap-4"
+                  >
+                    <span
+                      class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden"
+                      >{{ file.name }}</span
+                    >
+                    <div>{{ formatSize(file.size) }}</div>
+                    <Badge
+                      :value="fileUploaded ? 'Completado' : 'Pendiente'"
+                      :severity="fileUploaded ? 'success' : 'warn'"
+                    />
+                    <Button
+                      icon="pi pi-times"
+                      @click="
+                        onRemoveTemplatingFile(file, removeFileCallback, index)
+                      "
+                      outlined
+                      rounded
+                      severity="danger"
+                    />
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <template #empty>
+              <div class="flex items-center justify-center flex-col">
+                <i
+                  class="pi pi-cloud-upload !border-2 !rounded-full !p-8 !text-4xl !text-muted-color"
+                />
+                <p class="mt-6 mb-0">
+                  Arrastre el archivo de video aquí para subir.
+                </p>
+              </div>
+            </template>
+          </FileUpload>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3">
+
+      <Button
+        label="Guardar Cambios"
+        type="submit"
+        severity="help"
+        rounded
+        raised
+        :disabled="!isFormValid"
+      />
+      <Button
+        label="Cancelar"
+        rounded
+        raised
+        class="w-32"
+        severity="secondary"
+        @click="cerrarModal"
+      />
+      </div>
+    </form>
+  </Dialog>
 </template>
 
-<script>
-import { ref, onMounted } from "vue";
+<script setup>
+import { ref, onMounted, watch, computed } from "vue";
 import api from "@/axiosConfig.js";
 import { useConfirm } from "primevue/useconfirm";
 import { useAuthStore } from "@/stores/authStore";
-import { useToast } from 'primevue/usetoast';
+import { useToast } from "primevue/usetoast";
+import { defineProps } from "vue";
 
-export default {
-  props: {
-    idModulo: {
-      type: String,
-      required: true,
-    },
+const props = defineProps({
+  idModulo: {
+    type: String,
+    required: true,
   },
-  setup(props) {
-    const toast = useToast(); // Usar el servicio de Toast
+});
 
-    const lecciones = ref([]);
-    const leccionActivo = ref(null); // Solo un módulo activo a la vez
-    const visible = ref(false); // Estado del dialog
-    const leccionSeleccionado = ref({}); // Datos del módulo seleccionado
-    const confirm = useConfirm();
-    const authStore = useAuthStore();
-    const idUsuario = authStore.usuario.id;
+const toast = useToast();
+const lecciones = ref([]);
+const leccionActivo = ref(null); // Solo un módulo activo a la vez
+const visible = ref(false); // Estado del dialog
+const visibleVideo = ref(false);
+const leccionSeleccionado = ref({}); // Datos del módulo seleccionado
+const confirm = useConfirm();
+const authStore = useAuthStore();
+const idUsuario = authStore.usuario.id;
+const cambiandoVideo = ref(false);
+const videoInit = ref();
 
-    // Función para obtener los módulos del curso
-    const obtenerLecciones = async () => {
-      if (props.idModulo) {
-        try {
-          const response = await api.get(
-            `/lecciones/leccion/${props.idModulo}`
-          );
-          lecciones.value = response.data.reverse();
-          console.log(lecciones.value);
-        } catch (error) {
-          console.error("Error al obtener los módulos:", error);
-        }
-      }
-    };
+let selectedFile = null;
+let selectedVideoFile = null;
+const videoIntroFile = ref(null);
+const totalSize = ref(0);
+const progress = ref(0);
+const isUploading = ref(false);
 
-    const deleteLeccion = async (idLeccion) => {
-      try {
-        await api.delete(`/lecciones/eliminarLeccion/${idLeccion}`, {
-          params: { idUsuario },
-        });
-        lecciones.value = lecciones.value.filter(
-          (leccion) => leccion.idLeccion !== idLeccion
-        );
-        obtenerLecciones();
-        toast.add({
-          severity: "info",
-          summary: "Lección Eliminado",
-          detail: "La lección ha sido eliminada con éxito.",
-          life: 3000,
-        });
-      } catch (error) {
-        console.error(error);
-        toast.add({
-          severity: "error",
-          summary: "Error",
-          detail: "Hubo un problema al eliminar la lección.",
-          life: 3000,
-        });
-        // Manejar el error de forma adecuada
-      }
-    };
-    const eliminarLeccion = (idLeccion) => {
-      confirm.require({
-        group: "headless",
-        message: "¿Estás seguro de que deseas eliminar esta lección?",
-        header: "Confirmación",
-        icon: "pi-exclamation-triangle",
-        accept: () => deleteLeccion(idLeccion), // Llama a eliminarAnuncio solo si el usuario acepta
+// Función para obtener los módulos del curso
+const obtenerLecciones = async () => {
+  if (props.idModulo) {
+    try {
+      const response = await api.get(`/lecciones/leccion/${props.idModulo}`);
+      lecciones.value = response.data.reverse();
+      console.log(lecciones.value);
+    } catch (error) {
+      console.error("Error al obtener los módulos:", error);
+    }
+  }
+};
+const dataLeccion = ref();
+const obtenerLeccion = async (idLeccion) => {
+  try {
+    const response = await api.get(`/lecciones/obtenerLeccion/${idLeccion}`);
+    dataLeccion.value = response.data;
+    videoInit.value = dataLeccion.value.videoURL;
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Hubo un problema al eliminar la lección.",
+      life: 3000,
+    });
+  }
+};
+const cerrarModal = () => {
+  visible.value = false;
 
-        reject: () => {
-          // toast.add({
-          //   severity: "warn",
-          //   summary: "Cancelled",
-          //   detail: "Eliminación cancelada",
-          //   life: 3000,
-          // });
+};
+const deleteLeccion = async (idLeccion) => {
+  try {
+    await api.delete(`/lecciones/eliminarLeccion/${idLeccion}`, {
+      params: { idUsuario },
+    });
+    lecciones.value = lecciones.value.filter(
+      (leccion) => leccion.idLeccion !== idLeccion
+    );
+    obtenerLecciones();
+    toast.add({
+      severity: "info",
+      summary: "Lección Eliminado",
+      detail: "La lección ha sido eliminada con éxito.",
+      life: 3000,
+    });
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "Hubo un problema al eliminar la lección.",
+      life: 3000,
+    });
+  }
+};
+
+const eliminarLeccion = (idLeccion) => {
+  confirm.require({
+    group: "headless",
+    message: "¿Estás seguro de que deseas eliminar esta lección?",
+    header: "Confirmación",
+    icon: "pi-exclamation-triangle",
+    accept: () => deleteLeccion(idLeccion),
+    reject: () => {
+      // toast.add({
+      //   severity: "warn",
+      //   summary: "Cancelled",
+      //   detail: "Eliminación cancelada",
+      //   life: 3000,
+      // });
+    },
+  });
+};
+
+// Función para alternar el estado de un módulo (expandir/colapsar)
+const toggleLeccion = (index) => {
+  if (leccionActivo.value === index) {
+    leccionActivo.value = null; // Colapsar
+  } else {
+    leccionActivo.value = index; // Expandir el nuevo
+  }
+};
+
+// Verifica si el módulo está activo (expandido)
+const isActive = (index) => {
+  return leccionActivo.value === index;
+};
+
+// Función para abrir el dialog y cargar los datos del módulo
+const abrirDialog = async (idLeccion) => {
+  try {
+    await obtenerLeccion(idLeccion);
+    visible.value = true;
+  } catch (error) {
+    console.error("Error al abrir el diálogo:", error);
+  }
+};
+
+const abrirDialogVideo = (leccion) => {
+  console.log(leccion);
+  leccionSeleccionado.value = { ...leccion }; // Cargar datos en el módulo seleccionado
+  visibleVideo.value = true; // Mostrar el dialog
+};
+
+// Función para cerrar el dialog
+const cerrarDialog = () => {
+  visible.value = false; // Ocultar el dialog
+};
+
+// Función para guardar los cambios (puedes agregar la lógica para actualizar el módulo aquí)
+const guardarCambios = async () => {
+  const formData = new FormData();
+  formData.append("idLeccion", dataLeccion.value.idLeccion);
+  formData.append("tituloSeccion", dataLeccion.value.tituloSeccion);
+  formData.append("descripcion", dataLeccion.value.descripcion);
+  formData.append("idUsuario", idUsuario);
+
+  // Video
+  if (videoIntroFile.value) {
+    console.log(videoIntroFile.value);
+    formData.append("videoURL", videoIntroFile.value); // Usa el nuevo archivo de video
+  } else if (dataLeccion.value.videoIntroURL) {
+    formData.append("videoURL", dataLeccion.value.videoURL); // Mantén el video existente si no se cambia
+  }
+
+  try {
+    await api.put(
+      `lecciones/editarLeccion/${dataLeccion.value.idLeccion}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
         },
-      });
-    };
-    // Función para alternar el estado de un módulo (expandir/colapsar)
-    const toggleLeccion = (index) => {
-      if (leccionActivo.value === index) {
-        leccionActivo.value = null; // Colapsar
-      } else {
-        leccionActivo.value = index; // Expandir el nuevo
+        onUploadProgress: onProgress,
       }
-    };
-
-    // Verifica si el módulo está activo (expandido)
-    const isActive = (index) => {
-      return leccionActivo.value === index;
-    };
-
-    // Función para abrir el dialog y cargar los datos del módulo
-    const abrirDialog = (leccion) => {
-      leccionSeleccionado.value = { ...leccion }; // Cargar datos en el módulo seleccionado
-      visible.value = true; // Mostrar el dialog
-    };
-
-    // Función para cerrar el dialog
-    const cerrarDialog = () => {
-      visible.value = false; // Ocultar el dialog
-    };
-
-    // Función para guardar los cambios (puedes agregar la lógica para actualizar el módulo aquí)
-    const guardarCambios = async () => {
-      try {
-        // Aquí puedes hacer la llamada a la API para actualizar el módulo
-        // await api.put(`/lecciones/leccion/${leccionSeleccionado.value.idLeccion}`, leccionSeleccionado.value);
-        console.log("Cambios guardados:", leccionSeleccionado.value);
-        cerrarDialog(); // Cerrar el dialog después de guardar
-      } catch (error) {
-        console.error("Error al guardar los cambios:", error);
-      }
-    };
-
-    // Cargar los módulos cuando se monta el componente
-    onMounted(() => {
-      obtenerLecciones();
+    );
+    toast.add({
+      severity: "success",
+      summary: "Éxito",
+      detail: "Lección actualizado correctamente",
+      life: 3000,
     });
 
-    return {
-      lecciones,
-      isActive,
-      toggleLeccion,
-      visible,
-      abrirDialog,
-      cerrarDialog,
-      guardarCambios,
-      eliminarLeccion,
-      obtenerLecciones,
-      leccionSeleccionado,
-    };
-  },
+    //falta hacer el fetchData como modulos con eso funciona
+    obtenerLecciones();
+
+    visible.value = false;
+    cambiandoVideo.value = true;
+  } catch (error) {
+    console.error("Error al actualizar el lección:", error);
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "No se pudo actualizar el Lección",
+      life: 3000,
+    });
+  }
 };
+// Computed properties
+const isFormValid = computed(() => {
+  return (
+    dataLeccion.value &&
+    dataLeccion.value.tituloSeccion &&
+    dataLeccion.value.descripcion &&
+    videoInit.value && // Asegura que haya un video
+    !isUploading.value
+  );
+});
+const cambiarVideo = () => {
+  cambiandoVideo.value = true;
+  videoInit.value = "";
+};
+
+const formatSize = (bytes) => {
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+};
+
+const fileUploaded = ref(false);
+const onSelectedFiles = (event) => {
+  if (event.files.length > 0) {
+    videoIntroFile.value = event.files[0];
+    totalSize.value = event.files[0].size;
+    fileUploaded.value = false; // Resetear el estado cuando se selecciona un nuevo archivo
+    isUploading.value = false;
+  }
+};
+
+const onProgress = (event) => {
+  if (event.lengthComputable) {
+    progress.value = Math.round((event.loaded * 100) / event.total);
+  }
+};
+
+const uploadEvent = async (uploadCallback) => {
+  isUploading.value = true;
+  progress.value = 0;
+  fileUploaded.value = false;
+
+  try {
+    const interval = setInterval(() => {
+      if (progress.value < 100) {
+        progress.value += 10;
+      } else {
+        clearInterval(interval);
+        isUploading.value = false;
+        fileUploaded.value = true; // Marcar como cargado solo cuando se complete
+        toast.add({
+          severity: "info",
+          summary: "Éxito",
+          detail: "Video cargado exitosamente",
+          life: 3000,
+        });
+      }
+    }, 500);
+
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+  } catch (error) {
+    console.error("Error durante la carga:", error);
+    isUploading.value = false;
+    fileUploaded.value = false;
+    toast.add({
+      severity: "error",
+      summary: "Error",
+      detail: "No se pudo cargar el video",
+      life: 3000,
+    });
+  }
+  videoInit.value = "a";
+};
+
+const onHide = () => {
+  cambiandoVideo.value = false;
+};
+
+const handleClear = (clearCallback) => {
+  clearCallback(); // Ejecuta el clearCallback original
+  videoInit.value = ""; // Limpia el videoInit
+  fileUploaded.value = false; // Resetea el estado de carga
+  progress.value = 0; // Resetea la barra de progreso
+  totalSize.value = 0; // Resetea el tamaño total
+  isUploading.value = false; // Resetea el estado de carga
+  videoIntroFile.value = null; // Limpia el archivo de video seleccionado
+};
+
+const onRemoveTemplatingFile = (file, removeFileCallback, index) => {
+  removeFileCallback(index);
+  videoInit.value = ""; // Limpia el videoInit
+  fileUploaded.value = false; // Resetea el estado de carga
+  progress.value = 0; // Resetea la barra de progreso
+  totalSize.value = 0; // Resetea el tamaño total
+  isUploading.value = false; // Resetea el estado de carga
+  videoIntroFile.value = null; // Limpia el archivo de video seleccionado
+};
+const onTemplatedUpload = () => {
+  isUploading.value = false; // Termina la sub`ida
+  toast.add({
+    severity: "info",
+    summary: "Éxito",
+    detail: "Video subido",
+    life: 3000,
+  });
+};
+
+// Cargar los módulos cuando se monta el componente
+onMounted(() => {
+  obtenerLecciones();
+});
 </script>
 
 <style scoped>

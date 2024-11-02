@@ -104,73 +104,66 @@ export const agregarLeccion = async (req, res) => {
 };
 
 // Editar una lección
-// Editar una lección
 export const editarLeccion = async (req, res) => {
-    const idLeccion = req.params.id;
-    const { tituloSeccion, descripcion, idUsuario } = req.body;
+  const idLeccion = req.params.id;
+  const { tituloSeccion, descripcion, idUsuario } = req.body;
   
-    let video = req.body.video; // Aquí capturamos la URL del video
-  
-    try {
-      // Obtener la URL del video actual antes de actualizar
-      const [oldLeccion] = await connection.query(
-        "SELECT videoURL FROM leccion WHERE idLeccion = ?",
-        [idLeccion]
-      );
-  
-      if (oldLeccion.length === 0) {
-        return res.status(200).json({
-          mensaje: "Lección no encontrada",
-        });
-      }
-  
-      const oldVideoUrl = oldLeccion[0].videoURL;
-  
-      // Solo procesar el nuevo video si se ha enviado un archivo
-      if (req.files && req.files.video) {
-        // Eliminar el video anterior del servidor
-        const oldVideoPath = path.join(LESSON_VIDEO_UPLOAD_DIR, path.basename(oldVideoUrl));
-        if (fs.existsSync(oldVideoPath)) {
-          fs.removeSync(oldVideoPath);  // Eliminar el archivo del servidor
-        }
-  
-        // Subir el nuevo video
-        const fileVideo = req.files.video;
-        const extVideo = path.extname(fileVideo.name);
-        const fileNameVideo = `${uuidv4()}${extVideo}`;
-        const filePathVideo = path.join(LESSON_VIDEO_UPLOAD_DIR, fileNameVideo);
-        await fileVideo.mv(filePathVideo);
-        video = `http://localhost:3000/uploads/lecciones/videos/${fileNameVideo}`;
-      }
-  
-      // Actualizar la lección con el nuevo video o conservar el actual si no se cambia
-      const [result] = await connection.query(
-        `UPDATE leccion SET
-                  tituloSeccion = ?,
-                  videoURL = ?,
-                  descripcion = ?,
-                  estado = 1,
-                  idUsuario = ?
-              WHERE idLeccion = ?`,
-        [tituloSeccion, video, descripcion, idUsuario, idLeccion]
-      );
-  
-      if (result.affectedRows === 0) {
-        return res.status(404).json({
-          mensaje: "Lección no encontrada",
-        });
-      }
-  
-      res.json({
-        mensaje: "Lección actualizada correctamente",
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        mensaje: "Ocurrió un error en el servidor",
-      });
+  let video;
+
+  try {
+    // Obtener la URL del video actual antes de actualizar
+    const [oldLeccion] = await connection.query(
+      "SELECT videoURL FROM leccion WHERE idLeccion = ?",
+      [idLeccion]
+    );
+
+    if (oldLeccion.length === 0) {
+      return res.status(404).json({ mensaje: "Lección no encontrada" });
     }
-  };
+
+    const oldVideoUrl = oldLeccion[0].videoURL;
+
+    // Si se sube un nuevo video, manejar la actualización
+    if (req.files && req.files.videoURL) {
+      const fileVideo = req.files.videoURL;
+      const extVideo = path.extname(fileVideo.name);
+      const fileNameVideo = `${uuidv4()}${extVideo}`;
+      const filePathVideo = path.join(LESSON_VIDEO_UPLOAD_DIR, fileNameVideo);
+      await fileVideo.mv(filePathVideo);
+      video = `http://localhost:3000/uploads/lecciones/videos/${fileNameVideo}`;
+
+      // Eliminar el video anterior del servidor
+      const oldVideoPath = path.join(LESSON_VIDEO_UPLOAD_DIR, path.basename(oldVideoUrl));
+      if (fs.existsSync(oldVideoPath)) {
+        fs.unlinkSync(oldVideoPath); // Eliminar el archivo del servidor
+      }
+    } else {
+      video = oldVideoUrl; // Mantener el video anterior si no se sube uno nuevo
+    }
+
+    // Actualizar la lección con el nuevo video o conservar el actual si no se cambia
+    const [result] = await connection.query(
+      `UPDATE leccion SET
+                tituloSeccion = ?,
+                videoURL = ?,
+                descripcion = ?,
+                estado = 1,
+                idUsuario = ?
+            WHERE idLeccion = ?`,
+      [tituloSeccion, video, descripcion, idUsuario, idLeccion]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ mensaje: "Lección no encontrada" });
+    }
+
+    res.json({ mensaje: "Lección actualizada correctamente" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ mensaje: "Ocurrió un error en el servidor" });
+  }
+};
+
 
 // Eliminar una lección por ID
 export const eliminarLeccion = async (req, res) => {
